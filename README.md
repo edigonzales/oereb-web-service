@@ -11,7 +11,7 @@ For the current version of oereb-web-service, you will need a JRE (Java Runtime 
 The JRE (Java Runtime Environment) can be downloaded for free from the Website <http://www.java.com/>.
 
 ## Software Download 
-<https://dl.bintray.com/claeis/oereb-web-service/ch/ehi/oereb/oereb-web-service/>
+<http://jars.umleditor.org/ch/ehi/oereb/oereb-web-service/>
 
 ## Running oereb-web-service
 The oereb-web-service can be started with
@@ -24,5 +24,5 @@ To build the `oereb-web-service.jar`, use
     gradle build
 
 ## Documentation
-[docs/oereb-web-service_de.rst](docs/oereb-web-service_de.rst)
+[docs/asciidoc/oereb-web-service_de.adoc](docs/asciidoc/oereb-web-service_de.adoc)
 
