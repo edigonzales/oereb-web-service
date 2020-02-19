@@ -49,17 +49,20 @@ dependencies {
     	exclude group: 'org.slf4j', module: 'slf4j-simple'
 	}
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6' // add as compileOnly, so that eclipse sees it
-	compile	group: 'javax.xml.bind',name:'jaxb-api', version:'2.3.0'
-	compile	group: 'com.sun.xml.bind',name:'jaxb-core', version:'2.3.0'
-	compile	group: 'com.sun.xml.bind',name:'jaxb-impl', version:'2.3.0'
+	compile	group: 'javax.xml.bind',name:'jaxb-api', version:'2.3.1'
+	compile	group: 'com.sun.xml.bind',name:'jaxb-core', version:'2.3.0.1'
+	compile	group: 'com.sun.xml.bind',name:'jaxb-impl', version:'2.3.2'
 	compile group: 'javax.activation', name: 'activation', version: '1.1.1'
     compile("org.springframework.boot:spring-boot-starter-web:2.1.4.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-jdbc:2.1.4.RELEASE")
     compile("org.springframework:spring-oxm:5.1.6.RELEASE")
     testCompile('org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE')
     jaxb (
-		'com.sun.xml.bind:jaxb-xjc:2.2.7',
-		'com.sun.xml.bind:jaxb-impl:2.2.7'
+		'com.sun.xml.bind:jaxb-xjc:2.3.1',
+		'javax.xml.bind:jaxb-api:2.3.1',
+		'com.sun.xml.bind:jaxb-core:2.3.0.1',
+		'com.sun.xml.bind:jaxb-impl:2.3.2',
+		'javax.activation:activation:1.1.1'
     )
     deployerJars "org.apache.maven.wagon:wagon-ftp:3.3.3"
     deployerJars "org.apache.maven.wagon:wagon-ssh:3.3.3"
