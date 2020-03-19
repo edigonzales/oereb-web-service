@@ -157,6 +157,7 @@ public class OerebController {
     private static final String TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK = "dm01vch24lv95dliegenschaften_grundstueck";
     private static final String TABLE_OEREBKRM_V1_1CODELISTENTEXT_THEMATXT = "oerebkrm_v1_1codelistentext_thematxt";
     private static final String TABLE_OEREB_EXTRACTANNEX_V1_0_CODE = "oereb_extractannex_v1_0_code_";
+    private static final String TABLE_T_ILI2DB_BASKET = "T_ILI2DB_BASKET";
 
     protected static final String extractNS = "http://schemas.geo.admin.ch/V_D/OeREB/1.0/Extract";
     private static final LanguageCodeType DE = LanguageCodeType.DE;
@@ -1357,10 +1358,12 @@ public class OerebController {
                                 +",ea.auid as a_auid"
                                 +",ed.rechtsstatus"
                                 +",ARRAY[ed.t_id] as path, false as cycle"
+                                +",basket.topic as topic"
                                 
                                 + " from "+getSchema()+"."+TABLE_OERBKRMFR_V1_1TRANSFERSTRUKTUR_HINWEISVORSCHRIFT+" as h  inner join "+getSchema()+"."+TABLE_OERBKRMVS_V1_1VORSCHRIFTEN_DOKUMENT+" as ed on h.vorschrift_oerbkrmvs_v1_1vorschriften_dokument=ed.t_id"
                                 + "      INNER JOIN (SELECT "+TABLE_OEREBKRM_V1_1_MULTILINGUALURI+".oerbkrmvs_vrftn_dkment_textimweb as docid,"+TABLE_OEREBKRM_V1_1_LOCALISEDURI+".atext as docuri FROM  "+getSchema()+"."+TABLE_OEREBKRM_V1_1_MULTILINGUALURI+" INNER JOIN "+getSchema()+"."+TABLE_OEREBKRM_V1_1_LOCALISEDURI+" ON  "+TABLE_OEREBKRM_V1_1_LOCALISEDURI+".oerbkrm_v1__mltlngluri_localisedtext = "+TABLE_OEREBKRM_V1_1_MULTILINGUALURI+".t_id WHERE alanguage='de') as docuri1 ON docuri1.docid=ed.t_id"
                                 + "      INNER JOIN "+getSchema()+"."+TABLE_OERBKRMVS_V1_1VORSCHRIFTEN_AMT+" as ea ON ed.zustaendigestelle = ea.t_id"
+                                + "      INNER JOIN "+getSchema()+"."+TABLE_T_ILI2DB_BASKET+" as basket ON basket.t_id = ed.t_basket"
                                 +"  where eigentumsbeschraenkung=?"
                                 +"    UNION ALL"  
                                 +"    select w.ursprung "
@@ -1379,9 +1382,11 @@ public class OerebController {
                                 +",wa.auid as a_auid"
                                 +",wd.rechtsstatus"
                                 +",path || wd.t_id as path, wd.t_id = ANY(path) as cycle"
+                                +",basket.topic as topic"
                                 + " from "+getSchema()+"."+TABLE_OERBKRMVS_V1_1VORSCHRIFTEN_HINWEISWEITEREDOKUMENTE+" as w  inner join "+getSchema()+"."+TABLE_OERBKRMVS_V1_1VORSCHRIFTEN_DOKUMENT+" as wd on w.hinweis=wd.t_id"
                                 + "      INNER JOIN (SELECT "+TABLE_OEREBKRM_V1_1_MULTILINGUALURI+".oerbkrmvs_vrftn_dkment_textimweb as docid,"+TABLE_OEREBKRM_V1_1_LOCALISEDURI+".atext as docuri FROM  "+getSchema()+"."+TABLE_OEREBKRM_V1_1_MULTILINGUALURI+" INNER JOIN "+getSchema()+"."+TABLE_OEREBKRM_V1_1_LOCALISEDURI+" ON "+TABLE_OEREBKRM_V1_1_LOCALISEDURI+".oerbkrm_v1__mltlngluri_localisedtext = "+TABLE_OEREBKRM_V1_1_MULTILINGUALURI+".t_id WHERE alanguage='de') as docuri2 ON docuri2.docid=wd.t_id"
                                 +" INNER JOIN "+getSchema()+"."+TABLE_OERBKRMVS_V1_1VORSCHRIFTEN_AMT+" as wa ON wd.zustaendigestelle = wa.t_id"
+                                + "      INNER JOIN "+getSchema()+"."+TABLE_T_ILI2DB_BASKET+" as basket ON basket.t_id = wd.t_basket"
                                 +" INNER JOIN docs as s ON s.t_id = w.ursprung WHERE NOT cycle"  
                                 +") SELECT * FROM docs";
 
@@ -1399,11 +1404,13 @@ public class OerebController {
                                     parentid=null;
                                 }
                                 String type=rs.getString("t_type");
+                                String topic=rs.getString("topic");
                                 if(type.equals("oerbkrmvs_v1_1vorschriften_rechtsvorschrift")) {
                                     doc.setDocumentType("LegalProvision");
-                                }else {
+                                }else if(topic.equals("OeREBKRMvs_V1_1.HinweiseGesetzlicheGrundlagen")){
                                     doc.setDocumentType("Law");
-                                //    doc.setDocumentType("Hint");
+                                }else {
+                                    doc.setDocumentType("Hint");
                                 }
                                 doc.setLawstatus(mapLawstatus(rs.getString("rechtsstatus")));
                                 doc.setTitle(createMultilingualTextType(rs.getString("titel_de")));
