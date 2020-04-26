@@ -224,7 +224,7 @@ public class GetExtractTest {
     {
         Assert.assertNotNull(service);
         ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH580632068782",null,null,null);
-        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("tmp/out.xml"));
+        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/out.xml"));
         File controlFile = new File("src/test/data-expected/CH580632068782.xml");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Document doc = dbf.newDocumentBuilder().newDocument(); 
@@ -248,7 +248,7 @@ public class GetExtractTest {
     {
         Assert.assertNotNull(service);
         ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH133289063542",null,null,null);
-        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("tmp/out.xml"));
+        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/out.xml"));
         File controlFile = new File("src/test/data-expected/CH133289063542.xml");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Document doc = dbf.newDocumentBuilder().newDocument(); 
@@ -271,7 +271,7 @@ public class GetExtractTest {
     {
         Assert.assertNotNull(service);
         ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH793281100623",null,null,null);
-        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("tmp/out.xml"));
+        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/out.xml"));
         File controlFile = new File("src/test/data-expected/CH793281100623.xml");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Document doc = dbf.newDocumentBuilder().newDocument(); 
