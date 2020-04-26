@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="Amt für Geoinformation" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="CatalogueObjects_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="CatalogueObjectTrees_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="InternationalCodes_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="Localisation_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="LocalisationCH_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="Dictionaries_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="DictionariesCH_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="CHAdminCodes_V1" VERSION="2018-02-19" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="AdministrativeUnits_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="AdministrativeUnitsCH_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="OeREBKRM_V1_1" VERSION="2016-08-15" URI="http://models.geo.admin.ch/V_D/OeREB/"></MODEL>
+			<MODEL NAME="OeREB_ExtractAnnex_V1_0" VERSION="2019-06-27" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<OeREB_ExtractAnnex_V1_0.Annex BID="43767">
+			<OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt TID="40000">
+				<Code>Nutzungsplanung</Code>
+				<Titel>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>Nutzungsplanung Grundnutzung</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Titel>
+				<otherCode>ch.SO.NutzungsplanungGrundnutzung</otherCode>
+			</OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt>
+			<OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt TID="40001">
+				<Code>Nutzungsplanung</Code>
+				<Titel>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>Nutzungsplanung überlagernd</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Titel>
+				<otherCode>ch.SO.NutzungsplanungUeberlagernd</otherCode>
+			</OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt>		
+			<OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt TID="40002">
+				<Code>Nutzungsplanung</Code>
+				<Titel>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>Baulinien (kantonal/kommunal)</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Titel>
+				<otherCode>ch.SO.Baulinien</otherCode>
+			</OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt>		
+			<OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt TID="40003">
+				<Code>Nutzungsplanung</Code>
+				<Titel>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>Sondernutzungspläne</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Titel>
+				<otherCode>ch.SO.NutzungsplanungSondernutzungsplaene</otherCode>
+			</OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt>			
+			<OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt TID="50003">
+				<Code>Grundwasserschutzzonen</Code>
+				<Titel>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>Grundwasserschutzzonen Subthema</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Titel>
+				<otherCode>ch.SO.GrundwasserschutzzonenSubthema</otherCode>
+			</OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt>			
+			<OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt TID="60003">
+				<Code>Grundwasserschutzareale</Code>
+				<Titel>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>Grundwasserschutzareale Subthema</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Titel>
+				<otherCode>ch.SO.GrundwasserschutzarealeSubthema</otherCode>
+			</OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt>			
+			<OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt TID="70003">
+				<Code>Waldgrenzen</Code>
+				<Titel>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>Waldgrenzen Subthema</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Titel>
+				<otherCode>ch.SO.WaldgrenzenSubthema</otherCode>
+			</OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt>			
+			<OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt TID="43768">
+				<Code>WeiteresThema</Code>
+				<Titel>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>Einzelschutz</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Titel>
+				<otherCode>ch.SO.Einzelschutz</otherCode>
+			</OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt>
+			<OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt TID="43769">
+				<Code>WeiteresThema</Code>
+				<Titel>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>Globalschutz</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Titel>
+				<otherCode>ch.SO.Globalschutz</otherCode>
+			</OeREB_ExtractAnnex_V1_0.Annex.ThemaTxt>
+		</OeREB_ExtractAnnex_V1_0.Annex>
+	</DATASECTION>
+</TRANSFER>

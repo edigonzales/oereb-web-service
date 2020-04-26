@@ -41,8 +41,13 @@ configurations {
 dependencies {
     //compile group: 'org.slf4j', name: 'slf4j-api', version: "1.7.25"
     //compile group: 'org.slf4j', name: 'slf4j-simple', version: "1.7.25"
+    testCompile group: 'ch.interlis', name: 'ili2pg', version: '4.4.2'
+    testCompile group: 'ch.interlis', name: 'ili2c-tool', version: '5.0.8'
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'ch.interlis', name: 'ili2pg', version: '4.1.0'
+    testCompile group: 'org.xmlunit', name: 'xmlunit-matchers', version: '2.6.4'
+    testCompile group: 'org.xmlunit', name: 'xmlunit-core', version: '2.6.4'
+    testCompile group: 'org.xmlunit', name: 'xmlunit-placeholders', version: '2.6.4'
+    
 	compile group: 'com.vividsolutions', name: 'jts-core', version: '1.14.0'
 	compile 'commons-io:commons-io:2.6'
 	compile ('ch.so.agi.oereb:pdf4oereb:1.0.+') {
@@ -56,7 +61,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web:2.1.4.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-jdbc:2.1.4.RELEASE")
     compile("org.springframework:spring-oxm:5.1.6.RELEASE")
-    testCompile('org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE')
+    compile('org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE')
     jaxb (
 		'com.sun.xml.bind:jaxb-xjc:2.3.1',
 		'javax.xml.bind:jaxb-api:2.3.1',
@@ -88,6 +93,7 @@ def git = System.getProperty('git',properties.get('git','git'))
 def repos_pwd = System.getProperty('repos_pwd',properties.get('repos_pwd','repos_pwd'))
 def repos_usr = System.getProperty('repos_usr',properties.get('repos_usr','repos_usr'))
 def repos_url = System.getProperty('repos_url',properties.get('repos_url','repos_url'))
+def spring_config_location = System.getProperty('spring_config_location','file:./')
 
 def generatedResources = "$buildDir/generated-resources/main"
 
@@ -109,6 +115,11 @@ sourceSets {
     	//output.dir(generatedResources, builtBy: 'generateMyResources')
         java {
             srcDirs = ['src/main/java',"$generatedXjcSources"]
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test/java']
         }
     }
 }
@@ -174,6 +185,10 @@ asciidoctorPdf {
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
+}
+
+test{
+	systemProperty 'spring.config.location', spring_config_location
 }
 
 javadoc{

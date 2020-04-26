@@ -3,6 +3,13 @@ language: java
 jdk:
   - openjdk8
 
+  
+addons:
+  postgresql: "9.6"
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.4
+
 branches:
   only:
     - master
@@ -10,16 +17,23 @@ branches:
 
 install: true
 
+before_script:
+    - psql -c 'create database ili2db;' -U postgres
+    - psql -c 'select version();' -d ili2db -U postgres
+    - psql -c 'create extension postgis;' -d ili2db -U postgres
+    - psql -c 'create extension "uuid-ossp";' -d ili2db -U postgres
+    - psql -c 'select postgis_full_version();' -d ili2db -U postgres
+
 script: 
-  - gradle asciidoctor build 
+  - gradle -Dspring_config_location=file:travis/ asciidoctor build 
 deploy:
   - provider: script
     skip_cleanup: true
-    script: "ssh-keyscan -H ftp.umleditor.org >> ~/.ssh/known_hosts; gradle -Drepos_url=${repos_url} -Drepos_pwd=${repos_pwd} -Drepos_usr=${repos_usr} uploadArchives; body='{\"request\": {\"branch\":\"master\"}}'; curl -s -X POST -H \"Content-Type: application/json\" -H \"Accept: application/json\" -H \"Travis-API-Version: 3\" -H \"Authorization: token $travis_token\" -d \"$body\" https://api.travis-ci.org/repo/sogis%2Foereb-web-service-docker/requests"
+    script: "ssh-keyscan -H ftp.umleditor.org >> ~/.ssh/known_hosts; gradle -Dspring_config_location=file:travis/ -Drepos_url=${repos_url} -Drepos_pwd=${repos_pwd} -Drepos_usr=${repos_usr} uploadArchives; body='{\"request\": {\"branch\":\"master\"}}'; curl -s -X POST -H \"Content-Type: application/json\" -H \"Accept: application/json\" -H \"Travis-API-Version: 3\" -H \"Authorization: token $travis_token\" -d \"$body\" https://api.travis-ci.org/repo/sogis%2Foereb-web-service-docker/requests"
     on:
       branch: master
   - provider: script
     skip_cleanup: true
-    script: ssh-keyscan -H ftp.umleditor.org >> ~/.ssh/known_hosts; gradle -Drepos_url=${repos_url} -Drepos_pwd=${repos_pwd} -Drepos_usr=${repos_usr} '-Drelease=' uploadArchives
+    script: ssh-keyscan -H ftp.umleditor.org >> ~/.ssh/known_hosts; gradle -Dspring_config_location=file:travis/ -Drepos_url=${repos_url} -Drepos_pwd=${repos_pwd} -Drepos_usr=${repos_usr} '-Drelease=' uploadArchives
     on:
       branch: stable

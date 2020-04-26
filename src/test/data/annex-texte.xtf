@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="Amt für Geoinformation" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="CatalogueObjects_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="CatalogueObjectTrees_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="InternationalCodes_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="Localisation_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="LocalisationCH_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="Dictionaries_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="DictionariesCH_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="CHAdminCodes_V1" VERSION="2018-02-19" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="AdministrativeUnits_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="AdministrativeUnitsCH_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="OeREBKRM_V1_1" VERSION="2016-08-15" URI="http://models.geo.admin.ch/V_D/OeREB/"></MODEL>
+			<MODEL NAME="OeREB_ExtractAnnex_V1_0" VERSION="2019-06-27" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<OeREB_ExtractAnnex_V1_0.Annex BID="43767">
+			<OeREB_ExtractAnnex_V1_0.Annex.ExclusionOfLiability TID="43773">
+				<Title>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>Haftungsausschluss Kataster der belasteten Standorte (KbS)</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Title>
+				<Content>
+					<LocalisationCH_V1.MultilingualMText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedMText>
+								<Language>de</Language>
+								<Text>Der Kataster der belasteten Standorte (KbS) wurde anhand der vom Bundesamt für Umwelt BAFU festgelegten Kriterien erstellt und wird fortwährend aufgrund neuer Erkenntnisse (z.B. Untersuchungen) aktualisiert. Die im KbS eingetragenen Flächen können vom tatsächlichen Ausmass der Belastung abweichen. Erscheint ein Grundstück nicht im KbS, besteht keine absolute Gewähr, dass das Areal frei von jeglichen Abfall- oder Schadstoffbelastungen ist. Bahnbetrieblich, militärisch und für die Luftfahrt genutzte Standorte liegen im Zuständigkeitsbereich des Bundes. Für weitere Informationen wenden Sie sich an die kantonale Altlastenfachstelle: Amt für Umwelt (afu.so.ch)</Text>
+							</LocalisationCH_V1.LocalisedMText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualMText>
+				</Content>
+			</OeREB_ExtractAnnex_V1_0.Annex.ExclusionOfLiability>
+			<OeREB_ExtractAnnex_V1_0.Annex.GeneralInformation TID="43774">
+				<Content>
+					<LocalisationCH_V1.MultilingualMText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedMText>
+								<Language>de</Language>
+
+								<Text>Der Inhalt des ÖREB-Katasters wird als bekannt vorausgesetzt. Der Kanton Solothurn ist für die Genauigkeit und Verlässlichkeit der gesetzgebenden Dokumente in elektronischer Form nicht haftbar. Der Auszug hat rein informativen Charakter und begründet insbesondere keine Rechte und Pflichten. Rechtsverbindlich sind diejenigen Dokumente, welche rechtskräftig verabschiedet oder veröffentlicht worden sind. Weitere Informationen zum ÖREB-Kataster finden Sie unter cadastre.ch</Text>
+							</LocalisationCH_V1.LocalisedMText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualMText>
+				</Content>
+			</OeREB_ExtractAnnex_V1_0.Annex.GeneralInformation>
+			<OeREB_ExtractAnnex_V1_0.Annex.BaseData TID="43775">
+				<Content>
+					<LocalisationCH_V1.MultilingualMText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedMText>
+								<Language>de</Language>
+								<Text>Daten der amtlichen Vermessung, [weitere Grundlagedaten]. Stand der amtlichen Vermessung: ${baseDataDate} (Aktualisierungsdatum der AV im Geoportal)</Text>
+							</LocalisationCH_V1.LocalisedMText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualMText>
+				</Content>
+			</OeREB_ExtractAnnex_V1_0.Annex.BaseData>
+		</OeREB_ExtractAnnex_V1_0.Annex>
+	</DATASECTION>
+</TRANSFER>

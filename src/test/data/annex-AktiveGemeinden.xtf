@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="Amt für Geoinformation" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="CatalogueObjects_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="CatalogueObjectTrees_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="InternationalCodes_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="Localisation_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="LocalisationCH_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="Dictionaries_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="DictionariesCH_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="CHAdminCodes_V1" VERSION="2018-02-19" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="AdministrativeUnits_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="AdministrativeUnitsCH_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="OeREBKRM_V1_1" VERSION="2016-08-15" URI="http://models.geo.admin.ch/V_D/OeREB/"></MODEL>
+			<MODEL NAME="OeREB_ExtractAnnex_V1_0" VERSION="2019-06-27" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<OeREB_ExtractAnnex_V1_0.Annex BID="43767">
+			<OeREB_ExtractAnnex_V1_0.Annex.MunicipalityWithPLRC TID="99">
+				<municipality>2498</municipality>
+				<themes>
+				    <!-- wenn ein Thema hier aufgefuehrt ist, kommt es als 
+				    		ConcernedTheme oder NotConcernedTheme -->
+					<OeREB_ExtractAnnex_V1_0.Code_><value>SicherheitszonenplanFlughafen</value></OeREB_ExtractAnnex_V1_0.Code_>
+					<OeREB_ExtractAnnex_V1_0.Code_><value>ch.SO.Baulinien</value></OeREB_ExtractAnnex_V1_0.Code_>
+					<OeREB_ExtractAnnex_V1_0.Code_><value>ch.SO.Einzelschutz</value></OeREB_ExtractAnnex_V1_0.Code_>
+					<!-- Themen ohne Eigentumsbeschraenkungen -->
+						<OeREB_ExtractAnnex_V1_0.Code_><value>BaulinienFlughafenanlagen</value></OeREB_ExtractAnnex_V1_0.Code_>
+						<OeREB_ExtractAnnex_V1_0.Code_><value>ch.SO.NutzungsplanungUeberlagernd</value></OeREB_ExtractAnnex_V1_0.Code_>
+						<OeREB_ExtractAnnex_V1_0.Code_><value>ch.SO.Globalschutz</value></OeREB_ExtractAnnex_V1_0.Code_>
+						<!-- abstraktes Bundesthema -->
+						<!-- OeREB_ExtractAnnex_V1_0.Code_><value>Grundwasserschutzzonen</value></OeREB_ExtractAnnex_V1_0.Code_ -->
+						<OeREB_ExtractAnnex_V1_0.Code_><value>ch.SO.GrundwasserschutzzonenSubthema</value></OeREB_ExtractAnnex_V1_0.Code_>
+						<!-- konkretes Bundesthema -->
+						<OeREB_ExtractAnnex_V1_0.Code_><value>Grundwasserschutzareale</value></OeREB_ExtractAnnex_V1_0.Code_>
+						<OeREB_ExtractAnnex_V1_0.Code_><value>ch.SO.GrundwasserschutzarealeSubthema</value></OeREB_ExtractAnnex_V1_0.Code_>
+				</themes>
+				<baseDataDate>2019-07-15T00:00:00.000</baseDataDate>
+			</OeREB_ExtractAnnex_V1_0.Annex.MunicipalityWithPLRC>			
+			<OeREB_ExtractAnnex_V1_0.Annex.MunicipalityWithPLRC TID="98">
+				<municipality>2500</municipality>
+				<!-- Gemeinde ohne Themen -->
+				<baseDataDate>2019-07-15T00:00:00.000</baseDataDate>
+			</OeREB_ExtractAnnex_V1_0.Annex.MunicipalityWithPLRC>			
+		</OeREB_ExtractAnnex_V1_0.Annex>
+	</DATASECTION>
+</TRANSFER>
