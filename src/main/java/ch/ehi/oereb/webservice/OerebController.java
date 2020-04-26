@@ -1560,6 +1560,7 @@ public class OerebController {
             
         }
         );
+        List<RestrictionOnLandownershipType> rests=new ArrayList<RestrictionOnLandownershipType>(); 
         for(long e_id:concernedRestrictions) {
             RestrictionOnLandownershipType rest=restrictions.get(e_id);
             QualifiedCode concernedCode=new QualifiedCode(rest.getTypeCodelist(),rest.getTypeCode());
@@ -1591,6 +1592,19 @@ public class OerebController {
                     map.getOtherLegend().add(entry);
                 }
             }
+            rests.add(rest);
+        }
+        rests.sort(new Comparator<RestrictionOnLandownershipType>() {
+
+            @Override
+            public int compare(RestrictionOnLandownershipType o1, RestrictionOnLandownershipType o2) {
+                QualifiedCode o1Code=new QualifiedCode(o1.getTypeCodelist(),o1.getTypeCode());
+                QualifiedCode o2Code=new QualifiedCode(o2.getTypeCodelist(),o2.getTypeCode());
+                return o1Code.compareTo(o2Code);
+            }
+            
+        });
+        for(RestrictionOnLandownershipType rest:rests) {
             extract.getRealEstate().getRestrictionOnLandownership().add(rest);
         }
         

@@ -1,6 +1,6 @@
 package ch.ehi.oereb.webservice;
 
-public class QualifiedCode {
+public class QualifiedCode implements Comparable {
     private String codespace;
     private String code;
     public QualifiedCode(String codespace, String code) {
@@ -46,6 +46,17 @@ public class QualifiedCode {
     @Override
     public String toString() {
         return "{" + codespace + "}[" + code + "]";
+    }
+    @Override
+    public int compareTo(Object o) {
+        if(!(o instanceof QualifiedCode)) {
+            throw new IllegalArgumentException("unexpected class "+o.getClass().getName());
+        }
+        int ns= codespace.compareTo(((QualifiedCode)o).codespace);
+        if(ns==0) {
+            ns= code.compareTo(((QualifiedCode)o).code);
+        }
+        return ns;
     }
 
 }
