@@ -675,9 +675,13 @@ public class OerebController {
         addRestrictions(extract,parcelGeom,bbox,withGeometry,withImages,queryTopics,concernedTopics);
         // Themen
         List<TopicCode> themeWithoutData=new ArrayList<TopicCode>();
-        themeWithoutData.addAll(requestedTopics);
+        for(TopicCode requestedTopic:requestedTopics) {
+            TopicCode mainTopic=requestedTopic.getMainTopic();
+            if(!themeWithoutData.contains(mainTopic)) {
+                themeWithoutData.add(mainTopic);
+            }
+        }
         for(TopicCode availableTopic:availableTopics) {
-            themeWithoutData.remove(availableTopic);
             TopicCode mainTopic=availableTopic.getMainTopic();
             themeWithoutData.remove(mainTopic);
         }
