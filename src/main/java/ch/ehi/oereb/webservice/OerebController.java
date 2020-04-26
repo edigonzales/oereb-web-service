@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -688,8 +689,11 @@ public class OerebController {
             }
         }
 
+        concernedTopics.sort(null);
         setThemes(extract.getConcernedTheme(), concernedTopics);
+        notConcernedTopics.sort(null);
         setThemes(extract.getNotConcernedTheme(), notConcernedTopics);
+        themeWithoutData.sort(null);
         setThemes(extract.getThemeWithoutData(), themeWithoutData);
         // Logos
         if(withImages) {
