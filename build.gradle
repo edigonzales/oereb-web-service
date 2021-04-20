@@ -50,7 +50,7 @@ dependencies {
     
 	compile group: 'com.vividsolutions', name: 'jts-core', version: '1.14.0'
 	compile 'commons-io:commons-io:2.6'
-	compile ('ch.so.agi.oereb:pdf4oereb:1.0.+') {
+	compile ('io.github.sogis:pdf4oereb:1.1.+') {
     	exclude group: 'org.slf4j', module: 'slf4j-simple'
 	}
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6' // add as compileOnly, so that eclipse sees it
