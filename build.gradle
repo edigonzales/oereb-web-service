@@ -19,11 +19,11 @@ apply plugin: 'org.springframework.boot'
 
 group 'ch.ehi.oereb'
 
-version '0.9.1'+System.getProperty('release','-SNAPSHOT')
+version '2.0.0'+System.getProperty('release','-SNAPSHOT')
 
 
-sourceCompatibility = "1.8" 
-targetCompatibility = "1.8"
+sourceCompatibility = 11 // "1.8" 
+targetCompatibility = 11 // "1.8"
 compileJava.options.encoding = 'US-ASCII'
 
 
@@ -50,9 +50,13 @@ dependencies {
     
 	compile group: 'com.vividsolutions', name: 'jts-core', version: '1.14.0'
 	compile 'commons-io:commons-io:2.6'
-	compile ('ch.so.agi.oereb:pdf4oereb:1.0.+') {
+	implementation ('io.github.sogis:pdf4oereb:2.0.46') {
     	exclude group: 'org.slf4j', module: 'slf4j-simple'
 	}
+	
+	//compile ('ch.so.agi.oereb:pdf4oereb:1.0.+') {
+    //	exclude group: 'org.slf4j', module: 'slf4j-simple'
+	//}
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6' // add as compileOnly, so that eclipse sees it
 	compile	group: 'javax.xml.bind',name:'jaxb-api', version:'2.3.1'
 	compile	group: 'com.sun.xml.bind',name:'jaxb-core', version:'2.3.0.1'
@@ -154,8 +158,8 @@ task jaxb {
 			language: 'XMLSCHEMA',
 			extension: true
         ){
-            schema(dir: "src/main/xsd", includes: "OeREB/**/*.xsd,gml/3.2/gml.xsd")
-            binding(dir: "src/main/xjb", includes: "global.xjb,OeREB.xjb,xmldsig-core-schema.xjb,gml.xjb,iso-19139.xjb,xlink.xjb")
+            schema(dir: "src/main/xsd", includes: "OeREB/**/*.xsd,geometry/1.0/*.xsd")
+            binding(dir: "src/main/xjb", includes: "global.xjb,OeREB.xjb,xmldsig-core-schema.xjb,geometry.xjb")
             //arg(value: '-verbose')
         }
     }

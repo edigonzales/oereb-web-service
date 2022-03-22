@@ -23,14 +23,17 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.w3c.dom.Document;
 import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.ComparisonType;
 import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.Difference;
+import org.xmlunit.diff.DifferenceEvaluators;
 import org.xmlunit.placeholder.PlaceholderDifferenceEvaluator;
 
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2pg.PgMain;
-import ch.ehi.oereb.schemas.oereb._1_0.extract.GetExtractByIdResponse;
+import ch.ehi.oereb.schemas.oereb._2_0.extract.GetExtractByIdResponse;
 
 // -Ddburl=jdbc:postgresql:dbname -Ddbusr=user -Ddbpwd=userpwd
 @RunWith(SpringRunner.class)
@@ -72,12 +75,13 @@ public class GetExtractTest {
                 // --strokeArcs --createFk --createFkIdx --createGeomIdx   --createTidCol --createBasketCol --createImportTabs --createMetaInfo 
                 // --disableNameOptimization --defaultSrsCode 2056
                 // --models DM01AVCH24LV95D;PLZOCH1LV95D
-                config.setStrokeArcs(Config.STROKE_ARCS_ENABLE);
+                Config.setStrokeArcs(config,Config.STROKE_ARCS_ENABLE);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setCreateFkIdx(Config.CREATE_FKIDX_YES);
                 config.setValue(Config.CREATE_GEOM_INDEX,Config.TRUE);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setCreateTypeDiscriminator(Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS);
                 config.setCreateImportTabs(true);
                 config.setCreateMetaInfo(true);
                 config.setNameOptimization(Config.NAME_OPTIMIZATION_DISABLE);
@@ -224,22 +228,25 @@ public class GetExtractTest {
     {
         Assert.assertNotNull(service);
         ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH580632068782",null,null,null);
-        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/out.xml"));
+        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/CH580632068782-out.xml"));
         File controlFile = new File("src/test/data-expected/CH580632068782.xml");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Document doc = dbf.newDocumentBuilder().newDocument(); 
         marshaller.marshal(response.getBody(), new javax.xml.transform.dom.DOMResult(doc));
         //Assert.assertThat(doc,createMatcher(controlFile));
-        Diff diff = DiffBuilder
+        Diff diffs = DiffBuilder
         .compare(controlFile)
         .withTest(doc)
-        .withDifferenceEvaluator(new PlaceholderDifferenceEvaluator())
+        .withDifferenceEvaluator(DifferenceEvaluators.chain(new PlaceholderDifferenceEvaluator(), DifferenceEvaluators.downgradeDifferencesToSimilar(ComparisonType.NAMESPACE_PREFIX)))
         .ignoreComments()
         .ignoreWhitespace()
         .checkForSimilar()
         .build();
         //System.out.println(diff.toString());
-        Assert.assertFalse(diff.hasDifferences());
+        for(Difference diff:diffs.getDifferences()) {
+            System.out.println(diff.toString());
+        }
+        Assert.assertFalse(diffs.hasDifferences());
     }
 
     // CH133289063542 Liegenschaft ohne OEREBs, keine anderen OEREBs im sichtbaren Bereich
@@ -248,22 +255,24 @@ public class GetExtractTest {
     {
         Assert.assertNotNull(service);
         ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH133289063542",null,null,null);
-        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/out.xml"));
+        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/CH133289063542-out.xml"));
         File controlFile = new File("src/test/data-expected/CH133289063542.xml");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Document doc = dbf.newDocumentBuilder().newDocument(); 
         marshaller.marshal(response.getBody(), new javax.xml.transform.dom.DOMResult(doc));
         //Assert.assertThat(doc,createMatcher(controlFile));
-        Diff diff = DiffBuilder
+        Diff diffs = DiffBuilder
         .compare(controlFile)
         .withTest(doc)
-        .withDifferenceEvaluator(new PlaceholderDifferenceEvaluator())
+        .withDifferenceEvaluator(DifferenceEvaluators.chain(new PlaceholderDifferenceEvaluator(), DifferenceEvaluators.downgradeDifferencesToSimilar(ComparisonType.NAMESPACE_PREFIX)))
         .ignoreComments()
         .ignoreWhitespace()
         .checkForSimilar()
         .build();
-        //System.out.println(diff.toString());
-        Assert.assertFalse(diff.hasDifferences());
+        for(Difference diff:diffs.getDifferences()) {
+            System.out.println(diff.toString());
+        }
+        Assert.assertFalse(diffs.hasDifferences());
     }
     // CH793281100623 Liegenschaft ohne OEREBs, aber alle OEREBs von im sichtbaren Bereich (otherLegends)
     @Test
@@ -271,21 +280,24 @@ public class GetExtractTest {
     {
         Assert.assertNotNull(service);
         ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH793281100623",null,null,null);
-        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/out.xml"));
+        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/CH793281100623-out.xml"));
         File controlFile = new File("src/test/data-expected/CH793281100623.xml");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Document doc = dbf.newDocumentBuilder().newDocument(); 
         marshaller.marshal(response.getBody(), new javax.xml.transform.dom.DOMResult(doc));
         //Assert.assertThat(doc,createMatcher(controlFile));
-        Diff diff = DiffBuilder
+        Diff diffs = DiffBuilder
         .compare(controlFile)
         .withTest(doc)
-        .withDifferenceEvaluator(new PlaceholderDifferenceEvaluator())
+        .withDifferenceEvaluator(DifferenceEvaluators.chain(new PlaceholderDifferenceEvaluator(), DifferenceEvaluators.downgradeDifferencesToSimilar(ComparisonType.NAMESPACE_PREFIX)))
         .ignoreComments()
         .ignoreWhitespace()
         .checkForSimilar()
         .build();
         //System.out.println(diff.toString());
-        Assert.assertFalse(diff.hasDifferences());
+        for(Difference diff:diffs.getDifferences()) {
+            System.out.println(diff.toString());
+        }
+        Assert.assertFalse(diffs.hasDifferences());
     }
 }
