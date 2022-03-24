@@ -4,7 +4,7 @@ public class TopicCode implements Comparable {
     private String code;
     private String mainCode;
     private boolean subTopic=false;
-    public static final String FEDERAL_TOPICS_DATA[]=new String[] {
+    public static final String TODO_REMOVE_FEDERAL_TOPICS_DATA[]=new String[] {
             "Nutzungsplanung"
             ,"ProjektierungszonenNationalstrassen"
             ,"BaulinienNationalstrassen"

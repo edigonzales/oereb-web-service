@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         mavenCentral()
+//        mavenLocal()
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.4.RELEASE")
@@ -22,8 +23,8 @@ group 'ch.ehi.oereb'
 version '2.0.0'+System.getProperty('release','-SNAPSHOT')
 
 
-sourceCompatibility = 11 // "1.8" 
-targetCompatibility = 11 // "1.8"
+sourceCompatibility = "1.8" // 11
+targetCompatibility = "1.8" // 11
 compileJava.options.encoding = 'US-ASCII'
 
 
@@ -41,8 +42,8 @@ configurations {
 dependencies {
     //compile group: 'org.slf4j', name: 'slf4j-api', version: "1.7.25"
     //compile group: 'org.slf4j', name: 'slf4j-simple', version: "1.7.25"
-    testCompile group: 'ch.interlis', name: 'ili2pg', version: '4.4.2'
-    testCompile group: 'ch.interlis', name: 'ili2c-tool', version: '5.0.8'
+    testCompile group: 'ch.interlis', name: 'ili2pg', version: '4.7.0'
+    testCompile group: 'ch.interlis', name: 'ili2c-tool', version: '5.2.5'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.xmlunit', name: 'xmlunit-matchers', version: '2.6.4'
     testCompile group: 'org.xmlunit', name: 'xmlunit-core', version: '2.6.4'
@@ -51,6 +52,7 @@ dependencies {
 	compile group: 'com.vividsolutions', name: 'jts-core', version: '1.14.0'
 	compile 'commons-io:commons-io:2.6'
 	implementation ('io.github.sogis:pdf4oereb:2.0.46') {
+	//implementation ('io.github.sogis:app:2.0.47') {
     	exclude group: 'org.slf4j', module: 'slf4j-simple'
 	}
 	

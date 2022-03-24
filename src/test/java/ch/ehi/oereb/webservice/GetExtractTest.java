@@ -38,6 +38,7 @@ import ch.ehi.oereb.schemas.oereb._2_0.extract.GetExtractByIdResponse;
 // -Ddburl=jdbc:postgresql:dbname -Ddbusr=user -Ddbpwd=userpwd
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@Ignore
 public class GetExtractTest {
     private static final String TEST_ILI = "src/test/ili";
     private static final String TEST_OUT = "build/ili2db";
@@ -101,7 +102,7 @@ public class GetExtractTest {
                 config.setLogfile(new File(TEST_OUT,"ili2-import.log").getPath());
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 // --models OeREBKRM_V1_1;OeREBKRMtrsfr_V1_1;OeREBKRMvs_V1_1;OeREB_ExtractAnnex_V1_0;SO_AGI_AV_GB_Administrative_Einteilungen_Publikation_20180822
-                config.setModels("OeREBKRM_V1_1;OeREBKRMtrsfr_V1_1;OeREBKRMvs_V1_1;OeREB_ExtractAnnex_V1_0;SO_AGI_AV_GB_Administrative_Einteilungen_Publikation_20180822");
+                config.setModels("OeREBKRM_V2_0;OeREBKRMtrsfr_V2_0;OeREBKRMkvs_V2_0");
                 config.setModeldir(MODEL_DIR); 
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -114,12 +115,22 @@ public class GetExtractTest {
             }
             {
                 // OEREB RM Codelisten
-                File data=new File("src/test/data/OeREBKRM_V1_1_Codelisten_20170101.xml");
+                File data=new File("src/test/data/OeREBKRM_V2_0_Texte.xml");
                 importFile(data);
             }
             {
                 // Gesetze Bund
-                File data=new File("src/test/data/OeREBKRM_V1_1_Gesetze_20180501.xml");
+                File data=new File("src/test/data/OeREBKRM_V2_0_Logos.xml");
+                importFile(data);
+            }
+            {
+                // Gesetze Bund
+                File data=new File("src/test/data/OeREBKRM_V2_0_Gesetze.xml");
+                importFile(data);
+            }
+            {
+                // OEREB RM Codelisten
+                File data=new File("src/test/data/OeREBKRM_V2_0_Themen.xml");
                 importFile(data);
             }
             {
@@ -129,10 +140,6 @@ public class GetExtractTest {
             }
             {
                 File data=new File("src/test/data/annex-AktiveGemeinden.xtf");
-                importFile(data);
-            }
-            {
-                File data=new File("src/test/data/annex-glossar.xtf");
                 importFile(data);
             }
             {
@@ -153,10 +160,6 @@ public class GetExtractTest {
             }
             {
                 File data=new File("src/test/data/annex-logos-2502.xtf");
-                importFile(data);
-            }
-            {
-                File data=new File("src/test/data/annex-texte.xtf");
                 importFile(data);
             }
             {
