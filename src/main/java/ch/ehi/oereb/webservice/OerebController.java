@@ -807,7 +807,7 @@ public class OerebController {
         java.util.Map<String,Object> baseData=null;
         try {
             String sqlStmt=
-                    "SELECT aname_de,ea_lu.atext as amtimweb, auid,zeile1,zeile2,strasse,hausnr,plz,ort FROM "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" AS ea"
+                    "SELECT aname,aname_de,ea_lu.atext as amtimweb, auid,zeile1,zeile2,strasse,hausnr,plz,ort FROM "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" AS ea"
                             +" JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu ON ea.t_id = ea_mu.oerebkrm_v2_0amt_amt_amtimweb"+" JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as ea_lu ON ea_mu.t_id = ea_lu.oerbkrm_v2__mltlngluri_localisedtext"
                             +" WHERE ea_lu.atext=?";
             logger.info("stmt {} ",sqlStmt);
@@ -817,7 +817,7 @@ public class OerebController {
             ; // ignore if no record found
         }
         if(baseData!=null) {
-            office.setName(createMultilingualTextType(baseData, "aname_de"));
+            office.setName(createMultilingualTextType(baseData, "aname"));
             office.setUID((String) baseData.get("auid"));
             office.setLine1((String) baseData.get("zeile2"));
             office.setLine2((String) baseData.get("zeile1"));
@@ -889,6 +889,14 @@ public class OerebController {
     }
     private MultilingualTextType createMultilingualTextType(Map<String, Object> baseData,String prefix) {
         MultilingualTextType ret=new MultilingualTextType();
+        {
+            String txt=(String)baseData.get(prefix);
+            if(txt!=null) {
+                LocalisedTextType lTxt= new LocalisedTextType();
+                lTxt.setText(txt);
+                ret.getLocalisedText().add(lTxt);
+            }
+        }
         for(LanguageCodeType lang:LanguageCodeType.values()) {
             String txt=(String)baseData.get(prefix+"_"+lang.value());
             if(txt!=null) {
