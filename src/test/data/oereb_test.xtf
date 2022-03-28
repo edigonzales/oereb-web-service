@@ -263,7 +263,7 @@
 						</LegendeText>
 						<ArtCode>9901f</ArtCode>
 						<ArtCodeliste>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ArtCodeliste>
-						<Thema>ch.SicherheitszonenplanFlughafen</Thema>
+						<Thema>ch.ProjektierungszonenFlughafenanlagen</Thema>
 						<DarstellungsDienst REF="1000000000821"/>
 					</OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag>
 					<OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag TID="L9901l">
@@ -282,7 +282,7 @@
 						</LegendeText>
 						<ArtCode>9901l</ArtCode>
 						<ArtCodeliste>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ArtCodeliste>
-						<Thema>ch.SicherheitszonenplanFlughafen</Thema>
+						<Thema>ch.ProjektierungszonenFlughafenanlagen</Thema>
 						<DarstellungsDienst REF="1000000000821"/>
 					</OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag>
 					<OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag TID="L9901p">
@@ -301,7 +301,7 @@
 						</LegendeText>
 						<ArtCode>9901p</ArtCode>
 						<ArtCodeliste>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ArtCodeliste>
-						<Thema>ch.SicherheitszonenplanFlughafen</Thema>
+						<Thema>ch.ProjektierungszonenFlughafenanlagen</Thema>
 						<DarstellungsDienst REF="1000000000821"/>
 					</OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag>
 					<OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag TID="L9902">

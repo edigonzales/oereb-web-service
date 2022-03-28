@@ -677,7 +677,7 @@ public class OerebController {
         XMLGregorianCalendar today=createXmlDate(new java.util.Date());
         extract.setCreationDate(today);
         extract.setExtractIdentifier(UUID.randomUUID().toString());
-        List<TopicCode> requestedTopics=parseTopics(requestedTopicsAsText);
+        List<TopicCode> requestedTopics=parseParameterTopics(requestedTopicsAsText);
         // Grundstueck
         final Geometry parcelGeom = parcel.getGeometrie();
         Envelope bbox = getMapBBOX(parcelGeom);
@@ -1187,8 +1187,9 @@ public class OerebController {
     public void setThemes(final List<ThemeType> themes, List<TopicCode> topicCodes) {
         for(TopicCode topicCode:topicCodes) {
             ThemeType themeEle1=new ThemeType();
-            themeEle1.setCode(mapTopicCodeFromDataToExtract(topicCode.getCode()));
-            themeEle1.setText(getTopicText(topicCode.getCode()));
+            themeEle1.setCode(topicCode.getMainCode());
+            themeEle1.setSubCode(topicCode.getSubCode());
+            themeEle1.setText(getTopicText(topicCode));
             ThemeType themeEle = themeEle1;
             themes.add(themeEle);
         }
@@ -1250,7 +1251,7 @@ public class OerebController {
         " LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as d_mu_de ON d.t_id = d_mu_de.oerbkrmfr_vstllngsdnst_verweiswms"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage='de') as d_lu_de ON d_mu_de.t_id = d_lu_de.oerbkrm_v2__mltlngluri_localisedtext"+
         //" INNER JOIN "+getSchema()+"."+TABLE_OERBKRMVS_V1_1VORSCHRIFTEN_AMT+" as ga ON g.zustaendigestelle = ga.t_id"+
         " WHERE (ST_DWithin(ST_GeomFromWKB(:geom,2056),flaeche,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),linie,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),punkt,0.1)) "
-        + "AND (thema in (:topics) OR subthema in (:topics))";
+        + "AND (thema in (:topics) OR subthema in (:subtopics))";
         logger.info("stmt {} ",sqlStmt);
         Set<TopicCode> concernedTopics=new HashSet<TopicCode>();
         Map<Long,TopicCode> restriction2topicCode=new HashMap<Long,TopicCode>();
@@ -1264,11 +1265,17 @@ public class OerebController {
         Map<Long,Set<QualifiedCode>> otherLegendCodesPerMap=new HashMap<Long,Set<QualifiedCode>>();
         Map<Long,Set<QualifiedCode>> concernedCodesPerRestriction=new HashMap<Long,Set<QualifiedCode>>();
         ArrayList<String> queryTopicCodes = new ArrayList<String>();
+        ArrayList<String> querySubTopicCodes = new ArrayList<String>();
         for(TopicCode topicCode:queryTopics) {
-            queryTopicCodes.add(topicCode.getCode());
+            if(topicCode.isSubTopic()) {
+                querySubTopicCodes.add(topicCode.getSubCode());
+            }else {
+                queryTopicCodes.add(topicCode.getMainCode());
+            }
         }
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("topics", queryTopicCodes);
+        parameters.addValue("subtopics", querySubTopicCodes);
         parameters.addValue("geom", filterGeom);
         jdbcParamTemplate.query(sqlStmt, parameters,new ResultSetExtractor<Object>() {
 
@@ -1295,11 +1302,11 @@ public class OerebController {
                         String subThema=rs.getString("subthema"); 
 
                         String topic=rs.getString("thema");
-                        TopicCode qtopic=new TopicCode(topic,subThema,null);
+                        TopicCode qtopic=new TopicCode(topic,subThema);
                         restriction2topicCode.put(e_id, qtopic);
                         ThemeType themeEle1=new ThemeType();
-                        themeEle1.setCode(mapTopicCodeFromDataToExtract(topic));
-                        themeEle1.setText(getTopicText(qtopic.getCode()));
+                        themeEle1.setCode(topic);
+                        themeEle1.setText(getTopicText(qtopic));
                         themeEle1.setSubCode(subThema);
                         ThemeType themeEle = themeEle1;
                         rest.setTheme(themeEle);
@@ -1375,9 +1382,9 @@ public class OerebController {
                                     LegendEntryType l=new LegendEntryType();
                                     l.setLegendText(createMultilingualTextType(rs.getString("legendetext_de")));
                                     String legendTopic=rs.getString("thema");
-                                    String qualifiedThemeCode=getQualifiedThemeCode(legendTopic,rs.getString("subthema"),null);
+                                    TopicCode qualifiedThemeCode=new TopicCode(legendTopic,rs.getString("subthema"));
                                     ThemeType themeEle=new ThemeType();
-                                    themeEle.setCode(mapTopicCodeFromDataToExtract(legendTopic));
+                                    themeEle.setCode(legendTopic);
                                     themeEle.setSubCode(rs.getString("subthema"));
                                     themeEle.setText(getTopicText(qualifiedThemeCode));
                                     ThemeType legendThemeEle = themeEle;
@@ -1612,23 +1619,6 @@ public class OerebController {
         ret.getLocalisedBlob().add(blob);
         return ret;
     }
-    protected String mapTopicCodeFromDataToExtract(String topic) {
-        for(int i=0;i<TopicCode.TODO_REMOVE_FEDERAL_TOPICS_DATA.length;i++) {
-            if(topic.equals(TopicCode.TODO_REMOVE_FEDERAL_TOPICS_DATA[i])) {
-                return TopicCode.FEDERAL_TOPICS_EXTRACT[i];
-            }
-        }
-        return topic;
-    }
-    private String TODO_REMOVE_mapTopicCodeFromExtractToData(String topic) {
-        for(int i=0;i<TopicCode.FEDERAL_TOPICS_EXTRACT.length;i++) {
-            if(topic.equals(TopicCode.FEDERAL_TOPICS_EXTRACT[i])) {
-                return TopicCode.TODO_REMOVE_FEDERAL_TOPICS_DATA[i];
-            }
-        }
-        return topic;
-    }
-
 
     protected LegendEntryType getSymbol(List<LegendEntryType> legendEntries, String typeCodelist, String typeCode) {
         for(LegendEntryType entry:legendEntries) {
@@ -1930,41 +1920,63 @@ public class OerebController {
 
 
 
-    private List<TopicCode> parseTopics(String requestedTopicsAsText) {
+    private List<TopicCode> parseParameterTopics(String requestedTopicsAsText) {
         if(requestedTopicsAsText==null || requestedTopicsAsText.length()==0) {
             requestedTopicsAsText="ALL";
         }
+        java.util.Set<TopicCode> all=new java.util.HashSet<TopicCode>();
+        java.util.Set<TopicCode> allMain=new java.util.HashSet<TopicCode>();
+        java.util.Map<String,TopicCode> allSub=new java.util.HashMap<String,TopicCode>();
+        jdbcTemplate.query(
+                "SELECT acode,subcode FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA,new RowCallbackHandler() {
+                    @Override
+                    public void processRow(ResultSet rs) throws SQLException {
+                        String code=rs.getString("acode");
+                        String subcode=rs.getString("subcode");
+                        TopicCode topic=new TopicCode(code,subcode);
+                        all.add(topic);
+                        if(!topic.isSubTopic()) {
+                            allMain.add(topic);
+                        }else {
+                            allSub.put(topic.getSubCode(), topic);
+                        }
+                    }
+                });
         java.util.Set<TopicCode> ret=new java.util.HashSet<TopicCode>();
         String topicsx[]=requestedTopicsAsText.split(";");
-        for(String topic:topicsx) {
-            if(topic.equals("ALL_FEDERAL") || topic.equals("ALL")) {
-                jdbcTemplate.query(
-                        "SELECT acode,subcode FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA,new RowCallbackHandler() {
-                            @Override
-                            public void processRow(ResultSet rs) throws SQLException {
-                                String code=rs.getString("acode");
-                                String subcode=rs.getString("subcode");
-                                if(topic.equals("ALL_FEDERAL") && isFederalTopicCode(code)) {
-                                    ret.add(new TopicCode(code,subcode,null));
-                                }else{
-                                    ret.add(new TopicCode(code,subcode,null));
-                                }
-                            }
-                        });
+        for(String topicCode:topicsx) {
+            if(topicCode.equals("ALL_FEDERAL")) {
+                for(TopicCode code:allMain) {
+                    if(isFederalTopicCode(code.getMainCode())) {
+                        ret.add(code);
+                    }
+                }
+            }else if(topicCode.equals("ALL")){
+                ret.addAll(all);
             }else {
-                ret.add(new TopicCode(topic,null,null));
+                if(allSub.containsKey(topicCode)) {
+                    ret.add(allSub.get(topicCode));
+                }else {
+                    ret.add(new TopicCode(topicCode,null));
+                }
             }
+            
         }
         return new ArrayList<TopicCode>(ret);
     }
     private boolean isFederalTopicCode(String code) {
         return code.startsWith("ch.") && code.indexOf('.', 3)==-1;        
     }
-    private MultilingualTextType getTopicText(String code) {
+    private MultilingualTextType getTopicText(TopicCode code) {
         String title_de=null;
         try {
-            title_de=jdbcTemplate.queryForObject(
-                    "SELECT titel_de FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA+" WHERE (acode=? AND subcode IS NULL) OR subcode=?",String.class,code,code);
+            if(code.isSubTopic()) {
+                title_de=jdbcTemplate.queryForObject(
+                        "SELECT titel_de FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA+" WHERE acode=? AND subcode=?",String.class,code.getMainCode(),code.getSubCode());
+            }else {
+                title_de=jdbcTemplate.queryForObject(
+                        "SELECT titel_de FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA+" WHERE (acode=? AND subcode IS NULL)",String.class,code.getMainCode());
+            }
         }catch(EmptyResultDataAccessException ex) {
             logger.error("unknown topic code <{}>",code);
             title_de="Thematitel";
@@ -1986,7 +1998,7 @@ public class OerebController {
                             public void processRow(ResultSet rs) throws SQLException {
                                 String code=rs.getString("thema");
                                 String subcode=rs.getString("subthema");
-                                ret.add(new TopicCode(code,subcode,null));
+                                ret.add(new TopicCode(code,subcode));
                             }
                         },bfsNr);
         return ret;
@@ -2012,7 +2024,7 @@ public class OerebController {
                             public void processRow(ResultSet rs) throws SQLException {
                                 String code=rs.getString("acode");
                                 String subcode=rs.getString("subcode");
-                                ret.add(new TopicCode(code,subcode,null));
+                                ret.add(new TopicCode(code,subcode));
                             }
                         });
         return ret;
