@@ -637,8 +637,8 @@ public class OerebController {
             allTopics.add(topic.getMainTopic());
         }
         allTopicsOfThisCadastre=new ArrayList<TopicCode>(allTopics);
-        allTopicsOfThisCadastre.sort(null);
-        setThemes(ret.getTopic(),allTopicsOfThisCadastre);
+        Map<TopicCode,Integer> topicOrdering=getTopicOrdering();
+        setThemes(ret.getTopic(),sortTopics(allTopicsOfThisCadastre,topicOrdering));
         
         // Liste der vorhandenen Gemeinden;
         List<Integer> gemeinden=jdbcTemplate.query(
@@ -714,13 +714,10 @@ public class OerebController {
                 notConcernedTopics.remove(concernedTopic);
             }
         }
-
-        concernedTopics.sort(null);
-        setThemes(extract.getConcernedTheme(), concernedTopics);
-        notConcernedTopics.sort(null);
-        setThemes(extract.getNotConcernedTheme(), notConcernedTopics);
-        themeWithoutData.sort(null);
-        setThemes(extract.getThemeWithoutData(), themeWithoutData);
+        Map<TopicCode,Integer> topicOrdering=getTopicOrdering();
+        setThemes(extract.getConcernedTheme(), sortTopics(concernedTopics,topicOrdering));
+        setThemes(extract.getNotConcernedTheme(), sortTopics(notConcernedTopics,topicOrdering));
+        setThemes(extract.getThemeWithoutData(), sortTopics(themeWithoutData,topicOrdering));
         // Logos
         if(withImages) {
             extract.setLogoPLRCadastre(getImage("ch.plr"));
@@ -1918,6 +1915,35 @@ public class OerebController {
         return null;
     }
 
+    private List<TopicCode> sortTopics(List<TopicCode> topics, Map<TopicCode, Integer> topicOrdering) {
+        List<TopicCode> ret=new ArrayList<TopicCode>(topics);
+        ret.sort(new Comparator<TopicCode>() {
+
+            @Override
+            public int compare(TopicCode o1, TopicCode o2) {
+                int idx1=topicOrdering.get(o1);
+                int idx2=topicOrdering.get(o2);
+                return Integer.compare(idx1, idx2);
+            }
+            
+        });
+        return ret;
+    }
+    private Map<TopicCode, Integer> getTopicOrdering() {
+        java.util.Map<TopicCode,Integer> ret=new java.util.HashMap<TopicCode,Integer>();
+        jdbcTemplate.query(
+                "SELECT acode,subcode,auszugindex FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA,new RowCallbackHandler() {
+                    @Override
+                    public void processRow(ResultSet rs) throws SQLException {
+                        String code=rs.getString("acode");
+                        String subcode=rs.getString("subcode");
+                        int index=rs.getInt("auszugindex");
+                        TopicCode topic=new TopicCode(code,subcode);
+                        ret.put(topic,index);
+                    }
+                });
+        return ret;
+    }
 
 
     private List<TopicCode> parseParameterTopics(String requestedTopicsAsText) {
