@@ -771,6 +771,7 @@ public class OerebController {
         ret.getLocalisedText().add(uri);
         return ret;
     }
+    
     private String getSymbolRef(String id) {
         return ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment(SYMBOL_ENDPOINT).pathSegment(id).build().toUriString();
     }
@@ -926,8 +927,8 @@ public class OerebController {
         ret.getLocalisedText().add(lTxt);
         return ret;
     }
-    private MultilingualUriType createMultilinualUriType(String txt) {
-        LocalisedUriType lTxt = createLocalizedUri(txt);
+    private MultilingualUriType createMultilingualUri_de(String txt) {
+        LocalisedUriType lTxt = createLocalizedUri_de(txt);
         if(lTxt==null) {
             return null;
         }
@@ -954,7 +955,7 @@ public class OerebController {
         lTxt.setText(txt);
         return lTxt;
     }
-    private LocalisedUriType createLocalizedUri(String txt) {
+    private LocalisedUriType createLocalizedUri_de(String txt) {
         if(txt==null || txt.length()==0) {
             return null;
         }
@@ -1219,9 +1220,11 @@ public class OerebController {
         "g.t_id as g_id," + 
         "ea.aname_de as ea_aname_de," + 
         "ea_lu.atext as ea_amtimweb," + 
+        "ea_lu_de.atext as ea_amtimweb_de," + 
         "ea.auid as ea_auid," + 
         "d.t_id as d_id," + 
         "d_lu.atext as verweiswms," + 
+        "d_lu_de.atext as verweiswms_de," + 
         "e.t_id as e_id," + 
         "leg.legendetext_de," + 
         "leg.thema," + 
@@ -1241,8 +1244,10 @@ public class OerebController {
         " INNER JOIN "+getSchema()+"."+OERBKRMFR_V2_0TRANSFERSTRUKTUR_DARSTELLUNGSDIENST+" as d ON e.darstellungsdienst = d.t_id" + 
         " INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" as ea ON e.zustaendigestelle = ea.t_id"+
         " INNER JOIN "+getSchema()+"."+OERBKRMFR_V2_0TRANSFERSTRUKTUR_LEGENDEEINTRAG+" as leg ON e.legende = leg.t_id"+
-        " JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu ON ea.t_id = ea_mu.oerebkrm_v2_0amt_amt_amtimweb"+" JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as ea_lu ON ea_mu.t_id = ea_lu.oerbkrm_v2__mltlngluri_localisedtext"+
-        " JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as d_mu ON d.t_id = d_mu.oerbkrmfr_vstllngsdnst_verweiswms"+" JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as d_lu ON d_mu.t_id = d_lu.oerbkrm_v2__mltlngluri_localisedtext"+
+        " LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu ON ea.t_id = ea_mu.oerebkrm_v2_0amt_amt_amtimweb"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as ea_lu ON ea_mu.t_id = ea_lu.oerbkrm_v2__mltlngluri_localisedtext"+
+        " LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu_de ON ea.t_id = ea_mu_de.oerebkrm_v2_0amt_amt_amtimweb"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage='de') as ea_lu_de ON ea_mu_de.t_id = ea_lu_de.oerbkrm_v2__mltlngluri_localisedtext"+
+        " LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as d_mu ON d.t_id = d_mu.oerbkrmfr_vstllngsdnst_verweiswms"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as d_lu ON d_mu.t_id = d_lu.oerbkrm_v2__mltlngluri_localisedtext"+
+        " LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as d_mu_de ON d.t_id = d_mu_de.oerbkrmfr_vstllngsdnst_verweiswms"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage='de') as d_lu_de ON d_mu_de.t_id = d_lu_de.oerbkrm_v2__mltlngluri_localisedtext"+
         //" INNER JOIN "+getSchema()+"."+TABLE_OERBKRMVS_V1_1VORSCHRIFTEN_AMT+" as ga ON g.zustaendigestelle = ga.t_id"+
         " WHERE (ST_DWithin(ST_GeomFromWKB(:geom,2056),flaeche,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),linie,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),punkt,0.1)) "
         + "AND (thema in (:topics) OR subthema in (:topics))";
@@ -1304,13 +1309,21 @@ public class OerebController {
                         rest.setTypeCodelist(typeCodelist);
                         
                         OfficeType zustaendigeStelle=new OfficeType();
-                        zustaendigeStelle.setName(createMultilingualTextType(rs.getString("ea_aname_de")));
-                        zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(rs.getString("ea_amtimweb")));
+                        String ea_name=rs.getString("ea_aname_de");
+                        zustaendigeStelle.setName(createMultilingualTextType(ea_name));
+                        String ea_amtimweb=rs.getString("ea_amtimweb_de");
+                        if(ea_amtimweb==null) {
+                            ea_amtimweb=rs.getString("ea_amtimweb");
+                        }
+                        zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(ea_amtimweb));
                         zustaendigeStelle.setUID(rs.getString("ea_auid"));
                         rest.setResponsibleOffice(zustaendigeStelle);
                         
                         MapType map=new MapType();
-                        String wmsUrl=rs.getString("verweiswms");
+                        String wmsUrl=rs.getString("verweiswms_de");
+                        if(wmsUrl==null) {
+                            wmsUrl=rs.getString("verweiswms");
+                        }
                         wmsUrl = getWmsUrl(bbox, wmsUrl);
                         map.setReferenceWMS(createMultilingualUri(wmsUrl));
                         if(withImages) {
@@ -1420,7 +1433,7 @@ public class OerebController {
                                 doc.setTitle(createMultilingualTextType(rs.getString("titel_de")));
                                 doc.setAbbreviation(createMultilingualTextType(rs.getString("abkuerzung_de")));
                                 doc.setOfficialNumber(createMultilingualTextType(rs.getString("offiziellenr_de")));
-                                doc.setTextAtWeb(createMultilinualUriType(rs.getString("docuri")));
+                                doc.setTextAtWeb(createMultilingualUri_de(rs.getString("docuri")));
                                 OfficeType zustaendigeStelle=new OfficeType();
                                 zustaendigeStelle.setName(createMultilingualTextType(rs.getString("a_aname_de")));
                                 zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(rs.getString("a_amtimweb")));
@@ -1538,8 +1551,7 @@ public class OerebController {
                     
                 }
                 return null;
-            }
-            
+            }            
         }
         );
         List<RestrictionOnLandownershipType> rests=new ArrayList<RestrictionOnLandownershipType>(); 
