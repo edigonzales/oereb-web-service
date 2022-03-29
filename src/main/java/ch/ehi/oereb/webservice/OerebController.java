@@ -1748,7 +1748,7 @@ public class OerebController {
     private HashMap<String,LawstatusType> statusCodes=null;
     private HashMap<String,DocumentTypeType> docCodes=null;
     private HashMap<String,RealEstateTypeType> realEstateCodes=null;
-    private static final int DEFAULT_MAP_DPI = 300;
+    static final int DEFAULT_MAP_DPI = 300;
     private static final int MAP_WIDTH_MM = 174;
     private static final int MAP_HEIGHT_MM = 99;
     private LawstatusType mapLawstatus(String xtfTransferCode) {
