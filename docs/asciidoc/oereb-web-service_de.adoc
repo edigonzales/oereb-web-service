@@ -40,3 +40,14 @@ Falls ``oereb.tmpdir`` nicht gesetzt ist, werden die temporären Dateien in ``${
 Falls ``oereb.minIntersection`` nicht gesetzt ist, wird 0.001 als Default-Wert verwendet. Kleinere Schnittflächen (bzw. Längen) werden weggefiltert.
 
 Falls ``oereb.canton`` nicht gesetzt ist, wird Solothurn als Default-Wert verwendet.
+
+== Web-Service Ergänzungen
+
+=== GetExtractById()
+
+Die Funktion unterstützt einen zusätzlichen Parameter DPI für WMS-Requests, z.B
+
+[source]
+----
+  localhost:8080/extract/pdf/?EGRID=CH580632068782&DPI=200 
+----

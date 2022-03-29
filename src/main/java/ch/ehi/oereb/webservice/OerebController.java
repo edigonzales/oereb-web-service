@@ -457,21 +457,23 @@ public class OerebController {
         String signed=queryParameters.get("SIGNED");
         String lang=queryParameters.get("LANG");
         String topics=queryParameters.get("TOPICS");
-        String withImages=queryParameters.get("WITHIMAGES");     
+        String withImages=queryParameters.get("WITHIMAGES");
+        String dpiParam=queryParameters.get("DPI");
+        int dpi=dpiParam!=null?Integer.parseInt(dpiParam):DEFAULT_MAP_DPI;
         if(egrid!=null) {
             if(withGeometry) {
-                return getExtractWithGeometryByEgrid(format,egrid,lang,topics,withImages);
+                return getExtractWithGeometryByEgrid(format,egrid,lang,topics,withImages,dpi);
             }
-            return getExtractWithoutGeometryByEgrid(format,egrid,lang,topics,withImages);
+            return getExtractWithoutGeometryByEgrid(format,egrid,lang,topics,withImages,dpi);
         }else {
             if(withGeometry) {
-                return getExtractWithGeometryByNumber(format,identdn,number,lang,topics,withImages);
+                return getExtractWithGeometryByNumber(format,identdn,number,lang,topics,withImages,dpi);
             }
-            return getExtractWithoutGeometryByNumber(format,identdn,number,lang,topics,withImages);
+            return getExtractWithoutGeometryByNumber(format,identdn,number,lang,topics,withImages,dpi);
         }
     }
                 
-    ResponseEntity<?>  getExtractWithGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam) {
+    ResponseEntity<?>  getExtractWithGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam,int dpi) {
         if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
@@ -484,14 +486,13 @@ public class OerebController {
             // non unlocked municipality
             return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
         }
-
         boolean withGeometry = true;
         boolean withImages = withImagesParam==null?false:"TRUE".equalsIgnoreCase(withImagesParam);
         if(format.equals(PARAM_FORMAT_PDF)) {
             withImages = true;
             withGeometry = true;
         }
-        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages);
+        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages,dpi);
         
         GetExtractByIdResponseType response=new GetExtractByIdResponseType();
         response.setExtract(extract);
@@ -539,7 +540,7 @@ public class OerebController {
         }
     }    
 
-    private ResponseEntity<?>  getExtractWithoutGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam) {
+    private ResponseEntity<?>  getExtractWithoutGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam,int dpi) {
         if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
@@ -559,7 +560,7 @@ public class OerebController {
             withImages = true;
             withGeometry = true;
         }
-        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages);
+        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages,dpi);
         
         GetExtractByIdResponseType response=new GetExtractByIdResponseType();
         response.setExtract(extract);
@@ -570,7 +571,7 @@ public class OerebController {
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }    
-    private ResponseEntity<?>  getExtractWithGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam) {
+    private ResponseEntity<?>  getExtractWithGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam,int dpi) {
         if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
@@ -590,7 +591,7 @@ public class OerebController {
             withImages = true;
             withGeometry = true;
         }
-        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages);
+        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages,dpi);
         
         GetExtractByIdResponseType response=new GetExtractByIdResponseType();
         response.setExtract(extract);
@@ -601,7 +602,7 @@ public class OerebController {
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }    
-    private ResponseEntity<?>  getExtractWithoutGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam) {
+    private ResponseEntity<?>  getExtractWithoutGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam,int dpi) {
         if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
@@ -621,7 +622,7 @@ public class OerebController {
             withImages = true;
             withGeometry = true;
         }
-        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages);
+        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages,dpi);
         
         GetExtractByIdResponseType response=new GetExtractByIdResponseType();
         response.setExtract(extract);
@@ -682,7 +683,7 @@ public class OerebController {
         return new GetVersionsResponse(ret);
     }
     
-    private Extract createExtract(String egrid, Grundstueck parcel, java.sql.Date basedataDate,boolean withGeometry, String lang, String requestedTopicsAsText, boolean withImages) {
+    private Extract createExtract(String egrid, Grundstueck parcel, java.sql.Date basedataDate,boolean withGeometry, String lang, String requestedTopicsAsText, boolean withImages,int dpi) {
         ExtractType extract=new ExtractType();
         logger.info("timezone id {}",TimeZone.getDefault().getID());
         XMLGregorianCalendar today=createXmlDate(new java.util.Date());
@@ -692,7 +693,7 @@ public class OerebController {
         // Grundstueck
         final Geometry parcelGeom = parcel.getGeometrie();
         Envelope bbox = getMapBBOX(parcelGeom);
-        setParcel(extract,egrid,parcel,bbox,withGeometry,withImages);
+        setParcel(extract,egrid,parcel,bbox,withGeometry,withImages,dpi);
         int bfsNr=extract.getRealEstate().getMunicipalityCode();
         // freigeschaltete Themen in der betroffenen Gemeinde
         List<TopicCode> availableTopics=getTopicsOfMunicipality(bfsNr);
@@ -705,7 +706,7 @@ public class OerebController {
         }
         List<TopicCode> concernedTopics=new ArrayList<TopicCode>();
 
-        addRestrictions(extract,parcelGeom,bbox,withGeometry,withImages,queryTopics,concernedTopics);
+        addRestrictions(extract,parcelGeom,bbox,withGeometry,withImages,dpi,queryTopics,concernedTopics);
         // Themen
         List<TopicCode> themeWithoutData=new ArrayList<TopicCode>();
         for(TopicCode requestedTopic:requestedTopics) {
@@ -1239,7 +1240,7 @@ public class OerebController {
         return qualifiedThemeCode;
     }
 
-    private void addRestrictions(ExtractType extract, Geometry parcelGeom,Envelope bbox,boolean withGeometry, boolean withImages,
+    private void addRestrictions(ExtractType extract, Geometry parcelGeom,Envelope bbox,boolean withGeometry, boolean withImages,int dpi,
             List<TopicCode> queryTopics, List<TopicCode> concernedTopicsList) {
         // select schnitt parcelGeom/oerebGeom where restritctionTopic in queryTopic
         WKBWriter geomEncoder=new WKBWriter(2,ByteOrderValues.BIG_ENDIAN);
@@ -1369,7 +1370,7 @@ public class OerebController {
                         if(wmsUrl==null) {
                             wmsUrl=rs.getString("verweiswms");
                         }
-                        wmsUrl = getWmsUrl(bbox, wmsUrl);
+                        wmsUrl = getWmsUrl(bbox, wmsUrl,dpi);
                         map.setReferenceWMS(createMultilingualUri(wmsUrl));
                         if(withImages) {
                             try {
@@ -1747,11 +1748,9 @@ public class OerebController {
     private HashMap<String,LawstatusType> statusCodes=null;
     private HashMap<String,DocumentTypeType> docCodes=null;
     private HashMap<String,RealEstateTypeType> realEstateCodes=null;
-    private static final int MAP_DPI = 300;
+    private static final int DEFAULT_MAP_DPI = 300;
     private static final int MAP_WIDTH_MM = 174;
-    private static final int MAP_WIDTH_PIXEL = (int) (MAP_DPI*MAP_WIDTH_MM/25.4);
     private static final int MAP_HEIGHT_MM = 99;
-    private static final int MAP_HEIGHT_PIXEL = (int) (MAP_DPI*MAP_HEIGHT_MM/25.4);
     private LawstatusType mapLawstatus(String xtfTransferCode) {
         if(statusCodes==null) {
             statusCodes=new HashMap<String,LawstatusType>();
@@ -1836,7 +1835,7 @@ public class OerebController {
         return null;
     }
 
-    private void setParcel(ExtractType extract, String egrid, Grundstueck parcel,Envelope bbox, boolean withGeometry,boolean withImages) {
+    private void setParcel(ExtractType extract, String egrid, Grundstueck parcel,Envelope bbox, boolean withGeometry,boolean withImages,int dpi) {
         WKBWriter geomEncoder=new WKBWriter(2,ByteOrderValues.BIG_ENDIAN);
         geomEncoder.write(parcel.getGeometrie());
         
@@ -1866,7 +1865,7 @@ public class OerebController {
         {
             // Planausschnitt 174 * 99 mm
             MapType planForLandregister=new MapType();
-            String fixedWmsUrl = getWmsUrl(bbox, oerebPlanForLandregister);
+            String fixedWmsUrl = getWmsUrl(bbox, oerebPlanForLandregister,dpi);
             planForLandregister.setReferenceWMS(createMultilingualUri(fixedWmsUrl));
             gs.setPlanForLandRegister(planForLandregister);
             if(withImages) {
@@ -1892,7 +1891,7 @@ public class OerebController {
         {
             // Planausschnitt 174 * 99 mm
             MapType planForLandregisterMainPage=new MapType();
-            String fixedWmsUrl = getWmsUrl(bbox, oerebPlanForLandregisterMainPage);
+            String fixedWmsUrl = getWmsUrl(bbox, oerebPlanForLandregisterMainPage,dpi);
             planForLandregisterMainPage.setReferenceWMS(createMultilingualUri(fixedWmsUrl));
             gs.setPlanForLandRegisterMainPage(planForLandregisterMainPage);
             if(withImages) {
@@ -1998,16 +1997,19 @@ public class OerebController {
         return ret;
     }
 
-    private String getWmsUrl(Envelope bbox, String url) {
+    private String getWmsUrl(Envelope bbox, String url,int dpi) {
         final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
         UriComponents uri=builder.build();
         if(uri.getQueryParams().containsKey("SRS")) {
             builder.replaceQueryParam("SRS","EPSG:2056");
         }
         builder.replaceQueryParam("BBOX", bbox.getMinX()+","+bbox.getMinY()+","+bbox.getMaxX()+","+bbox.getMaxY());
-        builder.replaceQueryParam("DPI", MAP_DPI);
-        builder.replaceQueryParam("HEIGHT", MAP_HEIGHT_PIXEL);
-        builder.replaceQueryParam("WIDTH", MAP_WIDTH_PIXEL);
+        int mapWidthPixel = (int) (dpi*MAP_WIDTH_MM/25.4);
+        int mapHeightPixel = (int) (dpi*MAP_HEIGHT_MM/25.4);
+        
+        builder.replaceQueryParam("DPI", dpi);
+        builder.replaceQueryParam("HEIGHT", mapHeightPixel);
+        builder.replaceQueryParam("WIDTH", mapWidthPixel);
         String fixedWmsUrl = builder.build().toUriString();
         return fixedWmsUrl;
     }
