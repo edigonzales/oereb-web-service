@@ -238,7 +238,7 @@ public class OerebController {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         String geometryParam=queryParameters.get("GEOMETRY");
-        boolean withGeometry=false; // geometryParam!=null?"TRUE".equalsIgnoreCase(geometryParam):false;
+        boolean withGeometry=geometryParam!=null?"TRUE".equalsIgnoreCase(geometryParam):false;
         String identdn=queryParameters.get("IDENTDN");
         String en=queryParameters.get("EN");
         String gnss=queryParameters.get("GNSS");
@@ -264,20 +264,22 @@ public class OerebController {
         List<JAXBElement<String>[]> gsList=jdbcTemplate.query(
                 "SELECT egris_egrid,nummer,nbident,art AS type FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" WHERE nummer=? AND nbident=?", new RowMapper<JAXBElement<String>[]>() {
                     @Override
-                    public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    public JAXBElement[] mapRow(ResultSet rs, int rowNum) throws SQLException {
                         JAXBElement ret[]=new JAXBElement[5];
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,rs.getString(1));
+                        String egrid=rs.getString(1);
+                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,egrid);
                         ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
                         ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
                         ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
-                            ret[4]=new JAXBElement<String>(new QName(extractNS,"limit"),String.class,rs.getString(5));
+                            MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
+                            ret[4]=new JAXBElement<MultiSurfaceType>(new QName(extractNS,"limit"),MultiSurfaceType.class,geomGml);
                         }
                         return ret;
                     }
                     
                 },number,identdn);
-        for(JAXBElement<String>[] gs:gsList) {
+        for(JAXBElement[] gs:gsList) {
             ret.getEgridAndNumberAndIdentDN().add(gs[0]);
             ret.getEgridAndNumberAndIdentDN().add(gs[1]);
             ret.getEgridAndNumberAndIdentDN().add(gs[2]);
@@ -324,12 +326,14 @@ public class OerebController {
                     @Override
                     public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
                         JAXBElement ret[]=new JAXBElement[5];
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,rs.getString(1));
+                        String egrid=rs.getString(1);
+                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,egrid);
                         ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
                         ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
                         ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
-                            ret[4]=new JAXBElement<String>(new QName(extractNS,"limit"),String.class,rs.getString(5));
+                            MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
+                            ret[4]=new JAXBElement<MultiSurfaceType>(new QName(extractNS,"limit"),MultiSurfaceType.class,geomGml);
                         }
                         return ret;
                     }
@@ -371,12 +375,14 @@ public class OerebController {
                     @Override
                     public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
                         JAXBElement ret[]=new JAXBElement[3];
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,rs.getString(1));
+                        String egrid=rs.getString(1);
+                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,egrid);
                         ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
                         ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
                         ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
-                            ret[4]=new JAXBElement<String>(new QName(extractNS,"limit"),String.class,rs.getString(5));
+                            MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
+                            ret[4]=new JAXBElement<MultiSurfaceType>(new QName(extractNS,"limit"),MultiSurfaceType.class,geomGml);
                         }
                         return ret;
                     }
@@ -416,12 +422,14 @@ public class OerebController {
                     @Override
                     public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
                         JAXBElement ret[]=new JAXBElement[3];
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,rs.getString(1));
+                        String egrid=rs.getString(1);
+                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,egrid);
                         ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
                         ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
                         ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
-                            ret[4]=new JAXBElement<String>(new QName(extractNS,"limit"),String.class,rs.getString(5));
+                            MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
+                            ret[4]=new JAXBElement<MultiSurfaceType>(new QName(extractNS,"limit"),MultiSurfaceType.class,geomGml);
                         }
                         return ret;
                     }
