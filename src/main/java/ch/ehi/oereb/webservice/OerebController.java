@@ -174,6 +174,8 @@ public class OerebController {
     private String dbschema;
     @Value("${oereb.cadastreAuthorityUrl}")
     private String plrCadastreAuthorityUrl;
+    @Value("${oereb.canton:Solothurn}")
+    private String plrCanton;
     @Value("${oereb.tmpdir:${java.io.tmpdir}}")
     private String oerebTmpdir;
     @Value("${oereb.minIntersection:0.001}")
@@ -865,7 +867,9 @@ public class OerebController {
     private void setGeneralInformation(ExtractType extract) {
         java.util.Map<String,Object> baseData=jdbcTemplate.queryForMap(
                 "SELECT inhalt_de,inhalt_fr,inhalt_it,inhalt_rm,inhalt_en FROM "+getSchema()+"."+OERBKRMVS_V2_0KONFIGURATION_INFORMATION);
-        extract.getGeneralInformation().add(createMultilingualMTextType(baseData,"inhalt"));
+        Map<String,String> params=new HashMap<String,String>();
+        params.put("canton", plrCanton);
+        extract.getGeneralInformation().add(createMultilingualMTextType(baseData,"inhalt",params));
     }
 
     private void setBaseData(ExtractType extract,java.sql.Date basedataDate) {
@@ -878,6 +882,28 @@ public class OerebController {
         for(LanguageCodeType lang:LanguageCodeType.values()) {
             String txt=(String)baseData.get(prefix+"_"+lang.value());
             if(txt!=null && txt.length()>0) {
+                LocalisedMTextType lTxt= new LocalisedMTextType();
+                lTxt.setLanguage(lang);
+                lTxt.setText(txt);
+                ret.getLocalisedText().add(lTxt);
+            }
+        }
+        return ret;
+    }
+    private MultilingualMTextType createMultilingualMTextType(Map<String, Object> baseData,String prefix,Map<String,String> params) {
+        MultilingualMTextType ret=new MultilingualMTextType();
+        for(LanguageCodeType lang:LanguageCodeType.values()) {
+            String txt=(String)baseData.get(prefix+"_"+lang.value());
+            if(txt!=null && txt.length()>0) {
+                if(params!=null) {
+                    for(String key:params.keySet()) {
+                        String param="${"+key+"}";
+                        int pos=txt.indexOf(param);
+                        if(pos>-1) {
+                            txt=txt.substring(0, pos)+params.get(key)+txt.substring(pos+param.length());
+                        }
+                    }
+                }
                 LocalisedMTextType lTxt= new LocalisedMTextType();
                 lTxt.setLanguage(lang);
                 lTxt.setText(txt);
