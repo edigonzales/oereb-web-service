@@ -113,6 +113,7 @@ import ch.so.agi.oereb.pdf4oereb.Locale;
 @Controller
 public class OerebController {
     
+    private static final String OERBKRMVS_V2_0THEMA_THEMAGESETZ = "oerbkrmvs_v2_0thema_themagesetz";
     private static final String OERBKRMVS_V2_0KONFIGURATION_GRUNDSTUECKSARTTXT = "oerbkrmvs_v2_0konfiguration_grundstuecksarttxt";
     private static final String OEREBKRM_V2_0_LOCALISEDBLOB = "oerebkrm_v2_0_localisedblob";
     private static final String OEREBKRM_V2_0_MULTILINGUALBLOB = "oerebkrm_v2_0_multilingualblob";
@@ -1303,9 +1304,8 @@ public class OerebController {
                         
                         rest.setLegendText(createMultilingualMTextType(aussage_de));
                         rest.setLawstatus(mapLawstatus(rs.getString("e_rechtsstatus")));
-                        String subThema=rs.getString("subthema"); 
-
                         String topic=rs.getString("thema");
+                        String subThema=rs.getString("subthema"); 
                         TopicCode qtopic=new TopicCode(topic,subThema);
                         restriction2topicCode.put(e_id, qtopic);
                         ThemeType themeEle1=new ThemeType();
@@ -1410,54 +1410,127 @@ public class OerebController {
                             rest.setSymbolRef(getSymbolRef(Long.toString(l_id)));
                         }
                         rest.setMap(map);
-                        String stmt= 
-                                "select "
-                                +"ed.t_id"
-                                +",ed.typ"
-                                +",ed.titel_de"
-                                +",ed.abkuerzung_de"
-                                +",ed.offiziellenr_de"
-                                +",docuri1.docuri"
-                                +",ea.aname_de as a_aname_de" 
-                                +",NULL as a_amtimweb" // ",ea.amtimweb as a_amtimweb" 
-                                +",ea.auid as a_auid"
-                                +",ed.rechtsstatus"
-                                
-                                + " from "+getSchema()+"."+OERBKRMFR_V2_0TRANSFERSTRUKTUR_HINWEISVORSCHRIFT+" as h "
-                                + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0DOKUMENTE_DOKUMENT+" as ed on h.vorschrift=ed.t_id"
-                                + "      INNER JOIN (SELECT "+OEREBKRM_V2_0_MULTILINGUALURI+".oerbkrm_v2_kmnt_dkment_textimweb as docid,"+OEREBKRM_V2_0_LOCALISEDURI+".atext as docuri FROM  "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" ON  "+OEREBKRM_V2_0_LOCALISEDURI+".oerbkrm_v2__mltlngluri_localisedtext = "+OEREBKRM_V2_0_MULTILINGUALURI+".t_id WHERE alanguage='de') as docuri1 ON docuri1.docid=ed.t_id"
-                                + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" as ea ON ed.zustaendigestelle = ea.t_id"
-                                +"  where eigentumsbeschraenkung=?"
-                                ;
-                        logger.info("stmt {} ",stmt);
-                        List<DocumentType> documents = rest.getLegalProvisions();
-                        HashMap<Long,DocumentType> documentMap = new HashMap<Long,DocumentType>();
+                        
+                        // Dokumente
+                        Map<Long,DocumentType> documentMap = new HashMap<Long,DocumentType>();
+                        Map<Long,Long> documentOrdering = new HashMap<Long,Long>();
 
-                        jdbcTemplate.query(stmt, new RowCallbackHandler() {
+                        // Rechtsvorschriften
+                        {
+                            String stmt= 
+                                    "select "
+                                    +"ed.t_id"
+                                    +",ed.typ"
+                                    +",ed.titel_de"
+                                    +",ed.abkuerzung_de"
+                                    +",ed.offiziellenr_de"
+                                    +",ed.auszugindex"
+                                    +",docuri1.docuri"
+                                    +",ea.aname_de as a_aname_de" 
+                                    +",NULL as a_amtimweb" // ",ea.amtimweb as a_amtimweb" 
+                                    +",ea.auid as a_auid"
+                                    +",ed.rechtsstatus"
+                                    
+                                    + " from "+getSchema()+"."+OERBKRMFR_V2_0TRANSFERSTRUKTUR_HINWEISVORSCHRIFT+" as h "
+                                    + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0DOKUMENTE_DOKUMENT+" as ed on h.vorschrift=ed.t_id"
+                                    + "      INNER JOIN (SELECT "+OEREBKRM_V2_0_MULTILINGUALURI+".oerbkrm_v2_kmnt_dkment_textimweb as docid,"+OEREBKRM_V2_0_LOCALISEDURI+".atext as docuri FROM  "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" ON  "+OEREBKRM_V2_0_LOCALISEDURI+".oerbkrm_v2__mltlngluri_localisedtext = "+OEREBKRM_V2_0_MULTILINGUALURI+".t_id WHERE alanguage='de') as docuri1 ON docuri1.docid=ed.t_id"
+                                    + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" as ea ON ed.zustaendigestelle = ea.t_id"
+                                    +"  where eigentumsbeschraenkung=?"
+                                    ;
+                            logger.info("stmt {} ",stmt);
 
-                            @Override
-                            public void processRow(ResultSet rs) throws SQLException {
-                                DocumentType doc=new DocumentType();
-                                long docid=rs.getLong("t_id");
-                                doc.setType(mapDocumentType(rs.getString("typ")));
-                                doc.setLawstatus(mapLawstatus(rs.getString("rechtsstatus")));
-                                doc.setTitle(createMultilingualTextType(rs.getString("titel_de")));
-                                doc.setAbbreviation(createMultilingualTextType(rs.getString("abkuerzung_de")));
-                                doc.setOfficialNumber(createMultilingualTextType(rs.getString("offiziellenr_de")));
-                                doc.setTextAtWeb(createMultilingualUri_de(rs.getString("docuri")));
-                                OfficeType zustaendigeStelle=new OfficeType();
-                                zustaendigeStelle.setName(createMultilingualTextType(rs.getString("a_aname_de")));
-                                zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(rs.getString("a_amtimweb")));
-                                zustaendigeStelle.setUID(rs.getString("a_auid"));
-                                doc.setResponsibleOffice(zustaendigeStelle);
-                                
-                                documentMap.put(docid,doc);
-                                documents.add(doc);
+                            jdbcTemplate.query(stmt, new RowCallbackHandler() {
+
+                                @Override
+                                public void processRow(ResultSet rs) throws SQLException {
+                                    DocumentType doc=new DocumentType();
+                                    long docid=rs.getLong("t_id");
+                                    long docidx=rs.getLong("auszugindex");
+                                    doc.setType(mapDocumentType(rs.getString("typ")));
+                                    doc.setLawstatus(mapLawstatus(rs.getString("rechtsstatus")));
+                                    doc.setTitle(createMultilingualTextType(rs.getString("titel_de")));
+                                    doc.setAbbreviation(createMultilingualTextType(rs.getString("abkuerzung_de")));
+                                    doc.setOfficialNumber(createMultilingualTextType(rs.getString("offiziellenr_de")));
+                                    doc.setTextAtWeb(createMultilingualUri_de(rs.getString("docuri")));
+                                    OfficeType zustaendigeStelle=new OfficeType();
+                                    zustaendigeStelle.setName(createMultilingualTextType(rs.getString("a_aname_de")));
+                                    zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(rs.getString("a_amtimweb")));
+                                    zustaendigeStelle.setUID(rs.getString("a_auid"));
+                                    doc.setResponsibleOffice(zustaendigeStelle);
+                                    
+                                    documentMap.put(docid,doc);
+                                    documentOrdering.put(docid,docidx);
+                                }
+                            },e_id);
+                        }
+                        // Gesetze
+                        {
+                            TopicCode topicCode=restriction2topicCode.get(e_id);
+                            MapSqlParameterSource parameters = new MapSqlParameterSource();
+                            if(topicCode.isSubTopic()) {
+                                parameters.addValue("topics", topicCode.getMainCode());
+                                parameters.addValue("subtopics", topicCode.getSubCode());
+                            }else {
+                                parameters.addValue("topics", topicCode.getMainCode());
+                                parameters.addValue("subtopics", null);
                             }
+                            String stmt= 
+                                    "select "
+                                    +"ed.t_id"
+                                    +",ed.typ"
+                                    +",ed.titel_de"
+                                    +",ed.abkuerzung_de"
+                                    +",ed.offiziellenr_de"
+                                    +",ed.auszugindex"
+                                    +",docuri1.docuri"
+                                    +",ea.aname_de as a_aname_de" 
+                                    +",NULL as a_amtimweb" // ",ea.amtimweb as a_amtimweb" 
+                                    +",ea.auid as a_auid"
+                                    +",ed.rechtsstatus"
+                                    +" from "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA+" as t"
+                                    + " INNER JOIN "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMAGESETZ+" as tg ON t.t_id=tg.thema "
+                                    + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0DOKUMENTE_DOKUMENT+" as ed on tg.gesetz=ed.t_id"
+                                    + "      INNER JOIN (SELECT "+OEREBKRM_V2_0_MULTILINGUALURI+".oerbkrm_v2_kmnt_dkment_textimweb as docid,"+OEREBKRM_V2_0_LOCALISEDURI+".atext as docuri FROM  "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" ON  "+OEREBKRM_V2_0_LOCALISEDURI+".oerbkrm_v2__mltlngluri_localisedtext = "+OEREBKRM_V2_0_MULTILINGUALURI+".t_id WHERE alanguage='de') as docuri1 ON docuri1.docid=ed.t_id"
+                                    + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" as ea ON ed.zustaendigestelle = ea.t_id"
+                                    +"  WHERE (t.acode IN (:topics) OR t.subcode IN (:subtopics))"
+                                    ;
+                            logger.info("stmt {} ",stmt);
 
-                            
-                        },e_id);
+                            jdbcParamTemplate.query(stmt, parameters,new RowCallbackHandler() {
 
+                                @Override
+                                public void processRow(ResultSet rs) throws SQLException {
+                                    DocumentType doc=new DocumentType();
+                                    long docid=rs.getLong("t_id");
+                                    long docidx=rs.getLong("auszugindex");
+                                    doc.setType(mapDocumentType(rs.getString("typ")));
+                                    doc.setLawstatus(mapLawstatus(rs.getString("rechtsstatus")));
+                                    doc.setTitle(createMultilingualTextType(rs.getString("titel_de")));
+                                    doc.setAbbreviation(createMultilingualTextType(rs.getString("abkuerzung_de")));
+                                    doc.setOfficialNumber(createMultilingualTextType(rs.getString("offiziellenr_de")));
+                                    doc.setTextAtWeb(createMultilingualUri_de(rs.getString("docuri")));
+                                    OfficeType zustaendigeStelle=new OfficeType();
+                                    zustaendigeStelle.setName(createMultilingualTextType(rs.getString("a_aname_de")));
+                                    zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(rs.getString("a_amtimweb")));
+                                    zustaendigeStelle.setUID(rs.getString("a_auid"));
+                                    doc.setResponsibleOffice(zustaendigeStelle);
+                                    
+                                    documentMap.put(docid,doc);
+                                    documentOrdering.put(docid,docidx);
+                                }
+                            });
+                        }
+                        List<Long> docids=new ArrayList<Long>(documentOrdering.keySet());
+                        docids.sort(new Comparator<Long>() {
+                            @Override
+                            public int compare(Long o1, Long o2) {
+                                return documentOrdering.get(o1).compareTo(documentOrdering.get(o2));
+                            }
+                        });
+                        List<DocumentType> documents = rest.getLegalProvisions();
+                        for(Long docid:docids) {
+                            documents.add(documentMap.get(docid));
+                        }
                     }
                    
                     QualifiedCode thisCode=new QualifiedCode(rest.getTypeCodelist(),rest.getTypeCode());
