@@ -1224,6 +1224,8 @@ public class OerebController {
         "d_lu.atext as verweiswms," + 
         "d_lu_de.atext as verweiswms_de," + 
         "e.t_id as e_id," + 
+        "leg.t_id as l_id," + 
+        "leg.darstellungsdienst as l_d_id," + 
         "leg.legendetext_de," + 
         "leg.thema," + 
         "leg.subthema," + 
@@ -1282,8 +1284,10 @@ public class OerebController {
                     long g_id=rs.getLong("g_id");
                     long e_id=rs.getLong("e_id");
                     long d_id=rs.getLong("d_id");
+                    long l_id=rs.getLong("l_id");
+                    long l_d_id=rs.getLong("l_d_id");
                     final String aussage_de = rs.getString("legendetext_de");
-                    logger.info("g_id {} e_id {} d_id {} aussage {} ",g_id,e_id,d_id,aussage_de);
+                    logger.info("g_id {} e_id {} d_id {} l_id {} l_d_id {} aussage {} ",g_id,e_id,d_id,l_id,l_d_id,aussage_de);
                     
                     RestrictionOnLandownershipType rest=restrictions.get(e_id);
                     if(rest==null) {
