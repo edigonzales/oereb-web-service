@@ -475,7 +475,7 @@ public class OerebController {
         }
 
         boolean withGeometry = true;
-        boolean withImages = withImagesParam==null?false:withGeometry;
+        boolean withImages = withImagesParam==null?false:"TRUE".equalsIgnoreCase(withImagesParam);
         if(format.equals(PARAM_FORMAT_PDF)) {
             withImages = true;
             withGeometry = true;
@@ -487,11 +487,11 @@ public class OerebController {
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
         if(format.equals(PARAM_FORMAT_PDF)) {
-            return getExtractAsPdf(parcel, responseEle);
+            return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }
-    private ResponseEntity<?> getExtractAsPdf(Grundstueck parcel, GetExtractByIdResponse responseEle) {
+    private ResponseEntity<?> createExtractAsPdf(Grundstueck parcel, GetExtractByIdResponse responseEle) {
         java.io.File tmpFolder=new java.io.File(oerebTmpdir,"oerebws"+Thread.currentThread().getId());
         if(!tmpFolder.exists()) {
             tmpFolder.mkdirs();
@@ -543,7 +543,7 @@ public class OerebController {
         }
 
         boolean withGeometry = false;
-        boolean withImages = withImagesParam==null?false:withGeometry;
+        boolean withImages = withImagesParam==null?false:"TRUE".equalsIgnoreCase(withImagesParam);
         if(format.equals(PARAM_FORMAT_PDF)) {
             withImages = true;
             withGeometry = true;
@@ -555,7 +555,7 @@ public class OerebController {
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
         if(format.equals(PARAM_FORMAT_PDF)) {
-            return getExtractAsPdf(parcel, responseEle);
+            return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }    
@@ -574,7 +574,7 @@ public class OerebController {
         }
 
         boolean withGeometry = true;
-        boolean withImages = withImagesParam==null?false:withGeometry;
+        boolean withImages = withImagesParam==null?false:"TRUE".equalsIgnoreCase(withImagesParam);
         if(format.equals(PARAM_FORMAT_PDF)) {
             withImages = true;
             withGeometry = true;
@@ -586,7 +586,7 @@ public class OerebController {
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
         if(format.equals(PARAM_FORMAT_PDF)) {
-            return getExtractAsPdf(parcel, responseEle);
+            return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }    
@@ -605,7 +605,7 @@ public class OerebController {
         }
 
         boolean withGeometry = false;
-        boolean withImages = withImagesParam==null?false:withGeometry;
+        boolean withImages = withImagesParam==null?false:"TRUE".equalsIgnoreCase(withImagesParam);
         if(format.equals(PARAM_FORMAT_PDF)) {
             withImages = true;
             withGeometry = true;
@@ -617,7 +617,7 @@ public class OerebController {
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
         if(format.equals(PARAM_FORMAT_PDF)) {
-            return getExtractAsPdf(parcel, responseEle);
+            return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }    
@@ -1231,6 +1231,7 @@ public class OerebController {
         "leg.subthema," + 
         "leg.artcode," + 
         "leg.artcodeliste," + 
+        (withImages?" leg.symbol,":"") + 
         "e.rechtsstatus as e_rechtsstatus," + 
         "e.publiziertab," + 
         "g.rechtsstatus as g_rechtsstatus," + 
@@ -1288,7 +1289,9 @@ public class OerebController {
                     long l_d_id=rs.getLong("l_d_id");
                     final String aussage_de = rs.getString("legendetext_de");
                     logger.info("g_id {} e_id {} d_id {} l_id {} l_d_id {} aussage {} ",g_id,e_id,d_id,l_id,l_d_id,aussage_de);
-                    
+                    if(d_id!=l_d_id) {
+                        throw new IllegalArgumentException("LegendeEintrag "+l_id+" passt nicht zu Darstellungsdienst "+d_id);
+                    }
                     RestrictionOnLandownershipType rest=restrictions.get(e_id);
                     if(rest==null) {
                         
@@ -1402,9 +1405,9 @@ public class OerebController {
                             },d_id);
                         }
                         if(withImages) {
-                            rest.setSymbol(getSymbol(legendEntries,typeCodelist,typeCode).getSymbol());
+                            rest.setSymbol(rs.getBytes("symbol"));
                         }else {
-                            rest.setSymbolRef(getSymbol(legendEntries,typeCodelist,typeCode).getSymbolRef());
+                            rest.setSymbolRef(getSymbolRef(Long.toString(l_id)));
                         }
                         rest.setMap(map);
                         String stmt= 
