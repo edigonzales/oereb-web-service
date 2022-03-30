@@ -1241,31 +1241,48 @@ public class OerebController {
         return gs;
     }
     private Geometry getParcelGeometryByEgrid(String egrid) {
-        byte[] geom=jdbcTemplate.queryForObject(
-                "SELECT ST_AsBinary(ST_Collect(geometrie)) FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" g LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT+" l ON g.egris_egrid=?", new RowMapper<byte[]>() {
-                    @Override
-                    public byte[] mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return rs.getBytes(1);
-                    }
-                    
-                },egrid);
-        if(geom==null) {
-            return null;
-        }
-        PrecisionModel precisionModel=new PrecisionModel(1000.0);
-        GeometryFactory geomFactory=new GeometryFactory(precisionModel);
-        WKBReader decoder=new WKBReader(geomFactory);
-        Geometry polygon=null;
-        try {
-            polygon=decoder.read(geom);
-            if(polygon==null || polygon.isEmpty()) {
+            PrecisionModel precisionModel=new PrecisionModel(1000.0);
+            GeometryFactory geomFactory=new GeometryFactory(precisionModel);
+            List<Geometry> gslist=jdbcTemplate.query(
+                    "SELECT ST_AsBinary(l.geometrie) as l_geometrie,ST_AsBinary(s.geometrie) as s_geometrie,ST_AsBinary(b.geometrie) as b_geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" g"
+                            +" LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT+" l ON g.t_id=l.liegenschaft_von "
+                            +" LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT+" s ON g.t_id=s.selbstrecht_von"
+                            +" LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK+" b ON g.t_id=b.bergwerk_von"
+                            +" WHERE g.egris_egrid=?", new RowMapper<Geometry>() {
+                        WKBReader decoder=new WKBReader(geomFactory);
+                        
+                        @Override
+                        public Geometry mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            Geometry polygon=null;
+                            byte l_geometrie[]=rs.getBytes("l_geometrie");
+                            byte s_geometrie[]=rs.getBytes("s_geometrie");
+                            byte b_geometrie[]=rs.getBytes("b_geometrie");
+                            try {
+                                if(l_geometrie!=null) {
+                                    polygon=decoder.read(l_geometrie);
+                                }else if(s_geometrie!=null) {
+                                    polygon=decoder.read(s_geometrie);
+                                }else if(b_geometrie!=null) {
+                                    polygon=decoder.read(b_geometrie);
+                                }else {
+                                    throw new IllegalStateException("no geometrie");
+                                }
+                                if(polygon==null || polygon.isEmpty()) {
+                                    return null;
+                                }
+                            } catch (ParseException e) {
+                                throw new IllegalStateException(e);
+                            }
+                            return polygon;
+                        }
+
+                        
+                    },egrid);
+            if(gslist==null || gslist.isEmpty()) {
                 return null;
             }
-        } catch (ParseException e) {
-            throw new IllegalStateException(e);
-        }
-        
-        return polygon;
+            Geometry multiPolygon=geomFactory.createMultiPolygon(gslist.toArray(new Polygon[gslist.size()]));
+            return multiPolygon;
     }
     public void setThemes(final List<ThemeType> themes, List<TopicCode> topicCodes) {
         for(TopicCode topicCode:topicCodes) {
