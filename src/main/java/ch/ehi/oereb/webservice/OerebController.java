@@ -180,6 +180,8 @@ public class OerebController {
     private String oerebTmpdir;
     @Value("${oereb.minIntersection:0.001}")
     private double minIntersection;
+    @Value("${oereb.dpi:300}")
+    private int defaultMapDpi;
     
     @Value("${oereb.planForLandregisterMainPage}")
     private String oerebPlanForLandregisterMainPage;
@@ -459,7 +461,7 @@ public class OerebController {
         String topics=queryParameters.get("TOPICS");
         String withImages=queryParameters.get("WITHIMAGES");
         String dpiParam=queryParameters.get("DPI");
-        int dpi=dpiParam!=null?Integer.parseInt(dpiParam):DEFAULT_MAP_DPI;
+        int dpi=dpiParam!=null?Integer.parseInt(dpiParam):defaultMapDpi;
         if(egrid!=null) {
             if(withGeometry) {
                 return getExtractWithGeometryByEgrid(format,egrid,lang,topics,withImages,dpi);
@@ -1748,7 +1750,6 @@ public class OerebController {
     private HashMap<String,LawstatusType> statusCodes=null;
     private HashMap<String,DocumentTypeType> docCodes=null;
     private HashMap<String,RealEstateTypeType> realEstateCodes=null;
-    static final int DEFAULT_MAP_DPI = 300;
     private static final int MAP_WIDTH_MM = 174;
     private static final int MAP_HEIGHT_MM = 99;
     private LawstatusType mapLawstatus(String xtfTransferCode) {

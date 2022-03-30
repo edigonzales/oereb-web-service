@@ -230,7 +230,7 @@ public class GetExtractTest {
     public void SDR() throws Exception 
     {
         Assert.assertNotNull(service);
-        ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH580632068782",null,null,null,OerebController.DEFAULT_MAP_DPI);
+        ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH580632068782",null,null,null,200);
         marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/CH580632068782-out.xml"));
         File controlFile = new File("src/test/data-expected/CH580632068782.xml");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -257,7 +257,7 @@ public class GetExtractTest {
     public void Liegenschaft_ohneOEREBs() throws Exception 
     {
         Assert.assertNotNull(service);
-        ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH133289063542",null,null,null,OerebController.DEFAULT_MAP_DPI);
+        ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH133289063542",null,null,null,200);
         marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/CH133289063542-out.xml"));
         File controlFile = new File("src/test/data-expected/CH133289063542.xml");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -282,7 +282,7 @@ public class GetExtractTest {
     public void Liegenschaft_otherLegends() throws Exception 
     {
         Assert.assertNotNull(service);
-        ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH793281100623",null,null,null,OerebController.DEFAULT_MAP_DPI);
+        ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH793281100623",null,null,null,200);
         marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/CH793281100623-out.xml"));
         File controlFile = new File("src/test/data-expected/CH793281100623.xml");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -303,4 +303,7 @@ public class GetExtractTest {
         }
         Assert.assertFalse(diffs.hasDifferences());
     }
+    // IDENTDN=SO0200002498&NUMBER=514
+    // EN=2638380.0,1251430.0
+    
 }
