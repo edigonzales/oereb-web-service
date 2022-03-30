@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         mavenCentral()
+//        mavenLocal()
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.4.RELEASE")
@@ -19,11 +20,11 @@ apply plugin: 'org.springframework.boot'
 
 group 'ch.ehi.oereb'
 
-version '0.9.1'+System.getProperty('release','-SNAPSHOT')
+version '2.0.1'+System.getProperty('release','-SNAPSHOT')
 
 
-sourceCompatibility = "1.8" 
-targetCompatibility = "1.8"
+sourceCompatibility = "1.8" // 11
+targetCompatibility = "1.8" // 11
 compileJava.options.encoding = 'US-ASCII'
 
 
@@ -41,8 +42,9 @@ configurations {
 dependencies {
     //compile group: 'org.slf4j', name: 'slf4j-api', version: "1.7.25"
     //compile group: 'org.slf4j', name: 'slf4j-simple', version: "1.7.25"
-    testCompile group: 'ch.interlis', name: 'ili2pg', version: '4.4.2'
-    testCompile group: 'ch.interlis', name: 'ili2c-tool', version: '5.0.8'
+    testCompile group: 'ch.interlis', name: 'ili2pg', version: '4.7.0'
+    testCompile group: 'ch.interlis', name: 'ili2c-tool', version: '5.2.5'
+    testImplementation group: 'ch.ehi', name: 'ehibasics', version: '1.4.1'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.xmlunit', name: 'xmlunit-matchers', version: '2.6.4'
     testCompile group: 'org.xmlunit', name: 'xmlunit-core', version: '2.6.4'
@@ -50,9 +52,14 @@ dependencies {
     
 	compile group: 'com.vividsolutions', name: 'jts-core', version: '1.14.0'
 	compile 'commons-io:commons-io:2.6'
-	compile ('io.github.sogis:pdf4oereb:1.1.+') {
+	implementation ('io.github.sogis:pdf4oereb:2.0.46') {
+	//implementation ('io.github.sogis:app:2.0.47') {
     	exclude group: 'org.slf4j', module: 'slf4j-simple'
 	}
+	
+	//compile ('ch.so.agi.oereb:pdf4oereb:1.0.+') {
+    //	exclude group: 'org.slf4j', module: 'slf4j-simple'
+	//}
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6' // add as compileOnly, so that eclipse sees it
 	compile	group: 'javax.xml.bind',name:'jaxb-api', version:'2.3.1'
 	compile	group: 'com.sun.xml.bind',name:'jaxb-core', version:'2.3.0.1'
@@ -154,8 +161,8 @@ task jaxb {
 			language: 'XMLSCHEMA',
 			extension: true
         ){
-            schema(dir: "src/main/xsd", includes: "OeREB/**/*.xsd,gml/3.2/gml.xsd")
-            binding(dir: "src/main/xjb", includes: "global.xjb,OeREB.xjb,xmldsig-core-schema.xjb,gml.xjb,iso-19139.xjb,xlink.xjb")
+            schema(dir: "src/main/xsd", includes: "OeREB/**/*.xsd,geometry/1.0/*.xsd")
+            binding(dir: "src/main/xjb", includes: "global.xjb,OeREB.xjb,xmldsig-core-schema.xjb,geometry.xjb")
             //arg(value: '-verbose')
         }
     }

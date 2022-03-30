@@ -1,18 +1,18 @@
 
 <bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
 	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-    xmlns:extract="http://schemas.geo.admin.ch/V_D/OeREB/1.0/Extract"
-    xmlns:data="http://schemas.geo.admin.ch/V_D/OeREB/1.0/ExtractData"
+    xmlns:extract="http://schemas.geo.admin.ch/V_D/OeREB/2.0/Extract"
+    xmlns:data="http://schemas.geo.admin.ch/V_D/OeREB/2.0/ExtractData"
     xmlns:versioning="http://schemas.geo.admin.ch/V_D/OeREB/1.0/Versioning"
 	>
 	<bindings scd="x-schema::extract">
 		<schemaBindings>
-			<package name="ch.ehi.oereb.schemas.oereb._1_0.extract"/>
+			<package name="ch.ehi.oereb.schemas.oereb._2_0.extract"/>
 		</schemaBindings>
 	</bindings>
 	<bindings scd="x-schema::data">
 		<schemaBindings>
-			<package name="ch.ehi.oereb.schemas.oereb._1_0.extractdata"/>
+			<package name="ch.ehi.oereb.schemas.oereb._2_0.extractdata"/>
 			  <nameXmlTransform>
 				<typeName suffix="Type"/>
 			  </nameXmlTransform>

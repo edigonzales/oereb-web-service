@@ -1,72 +1,42 @@
 package ch.ehi.oereb.webservice;
 
 public class TopicCode implements Comparable {
-    private String code;
+    private String subCode;
     private String mainCode;
-    private boolean subTopic=false;
-    public static final String FEDERAL_TOPICS_DATA[]=new String[] {
-            "Nutzungsplanung"
-            ,"ProjektierungszonenNationalstrassen"
-            ,"BaulinienNationalstrassen"
-            ,"ProjektierungszonenEisenbahnanlagen"
-            ,"BaulinienEisenbahnanlagen"
-            ,"ProjektierungszonenFlughafenanlagen"
-            ,"BaulinienFlughafenanlagen"
-            ,"SicherheitszonenplanFlughafen"
-            ,"BelasteteStandorte"
-            ,"BelasteteStandorteMilitaer"
-            ,"BelasteteStandorteZivileFlugplaetze"
-            ,"BelasteteStandorteOeffentlicherVerkehr"
-            ,"Grundwasserschutzzonen"
-            ,"Grundwasserschutzareale"
-            ,"Laermemfindlichkeitsstufen"
-            ,"Waldgrenzen"
-            ,"Waldabstandslinien"
-            
-    };
-    public static final String WEITERES_THEMA = "WeiteresThema";
-    public static final String FEDERAL_TOPICS_EXTRACT[]=new String[] {
-            "LandUsePlans"
-            , "MotorwaysProjectPlaningZones"
-            , "MotorwaysBuildingLines"
-            , "RailwaysProjectPlanningZones"
-            , "RailwaysBuildingLines"
-            , "AirportsProjectPlanningZones"
-            , "AirportsBuildingLines"
-            , "AirportsSecurityZonePlans"
-            , "ContaminatedSites"
-            , "ContaminatedMilitarySites"
-            , "ContaminatedCivilAviationSites"
-            , "ContaminatedPublicTransportSites"
-            , "GroundwaterProtectionZones"
-            , "GroundwaterProtectionSites"
-            , "NoiseSensitivityLevels"
-            , "ForestPerimeters"
-            , "ForestDistanceLines"
-    };
-    public TopicCode(String themeCode,String subCode,String otherCode) {
+    public TopicCode(String themeCode,String subCode) {
         super();
-        if(subCode==null && otherCode==null) {
-            mainCode=themeCode;
-            code=themeCode;
-            subTopic=false;
-        }else if(otherCode!=null) {
-            mainCode=WEITERES_THEMA;
-            code=otherCode;
-            subTopic=false;
-        }else{
-            mainCode=themeCode;
-            code=subCode;
-            subTopic=true;
+        this.mainCode=themeCode;
+        this.subCode=subCode;
+    }
+
+    public String getSubCode() {
+        return subCode;
+    }
+
+
+    public String getMainCode() {
+        return mainCode;
+    }
+    public TopicCode getMainTopic() {
+        if(isSubTopic()) {
+            return new TopicCode(getMainCode(),null);
+        }else {
+            return this;
         }
     }
 
+    
+    public boolean isSubTopic()
+    {
+        return subCode!=null;
+    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((code == null) ? 0 : code.hashCode());
+        result = prime * result + ((mainCode == null) ? 0 : mainCode.hashCode());
+        result = prime * result + ((subCode == null) ? 0 : subCode.hashCode());
         return result;
     }
 
@@ -79,44 +49,34 @@ public class TopicCode implements Comparable {
         if (getClass() != obj.getClass())
             return false;
         TopicCode other = (TopicCode) obj;
-        if (code == null) {
-            if (other.code != null)
+        if (mainCode == null) {
+            if (other.mainCode != null)
                 return false;
-        } else if (!code.equals(other.code))
+        } else if (!mainCode.equals(other.mainCode))
+            return false;
+        if (subCode == null) {
+            if (other.subCode != null)
+                return false;
+        } else if (!subCode.equals(other.subCode))
             return false;
         return true;
     }
-
-
-    public String getCode() {
-        return code;
-    }
-
-
-    public String getMainCode() {
-        return mainCode;
-    }
-    public TopicCode getMainTopic() {
-        if(isSubTopic()) {
-            return new TopicCode(getMainCode(),null,null);
-        }else {
-            return this;
-        }
-    }
-
-    
-    public boolean isSubTopic()
-    {
-        return subTopic;
-    }
-
 
     @Override
     public int compareTo(Object o) {
         if(!(o instanceof TopicCode)) {
             throw new IllegalArgumentException("unexpected class "+o.getClass().getName());
         }
-        return code.compareTo(((TopicCode)o).code);
+        int ret= mainCode.compareTo(((TopicCode)o).mainCode);
+        if(ret==0 && subCode!=null) {
+            ret= subCode.compareTo(((TopicCode)o).subCode);
+        }
+        return ret;
+}
+
+    @Override
+    public String toString() {
+        return "TopicCode[" + mainCode + (subCode!=null ? ":" + subCode:"") + "]";
     }
 
 
