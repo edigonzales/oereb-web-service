@@ -26,7 +26,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.namespace.QName;
 
 import org.postgresql.util.Base64;
 import org.slf4j.Logger;
@@ -35,6 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +48,7 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileSystemUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -119,6 +120,25 @@ import ch.so.agi.oereb.pdf4oereb.Locale;
 @Controller
 public class OerebController {
     
+    private static final String PARAM_CONST_PDF = "pdf";
+    private static final String PARAM_CONST_XML = "xml";
+    private static final String PARAM_CONST_URL = "url";
+    private static final String PARAM_CONST_ALL_FEDERAL = "ALL_FEDERAL";
+    private static final String PARAM_CONST_ALL = "ALL";
+    private static final String PARAM_CONST_TRUE = "TRUE";
+    private static final String PARAM_LOCALISATION = "LOCALISATION";
+    private static final String PARAM_POSTALCODE = "POSTALCODE";
+    private static final String PARAM_GNSS = "GNSS";
+    private static final String PARAM_EN = "EN";
+    private static final String PARAM_DPI = "DPI";
+    private static final String PARAM_WITHIMAGES = "WITHIMAGES";
+    private static final String PARAM_TOPICS = "TOPICS";
+    private static final String PARAM_LANG = "LANG";
+    private static final String PARAM_SIGNED = "SIGNED";
+    private static final String PARAM_NUMBER = "NUMBER";
+    private static final String PARAM_IDENTDN = "IDENTDN";
+    private static final String PARAM_EGRID = "EGRID";
+    private static final String PARAM_GEOMETRY = "GEOMETRY";
     private static final String OERBKRMVS_V2_0THEMA_THEMAGESETZ = "oerbkrmvs_v2_0thema_themagesetz";
     private static final String OERBKRMVS_V2_0KONFIGURATION_GRUNDSTUECKSARTTXT = "oerbkrmvs_v2_0konfiguration_grundstuecksarttxt";
     private static final String OEREBKRM_V2_0_LOCALISEDBLOB = "oerebkrm_v2_0_localisedblob";
@@ -147,8 +167,6 @@ public class OerebController {
     private static final String TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_GEBAEUDEEINGANG = "dm01vch24lv95dgebaeudeadressen_gebaeudeeingang";
     private static final String TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_LOKALISATION = "dm01vch24lv95dgebaeudeadressen_lokalisation";
     private static final String TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_LOKALISATIONSNAME = "dm01vch24lv95dgebaeudeadressen_lokalisationsname";
-    private static final String PARAM_FORMAT_PDF = "pdf";
-    private static final String PARAM_FORMAT_XML = "xml";
     private static final String TABLE_DM01VCH24LV95DGEMEINDEGRENZEN_GEMEINDE = "dm01vch24lv95dgemeindegrenzen_gemeinde";
     private static final String TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT = "dm01vch24lv95dliegenschaften_liegenschaft";
     private static final String TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT = "dm01vch24lv95dliegenschaften_selbstrecht";
@@ -159,6 +177,8 @@ public class OerebController {
     private static final String LOGO_ENDPOINT = "logo";
     private static final String SYMBOL_ENDPOINT = "symbol";
     private static final String TMP_FOLDER_PREFIX = "oerebws";
+    private static final String SERVICE_SPEC_VERSION = "extract-2.0";
+    private static final String FILE_EXT_XML = ".xml";
     
     private Logger logger=org.slf4j.LoggerFactory.getLogger(this.getClass());
     private Jts2xtf24 jts2xtf = new Jts2xtf24();
@@ -180,6 +200,8 @@ public class OerebController {
     private String dbschema;
     @Value("${oereb.cadastreAuthorityUrl}")
     private String plrCadastreAuthorityUrl;
+    @Value("${oereb.webAppUrl}")
+    private String webAppUrl;
     @Value("${oereb.canton:Solothurn}")
     private String plrCanton;
     @Value("${oereb.tmpdir:${java.io.tmpdir}}")
@@ -242,17 +264,17 @@ public class OerebController {
     // ON ST_Intersects(gebein.lage, plz.flaeche)
     @GetMapping("/getegrid/{format}")
     public ResponseEntity<GetEGRIDResponse>  getEgrid(@PathVariable String format, @RequestParam Map<String, String> queryParameters) {
-        if(!format.equals(PARAM_FORMAT_XML)) {
+        if(!format.equals(PARAM_CONST_XML)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
-        String geometryParam=queryParameters.get("GEOMETRY");
-        boolean withGeometry=geometryParam!=null?"TRUE".equalsIgnoreCase(geometryParam):false;
-        String identdn=queryParameters.get("IDENTDN");
-        String en=queryParameters.get("EN");
-        String gnss=queryParameters.get("GNSS");
-        String postalcode=queryParameters.get("POSTALCODE");
-        String localisation=queryParameters.get("LOCALISATION");
-        String number=queryParameters.get("NUMBER");
+        String geometryParam=queryParameters.get(PARAM_GEOMETRY);
+        boolean withGeometry=geometryParam!=null?PARAM_CONST_TRUE.equalsIgnoreCase(geometryParam):false;
+        String identdn=queryParameters.get(PARAM_IDENTDN);
+        String en=queryParameters.get(PARAM_EN);
+        String gnss=queryParameters.get(PARAM_GNSS);
+        String postalcode=queryParameters.get(PARAM_POSTALCODE);
+        String localisation=queryParameters.get(PARAM_LOCALISATION);
+        String number=queryParameters.get(PARAM_NUMBER);
         if(identdn!=null) {
             return getEgridByNumber(withGeometry, identdn, number);
         }else if(en!=null || gnss!=null) {
@@ -461,18 +483,20 @@ public class OerebController {
     
     @GetMapping(value="/extract/{format}",consumes=MediaType.ALL_VALUE,produces = {MediaType.APPLICATION_PDF_VALUE,MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?>  getExtract(@PathVariable String format,@RequestParam Map<String, String> queryParameters) {
-        String geometryParam=queryParameters.get("GEOMETRY");
-        boolean withGeometry=geometryParam!=null?"TRUE".equalsIgnoreCase(geometryParam):false;
-        String egrid=queryParameters.get("EGRID");
-        String identdn=queryParameters.get("IDENTDN");
-        String number=queryParameters.get("NUMBER");
-        String signed=queryParameters.get("SIGNED");
-        String lang=queryParameters.get("LANG");
-        String topics=queryParameters.get("TOPICS");
-        String withImages=queryParameters.get("WITHIMAGES");
-        String dpiParam=queryParameters.get("DPI");
+        String geometryParam=queryParameters.get(PARAM_GEOMETRY);
+        boolean withGeometry=geometryParam!=null?PARAM_CONST_TRUE.equalsIgnoreCase(geometryParam):false;
+        String egrid=queryParameters.get(PARAM_EGRID);
+        String identdn=queryParameters.get(PARAM_IDENTDN);
+        String number=queryParameters.get(PARAM_NUMBER);
+        String signed=queryParameters.get(PARAM_SIGNED);
+        String lang=queryParameters.get(PARAM_LANG);
+        String topics=queryParameters.get(PARAM_TOPICS);
+        String withImages=queryParameters.get(PARAM_WITHIMAGES);
+        String dpiParam=queryParameters.get(PARAM_DPI);
         int dpi=dpiParam!=null?Integer.parseInt(dpiParam):defaultMapDpi;
-        if(egrid!=null) {
+        if(format.equalsIgnoreCase(PARAM_CONST_URL)) {
+            return getExtractRedirect(egrid,identdn,number);
+        }else if(egrid!=null) {
             if(withGeometry) {
                 return getExtractWithGeometryByEgrid(format,egrid,lang,topics,withImages,dpi);
             }
@@ -486,7 +510,7 @@ public class OerebController {
     }
                 
     ResponseEntity<?>  getExtractWithGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam,int dpi) {
-        if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
+        if(!format.equals(PARAM_CONST_XML) && !format.equals(PARAM_CONST_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         Grundstueck parcel=getParcelByEgrid(egrid);
@@ -499,8 +523,8 @@ public class OerebController {
             return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
         }
         boolean withGeometry = true;
-        boolean withImages = withImagesParam==null?false:"TRUE".equalsIgnoreCase(withImagesParam);
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        boolean withImages = withImagesParam==null?false:PARAM_CONST_TRUE.equalsIgnoreCase(withImagesParam);
+        if(format.equals(PARAM_CONST_PDF)) {
             withImages = true;
             withGeometry = true;
         }
@@ -510,7 +534,7 @@ public class OerebController {
         response.setExtract(extract);
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
@@ -521,7 +545,7 @@ public class OerebController {
             tmpFolder.mkdirs();
         }
         logger.info("tmpFolder {}",tmpFolder.getAbsolutePath());
-        java.io.File tmpExtractFile=new java.io.File(tmpFolder,parcel.getEgrid()+".xml");
+        java.io.File tmpExtractFile=new java.io.File(tmpFolder,parcel.getEgrid()+FILE_EXT_XML);
         marshaller.marshal(responseEle,new javax.xml.transform.stream.StreamResult(tmpExtractFile));
         try {
             java.io.File pdfFile=extractXml2pdf.runXml2Pdf(tmpExtractFile.getAbsolutePath(), tmpFolder.getAbsolutePath(), Locale.DE);
@@ -553,7 +577,7 @@ public class OerebController {
     }    
 
     private ResponseEntity<?>  getExtractWithoutGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam,int dpi) {
-        if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
+        if(!format.equals(PARAM_CONST_XML) && !format.equals(PARAM_CONST_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         Grundstueck parcel=getParcelByEgrid(egrid);
@@ -567,8 +591,8 @@ public class OerebController {
         }
 
         boolean withGeometry = false;
-        boolean withImages = withImagesParam==null?false:"TRUE".equalsIgnoreCase(withImagesParam);
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        boolean withImages = withImagesParam==null?false:PARAM_CONST_TRUE.equalsIgnoreCase(withImagesParam);
+        if(format.equals(PARAM_CONST_PDF)) {
             withImages = true;
             withGeometry = true;
         }
@@ -578,13 +602,13 @@ public class OerebController {
         response.setExtract(extract);
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }    
     private ResponseEntity<?>  getExtractWithGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam,int dpi) {
-        if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
+        if(!format.equals(PARAM_CONST_XML) && !format.equals(PARAM_CONST_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         Grundstueck parcel=getParcelByNumber(identdn,number);
@@ -598,8 +622,8 @@ public class OerebController {
         }
 
         boolean withGeometry = true;
-        boolean withImages = withImagesParam==null?false:"TRUE".equalsIgnoreCase(withImagesParam);
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        boolean withImages = withImagesParam==null?false:PARAM_CONST_TRUE.equalsIgnoreCase(withImagesParam);
+        if(format.equals(PARAM_CONST_PDF)) {
             withImages = true;
             withGeometry = true;
         }
@@ -609,13 +633,24 @@ public class OerebController {
         response.setExtract(extract);
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }    
+    private ResponseEntity<?> getExtractRedirect(String egridParam, String identdn, String number) {
+        String egrid=verifyEgrid(egridParam, identdn, number);
+        if(egrid==null) {
+            return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+        }
+        HttpHeaders headers=new HttpHeaders();
+        headers.add(HttpHeaders.LOCATION, getWebAppUrl(egrid));
+        ResponseEntity<Object> ret=new ResponseEntity<Object>(headers,HttpStatus.SEE_OTHER);
+        return ret;
+    }
+
     private ResponseEntity<?>  getExtractWithoutGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam,int dpi) {
-        if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
+        if(!format.equals(PARAM_CONST_XML) && !format.equals(PARAM_CONST_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         Grundstueck parcel=getParcelByNumber(identdn,number);
@@ -629,8 +664,8 @@ public class OerebController {
         }
 
         boolean withGeometry = false;
-        boolean withImages = withImagesParam==null?false:"TRUE".equalsIgnoreCase(withImagesParam);
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        boolean withImages = withImagesParam==null?false:PARAM_CONST_TRUE.equalsIgnoreCase(withImagesParam);
+        if(format.equals(PARAM_CONST_PDF)) {
             withImages = true;
             withGeometry = true;
         }
@@ -640,14 +675,14 @@ public class OerebController {
         response.setExtract(extract);
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }    
     @GetMapping("/capabilities/{format}")
     public @ResponseBody  GetCapabilitiesResponse getCapabilities(@PathVariable String format) {
-        if(!format.equals(PARAM_FORMAT_XML)) {
+        if(!format.equals(PARAM_CONST_XML)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         GetCapabilitiesResponseType ret=new GetCapabilitiesResponseType();
@@ -685,12 +720,12 @@ public class OerebController {
 
     @GetMapping("/versions/{format}")
     public @ResponseBody  GetVersionsResponse getVersions(@PathVariable String format) {
-        if(!format.equals(PARAM_FORMAT_XML)) {
+        if(!format.equals(PARAM_CONST_XML)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         GetVersionsResponseType ret=new GetVersionsResponseType();
         VersionType ver=new VersionType();
-        ver.setVersion("extract-2.0");
+        ver.setVersion(SERVICE_SPEC_VERSION);
         ret.getSupportedVersion().add(ver);
         return new GetVersionsResponse(ret);
     }
@@ -793,6 +828,9 @@ public class OerebController {
         return ret;
     }
     
+    private String getWebAppUrl(String egrid) {
+        return webAppUrl+egrid;
+    }
     private String getSymbolRef(String id) {
         return ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment(SYMBOL_ENDPOINT).pathSegment(id).build().toUriString();
     }
@@ -2075,7 +2113,7 @@ public class OerebController {
 
     private List<TopicCode> parseParameterTopics(String requestedTopicsAsText) {
         if(requestedTopicsAsText==null || requestedTopicsAsText.length()==0) {
-            requestedTopicsAsText="ALL";
+            requestedTopicsAsText=PARAM_CONST_ALL;
         }
         java.util.Set<TopicCode> all=new java.util.HashSet<TopicCode>();
         java.util.Set<TopicCode> allMain=new java.util.HashSet<TopicCode>();
@@ -2098,13 +2136,13 @@ public class OerebController {
         java.util.Set<TopicCode> ret=new java.util.HashSet<TopicCode>();
         String topicsx[]=requestedTopicsAsText.split(";");
         for(String topicCode:topicsx) {
-            if(topicCode.equals("ALL_FEDERAL")) {
+            if(topicCode.equals(PARAM_CONST_ALL_FEDERAL)) {
                 for(TopicCode code:allMain) {
                     if(isFederalTopicCode(code.getMainCode())) {
                         ret.add(code);
                     }
                 }
-            }else if(topicCode.equals("ALL")){
+            }else if(topicCode.equals(PARAM_CONST_ALL)){
                 ret.addAll(all);
             }else {
                 if(allSub.containsKey(topicCode)) {
@@ -2141,6 +2179,16 @@ public class OerebController {
         ret.getLocalisedText().add(text);
         return ret;
     }
+    private String  verifyEgrid(String egrid,String identdn,String number) {
+        try {
+            String ret=jdbcTemplate.queryForObject(
+                    "SELECT egris_egrid AS type FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" WHERE egris_egrid=? OR (nummer=? AND nbident=?)", String.class,egrid,number,identdn);
+            return ret;
+        }catch(EmptyResultDataAccessException ex) {
+        }
+        return null;
+    }
+    
 
     private List<TopicCode> getTopicsOfMunicipality(int bfsNr) {
         List<TopicCode> ret=new ArrayList<TopicCode>();
