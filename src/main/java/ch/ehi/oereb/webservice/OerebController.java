@@ -4,8 +4,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -41,7 +45,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -152,6 +158,7 @@ public class OerebController {
     private static final LanguageCodeType DE = LanguageCodeType.DE;
     private static final String LOGO_ENDPOINT = "logo";
     private static final String SYMBOL_ENDPOINT = "symbol";
+    private static final String TMP_FOLDER_PREFIX = "oerebws";
     
     private Logger logger=org.slf4j.LoggerFactory.getLogger(this.getClass());
     private Jts2xtf24 jts2xtf = new Jts2xtf24();
@@ -509,7 +516,7 @@ public class OerebController {
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }
     private ResponseEntity<?> createExtractAsPdf(Grundstueck parcel, GetExtractByIdResponse responseEle) {
-        java.io.File tmpFolder=new java.io.File(oerebTmpdir,"oerebws"+Thread.currentThread().getId());
+        java.io.File tmpFolder=new java.io.File(oerebTmpdir,TMP_FOLDER_PREFIX+Thread.currentThread().getId());
         if(!tmpFolder.exists()) {
             tmpFolder.mkdirs();
         }
@@ -2174,5 +2181,26 @@ public class OerebController {
                             }
                         });
         return ret;
+    }
+    
+    @Scheduled(cron="0 * * * * *")
+    private void cleanUp() {    
+        java.io.File[] tmpDirs = new java.io.File(oerebTmpdir).listFiles();
+        for (java.io.File tmpDir : tmpDirs) {
+            if (tmpDir.getName().startsWith(TMP_FOLDER_PREFIX)) {
+                try {
+                    FileTime creationTime = (FileTime) Files.getAttribute(Paths.get(tmpDir.getAbsolutePath()), "creationTime");                    
+                    Instant now = Instant.now();
+                    
+                    long fileAge = now.getEpochSecond() - creationTime.toInstant().getEpochSecond();
+                    if (fileAge > 60*60) {
+                        logger.info("deleting {}", tmpDir.getAbsolutePath());
+                        FileSystemUtils.deleteRecursively(tmpDir);
+                    }
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }
     }
 }
