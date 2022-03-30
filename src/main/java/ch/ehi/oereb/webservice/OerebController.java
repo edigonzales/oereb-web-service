@@ -149,7 +149,6 @@ public class OerebController {
     private static final String TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK = "dm01vch24lv95dliegenschaften_bergwerk";
     private static final String TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK = "dm01vch24lv95dliegenschaften_grundstueck";
 
-    protected static final String extractNS = "http://schemas.geo.admin.ch/V_D/OeREB/1.0/Extract";
     private static final LanguageCodeType DE = LanguageCodeType.DE;
     private static final String LOGO_ENDPOINT = "logo";
     private static final String SYMBOL_ENDPOINT = "symbol";
@@ -261,21 +260,22 @@ public class OerebController {
         }
         throw new IllegalArgumentException("parameter IDENTDN or EN or GNSS or POSTALCODE expected");
     }
-    private ResponseEntity<GetEGRIDResponse>  getEgridByNumber(boolean withGeometry,String identdn,String number) {
+    ResponseEntity<GetEGRIDResponse>  getEgridByNumber(boolean withGeometry,String identdn,String number) {
         GetEGRIDResponseType ret= new GetEGRIDResponseType();
+        ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory of=new ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory();
         List<JAXBElement<String>[]> gsList=jdbcTemplate.query(
                 "SELECT egris_egrid,nummer,nbident,art AS type FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" WHERE nummer=? AND nbident=?", new RowMapper<JAXBElement<String>[]>() {
                     @Override
                     public JAXBElement[] mapRow(ResultSet rs, int rowNum) throws SQLException {
                         JAXBElement ret[]=new JAXBElement[5];
                         String egrid=rs.getString(1);
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,egrid);
-                        ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
-                        ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
-                        ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
+                        ret[0]=of.createGetEGRIDResponseTypeEgrid(egrid);
+                        ret[1]=of.createGetEGRIDResponseTypeNumber(rs.getString(2));
+                        ret[2]=of.createGetEGRIDResponseTypeIdentDN(rs.getString(3));
+                        ret[3]=of.createGetEGRIDResponseTypeType(mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
                             MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
-                            ret[4]=new JAXBElement<MultiSurfaceType>(new QName(extractNS,"limit"),MultiSurfaceType.class,geomGml);
+                            ret[4]=of.createGetEGRIDResponseTypeLimit(geomGml);
                         }
                         return ret;
                     }
@@ -292,7 +292,7 @@ public class OerebController {
         }
          return new ResponseEntity<GetEGRIDResponse>(new GetEGRIDResponse(ret),gsList.size()>0?HttpStatus.OK:HttpStatus.NO_CONTENT);
     }
-    private ResponseEntity<GetEGRIDResponse>  getEgridByXY(boolean  withGeometry,String xy,String gnss) {
+    ResponseEntity<GetEGRIDResponse>  getEgridByXY(boolean  withGeometry,String xy,String gnss) {
         if(xy==null && gnss==null) {
             throw new IllegalArgumentException("parameter EN or GNSS required");
         }else if(xy!=null && gnss!=null) {
@@ -319,6 +319,7 @@ public class OerebController {
         // SELECT g.egris_egrid,g.nummer,g.nbident FROM oereb.dm01vch24lv95dliegenschaften_grundstueck g LEFT JOIN oereb.dm01vch24lv95dliegenschaften_liegenschaft l ON l.liegenschaft_von=g.t_id WHERE ST_DWithin(ST_GeomFromEWKT('SRID=2056;POINT( 2638242.500 1251450.000)'),l.geometrie,1.0)
         // SELECT g.egris_egrid,g.nummer,g.nbident FROM oereb.dm01vch24lv95dliegenschaften_grundstueck g LEFT JOIN oereb.dm01vch24lv95dliegenschaften_liegenschaft l ON l.liegenschaft_von=g.t_id WHERE ST_DWithin(ST_Transform(ST_GeomFromEWKT('SRID=4326;POINT( 7.94554 47.41277)'),2056),l.geometrie,1.0)
         GetEGRIDResponseType ret= new GetEGRIDResponseType();
+        ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory of=new ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory();
         List<JAXBElement<String>[]> gsList=jdbcTemplate.query(
                 "SELECT egris_egrid,nummer,nbident,art as type FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" g"
                         +" LEFT JOIN (SELECT liegenschaft_von as von, geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT
@@ -329,13 +330,13 @@ public class OerebController {
                     public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
                         JAXBElement ret[]=new JAXBElement[5];
                         String egrid=rs.getString(1);
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,egrid);
-                        ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
-                        ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
-                        ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
+                        ret[0]=of.createGetEGRIDResponseTypeEgrid(egrid);
+                        ret[1]=of.createGetEGRIDResponseTypeNumber(rs.getString(2));
+                        ret[2]=of.createGetEGRIDResponseTypeIdentDN(rs.getString(3));
+                        ret[3]=of.createGetEGRIDResponseTypeType(mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
                             MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
-                            ret[4]=new JAXBElement<MultiSurfaceType>(new QName(extractNS,"limit"),MultiSurfaceType.class,geomGml);
+                            ret[4]=of.createGetEGRIDResponseTypeLimit(geomGml);
                         }
                         return ret;
                     }
@@ -358,6 +359,7 @@ public class OerebController {
         logger.debug("localisation {}",localisation);
         logger.debug("number {}",number);
         GetEGRIDResponseType ret= new GetEGRIDResponseType();
+        ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory of=new ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory();
         String stmt="SELECT DISTINCT egris_egrid,nummer,nbident, art as type FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" as g"
                 +" JOIN ("
                 + "(SELECT liegenschaft_von as von, geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT
@@ -378,13 +380,13 @@ public class OerebController {
                     public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
                         JAXBElement ret[]=new JAXBElement[3];
                         String egrid=rs.getString(1);
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,egrid);
-                        ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
-                        ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
-                        ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
+                        ret[0]=of.createGetEGRIDResponseTypeEgrid(egrid);
+                        ret[1]=of.createGetEGRIDResponseTypeNumber(rs.getString(2));
+                        ret[2]=of.createGetEGRIDResponseTypeIdentDN(rs.getString(3));
+                        ret[3]=of.createGetEGRIDResponseTypeType(mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
                             MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
-                            ret[4]=new JAXBElement<MultiSurfaceType>(new QName(extractNS,"limit"),MultiSurfaceType.class,geomGml);
+                            ret[4]=of.createGetEGRIDResponseTypeLimit(geomGml);
                         }
                         return ret;
                     }
@@ -405,6 +407,7 @@ public class OerebController {
         logger.debug("postalcode {}",postalcode);
         logger.debug("localisation {}",localisation);
         GetEGRIDResponseType ret= new GetEGRIDResponseType();
+        ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory of=new ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory();
         String stmt="SELECT DISTINCT egris_egrid,nummer,nbident,art as type FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" as g"
                 +" JOIN ("
                 + "(SELECT liegenschaft_von as von, geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT
@@ -425,13 +428,13 @@ public class OerebController {
                     public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
                         JAXBElement ret[]=new JAXBElement[3];
                         String egrid=rs.getString(1);
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,egrid);
-                        ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
-                        ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
-                        ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
+                        ret[0]=of.createGetEGRIDResponseTypeEgrid(egrid);
+                        ret[1]=of.createGetEGRIDResponseTypeNumber(rs.getString(2));
+                        ret[2]=of.createGetEGRIDResponseTypeIdentDN(rs.getString(3));
+                        ret[3]=of.createGetEGRIDResponseTypeType(mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
                             MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
-                            ret[4]=new JAXBElement<MultiSurfaceType>(new QName(extractNS,"limit"),MultiSurfaceType.class,geomGml);
+                            ret[4]=of.createGetEGRIDResponseTypeLimit(geomGml);
                         }
                         return ret;
                     }

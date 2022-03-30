@@ -33,6 +33,7 @@ import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2pg.PgMain;
+import ch.ehi.oereb.schemas.oereb._2_0.extract.GetEGRIDResponse;
 import ch.ehi.oereb.schemas.oereb._2_0.extract.GetExtractByIdResponse;
 
 // -Ddburl=jdbc:postgresql:dbname -Ddbusr=user -Ddbpwd=userpwd
@@ -303,7 +304,54 @@ public class GetExtractTest {
         }
         Assert.assertFalse(diffs.hasDifferences());
     }
-    // IDENTDN=SO0200002498&NUMBER=514
+    @Test
+    public void egrid_mitGeometrie() throws Exception 
+    {
+        Assert.assertNotNull(service);
+        ResponseEntity<GetEGRIDResponse> response = (ResponseEntity<GetEGRIDResponse>) service.getEgridByNumber(true,"SO0200002498","514");
+        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/egrid-CH133289063542-out.xml"));
+        File controlFile = new File("src/test/data-expected/egrid-CH580632068782.xml");
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        Document doc = dbf.newDocumentBuilder().newDocument(); 
+        marshaller.marshal(response.getBody(), new javax.xml.transform.dom.DOMResult(doc));
+        //Assert.assertThat(doc,createMatcher(controlFile));
+        Diff diffs = DiffBuilder
+        .compare(controlFile)
+        .withTest(doc)
+        .withDifferenceEvaluator(DifferenceEvaluators.chain(new PlaceholderDifferenceEvaluator(), DifferenceEvaluators.downgradeDifferencesToSimilar(ComparisonType.NAMESPACE_PREFIX)))
+        .ignoreComments()
+        .ignoreWhitespace()
+        .checkForSimilar()
+        .build();
+        for(Difference diff:diffs.getDifferences()) {
+            System.out.println(diff.toString());
+        }
+        Assert.assertFalse(diffs.hasDifferences());
+    }
     // EN=2638380.0,1251430.0
+    @Test
+    public void egrid_xy() throws Exception 
+    {
+        Assert.assertNotNull(service);
+        ResponseEntity<GetEGRIDResponse> response = (ResponseEntity<GetEGRIDResponse>) service.getEgridByXY(false,"2638380.0,1251430.0",null);
+        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/egrid-xy-out.xml"));
+        File controlFile = new File("src/test/data-expected/egrid-xy.xml");
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        Document doc = dbf.newDocumentBuilder().newDocument(); 
+        marshaller.marshal(response.getBody(), new javax.xml.transform.dom.DOMResult(doc));
+        //Assert.assertThat(doc,createMatcher(controlFile));
+        Diff diffs = DiffBuilder
+        .compare(controlFile)
+        .withTest(doc)
+        .withDifferenceEvaluator(DifferenceEvaluators.chain(new PlaceholderDifferenceEvaluator(), DifferenceEvaluators.downgradeDifferencesToSimilar(ComparisonType.NAMESPACE_PREFIX)))
+        .ignoreComments()
+        .ignoreWhitespace()
+        .checkForSimilar()
+        .build();
+        for(Difference diff:diffs.getDifferences()) {
+            System.out.println(diff.toString());
+        }
+        Assert.assertFalse(diffs.hasDifferences());
+    }
     
 }
