@@ -1353,9 +1353,7 @@ public class OerebController {
         " LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as d_mu ON d.t_id = d_mu.oerbkrmfr_vstllngsdnst_verweiswms"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as d_lu ON d_mu.t_id = d_lu.oerbkrm_v2__mltlngluri_localisedtext"+
         " LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as d_mu_de ON d.t_id = d_mu_de.oerbkrmfr_vstllngsdnst_verweiswms"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage='de') as d_lu_de ON d_mu_de.t_id = d_lu_de.oerbkrm_v2__mltlngluri_localisedtext"+
         //" INNER JOIN "+getSchema()+"."+TABLE_OERBKRMVS_V1_1VORSCHRIFTEN_AMT+" as ga ON g.zustaendigestelle = ga.t_id"+
-        " WHERE (ST_DWithin(ST_GeomFromWKB(:geom,2056),flaeche,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),linie,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),punkt,0.1)) "
-        + "AND (thema in (:topics) OR subthema in (:subtopics))";
-        logger.info("stmt {} ",sqlStmt);
+        " WHERE (ST_DWithin(ST_GeomFromWKB(:geom,2056),flaeche,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),linie,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),punkt,0.1)) ";
         Set<TopicCode> concernedTopics=new HashSet<TopicCode>();
         Map<Long,TopicCode> restriction2topicCode=new HashMap<Long,TopicCode>();
         Map<Long,RestrictionOnLandownershipType> restrictions=new HashMap<Long,RestrictionOnLandownershipType>();
@@ -1378,8 +1376,15 @@ public class OerebController {
         }
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("topics", queryTopicCodes);
-        parameters.addValue("subtopics", querySubTopicCodes);
+        if(!querySubTopicCodes.isEmpty()) {
+            parameters.addValue("subtopics", querySubTopicCodes);
+            sqlStmt=sqlStmt+ "AND (thema in (:topics) OR subthema in (:subtopics))";
+        }else {
+            sqlStmt=sqlStmt+ "AND (thema in (:topics))";
+            
+        }
         parameters.addValue("geom", filterGeom);
+        logger.info("stmt {} ",sqlStmt);
         jdbcParamTemplate.query(sqlStmt, parameters,new ResultSetExtractor<Object>() {
 
             @Override
@@ -1569,13 +1574,6 @@ public class OerebController {
                         {
                             TopicCode topicCode=restriction2topicCode.get(e_id);
                             MapSqlParameterSource parameters = new MapSqlParameterSource();
-                            if(topicCode.isSubTopic()) {
-                                parameters.addValue("topics", topicCode.getMainCode());
-                                parameters.addValue("subtopics", topicCode.getSubCode());
-                            }else {
-                                parameters.addValue("topics", topicCode.getMainCode());
-                                parameters.addValue("subtopics", null);
-                            }
                             String stmt= 
                                     "select "
                                     +"ed.t_id"
@@ -1593,9 +1591,15 @@ public class OerebController {
                                     + " INNER JOIN "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMAGESETZ+" as tg ON t.t_id=tg.thema "
                                     + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0DOKUMENTE_DOKUMENT+" as ed on tg.gesetz=ed.t_id"
                                     + "      INNER JOIN (SELECT "+OEREBKRM_V2_0_MULTILINGUALURI+".oerbkrm_v2_kmnt_dkment_textimweb as docid,"+OEREBKRM_V2_0_LOCALISEDURI+".atext as docuri FROM  "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" ON  "+OEREBKRM_V2_0_LOCALISEDURI+".oerbkrm_v2__mltlngluri_localisedtext = "+OEREBKRM_V2_0_MULTILINGUALURI+".t_id WHERE alanguage='de') as docuri1 ON docuri1.docid=ed.t_id"
-                                    + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" as ea ON ed.zustaendigestelle = ea.t_id"
-                                    +"  WHERE (t.acode IN (:topics) OR t.subcode IN (:subtopics))"
-                                    ;
+                                    + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" as ea ON ed.zustaendigestelle = ea.t_id";
+                            if(topicCode.isSubTopic()) {
+                                parameters.addValue("topics", topicCode.getMainCode());
+                                parameters.addValue("subtopics", topicCode.getSubCode());
+                                stmt=stmt+"  WHERE (t.acode IN (:topics) AND t.subcode IS NULL) OR t.subcode IN (:subtopics)";
+                            }else {
+                                parameters.addValue("topics", topicCode.getMainCode());
+                                stmt=stmt+"  WHERE (t.acode IN (:topics) AND t.subcode IS NULL)";
+                            }
                             logger.info("stmt {} ",stmt);
 
                             jdbcParamTemplate.query(stmt, parameters,new RowCallbackHandler() {
