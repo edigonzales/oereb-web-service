@@ -120,6 +120,12 @@ import ch.so.agi.oereb.pdf4oereb.Locale;
 @Controller
 public class OerebController {
     
+    private static final String WMS_PARAM_LAYERS = "LAYERS";
+    private static final String WMS_PARAM_WIDTH = "WIDTH";
+    private static final String WMS_PARAM_HEIGHT = "HEIGHT";
+    private static final String WMS_PARAM_DPI = "DPI";
+    private static final String WMS_PARAM_BBOX = "BBOX";
+    private static final String WMS_PARAM_SRS = "SRS";
     private static final String PARAM_CONST_PDF = "pdf";
     private static final String PARAM_CONST_XML = "xml";
     private static final String PARAM_CONST_URL = "url";
@@ -130,7 +136,7 @@ public class OerebController {
     private static final String PARAM_POSTALCODE = "POSTALCODE";
     private static final String PARAM_GNSS = "GNSS";
     private static final String PARAM_EN = "EN";
-    private static final String PARAM_DPI = "DPI";
+    private static final String PARAM_DPI = WMS_PARAM_DPI;
     private static final String PARAM_WITHIMAGES = "WITHIMAGES";
     private static final String PARAM_TOPICS = "TOPICS";
     private static final String PARAM_LANG = "LANG";
@@ -2073,28 +2079,35 @@ public class OerebController {
     private String getWmsUrl(Envelope bbox, String url,int dpi) {
         final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
         UriComponents uri=builder.build();
-        if(uri.getQueryParams().containsKey("SRS")) {
-            builder.replaceQueryParam("SRS","EPSG:2056");
+        String paramSrs=getWmsParam(uri.getQueryParams(), WMS_PARAM_SRS);
+        if(uri.getQueryParams().containsKey(paramSrs)) {
+            builder.replaceQueryParam(paramSrs,"EPSG:2056");
         }
-        builder.replaceQueryParam("BBOX", bbox.getMinX()+","+bbox.getMinY()+","+bbox.getMaxX()+","+bbox.getMaxY());
+        String paramBbox=getWmsParam(uri.getQueryParams(), WMS_PARAM_BBOX);
+        builder.replaceQueryParam(paramBbox, bbox.getMinX()+","+bbox.getMinY()+","+bbox.getMaxX()+","+bbox.getMaxY());
         int mapWidthPixel = (int) (dpi*MAP_WIDTH_MM/25.4);
         int mapHeightPixel = (int) (dpi*MAP_HEIGHT_MM/25.4);
         
-        builder.replaceQueryParam("DPI", dpi);
-        builder.replaceQueryParam("HEIGHT", mapHeightPixel);
-        builder.replaceQueryParam("WIDTH", mapWidthPixel);
+        String paramDpi=getWmsParam(uri.getQueryParams(), WMS_PARAM_DPI);
+        builder.replaceQueryParam(paramDpi, dpi);
+        String paramHeight=getWmsParam(uri.getQueryParams(), WMS_PARAM_HEIGHT);
+        builder.replaceQueryParam(paramHeight, mapHeightPixel);
+        String paramWidth=getWmsParam(uri.getQueryParams(), WMS_PARAM_WIDTH);
+        builder.replaceQueryParam(paramWidth, mapWidthPixel);
         String fixedWmsUrl = builder.build().toUriString();
         return fixedWmsUrl;
     }
     private Integer getLayerIndex(String url, double[] layerOpacity) {
         UriComponents builder = UriComponentsBuilder.fromUriString(url).build();
-        List<String> layers=new ArrayList<String>(builder.getQueryParams().get("LAYERS"));
+        String paramLayers=getWmsParam(builder.getQueryParams(),WMS_PARAM_LAYERS);
+        List<String> layers=new ArrayList<String>(builder.getQueryParams().get(paramLayers));
         layers.sort(null);
         java.util.List<java.util.Map<String,Object>> wmsv=jdbcTemplate.queryForList(
                 "SELECT verweiswms, layerindex, layerdeckkraft FROM "+getSchema()+"."+OERBKRMVS_V2_0KONFIGURATION_MAPLAYERING);
         for(java.util.Map<String,Object> wmsData:wmsv) {
             UriComponents wmsUrlBuilder = UriComponentsBuilder.fromUriString((String)wmsData.get("verweiswms")).build();
-            List<String> wmsLayers=new ArrayList<String>(wmsUrlBuilder.getQueryParams().get("LAYERS"));
+            paramLayers=getWmsParam(wmsUrlBuilder.getQueryParams(),WMS_PARAM_LAYERS);
+            List<String> wmsLayers=new ArrayList<String>(wmsUrlBuilder.getQueryParams().get(paramLayers));
             wmsLayers.sort(null);
             if(wmsLayers.equals(layers)) {
                 layerOpacity[0]=((BigDecimal) wmsData.get("layerdeckkraft")).doubleValue();
@@ -2103,7 +2116,14 @@ public class OerebController {
         }
         return null;
     }
-
+    private String getWmsParam(MultiValueMap<String, String> queryParams, String param) {
+        for(String queryParam:queryParams.keySet()) {
+            if(queryParam.equalsIgnoreCase(param)) {
+                return queryParam;
+            }
+        }
+        return param;
+    }
     private List<TopicCode> sortTopics(List<TopicCode> topics, Map<TopicCode, Integer> topicOrdering) {
         List<TopicCode> ret=new ArrayList<TopicCode>(topics);
         ret.sort(new Comparator<TopicCode>() {
