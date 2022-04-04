@@ -1917,6 +1917,9 @@ public class OerebController {
         gs.setIdentDN(nbident);
         gs.setNumber(parcel.getNummer());
         gs.setSubunitOfLandRegister(parcel.getGbSubKreis());
+        if(gs.getSubunitOfLandRegister()!=null) {
+            gs.setSubunitOfLandRegisterDesignation(getSubunitDesignationOfMunicipality(parcel.getBfsNr()));
+        }
         gs.setMunicipalityCode(parcel.getBfsNr());
         // gemeindename
         String gemeindename=jdbcTemplate.queryForObject(
@@ -2235,6 +2238,16 @@ public class OerebController {
         }
         if(ret==null) {
             ret=new java.sql.Date(System.currentTimeMillis());
+        }
+        return ret;
+    }
+    private String getSubunitDesignationOfMunicipality(int bfsNr) {
+        String ret=null;
+        try {
+            ret=jdbcTemplate.queryForObject("SELECT bezeichnunguntereinheitgrundbuch from "+getSchema()+"."+OERBKRMVS_V2_0KONFIGURATION_GEMEINDEMITOEREBK+" WHERE gemeinde=?",String.class,bfsNr);
+        }catch(EmptyResultDataAccessException ex) {
+            // a non-unlocked municipality has no entry
+            return null;
         }
         return ret;
     }
