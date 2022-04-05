@@ -757,9 +757,25 @@ public class OerebController {
                 queryTopics.add(availableTopic);
             }
         }
-        List<TopicCode> concernedTopics=new ArrayList<TopicCode>();
 
-        addRestrictions(extract,parcelGeom,bbox,withGeometry,withImages,dpi,queryTopics,concernedTopics);
+        Map<TopicCode,Integer> topicOrdering=getTopicOrdering();
+        
+        List<TopicCode> concernedTopics=new ArrayList<TopicCode>();
+        List<RestrictionOnLandownershipType> rests=getRestrictions(parcelGeom,bbox,withGeometry,withImages,dpi,queryTopics,concernedTopics);
+        rests.sort(new Comparator<RestrictionOnLandownershipType>() {
+
+            @Override
+            public int compare(RestrictionOnLandownershipType o1, RestrictionOnLandownershipType o2) {
+                Integer o1Code=topicOrdering.get(new TopicCode(o1.getTheme().getCode(),o1.getTheme().getSubCode()));
+                Integer o2Code=topicOrdering.get(new TopicCode(o2.getTheme().getCode(),o2.getTheme().getSubCode()));
+                return o1Code.compareTo(o2Code);
+            }
+            
+        });
+        for(RestrictionOnLandownershipType rest:rests) {
+            extract.getRealEstate().getRestrictionOnLandownership().add(rest);
+        }
+        
         // Themen
         List<TopicCode> themeWithoutData=new ArrayList<TopicCode>();
         for(TopicCode requestedTopic:requestedTopics) {
@@ -779,7 +795,6 @@ public class OerebController {
                 notConcernedTopics.remove(concernedTopic);
             }
         }
-        Map<TopicCode,Integer> topicOrdering=getTopicOrdering();
         setThemes(extract.getConcernedTheme(), sortTopics(concernedTopics,topicOrdering));
         setThemes(extract.getNotConcernedTheme(), sortTopics(notConcernedTopics,topicOrdering));
         setThemes(extract.getThemeWithoutData(), sortTopics(themeWithoutData,topicOrdering));
@@ -1313,7 +1328,7 @@ public class OerebController {
         return qualifiedThemeCode;
     }
 
-    private void addRestrictions(ExtractType extract, Geometry parcelGeom,Envelope bbox,boolean withGeometry, boolean withImages,int dpi,
+    private List<RestrictionOnLandownershipType> getRestrictions(Geometry parcelGeom,Envelope bbox,boolean withGeometry, boolean withImages,int dpi,
             List<TopicCode> queryTopics, List<TopicCode> concernedTopicsList) {
         // select schnitt parcelGeom/oerebGeom where restritctionTopic in queryTopic
         WKBWriter geomEncoder=new WKBWriter(2,ByteOrderValues.BIG_ENDIAN);
@@ -1783,22 +1798,9 @@ public class OerebController {
                 }
             }
             rests.add(rest);
-        }
-        rests.sort(new Comparator<RestrictionOnLandownershipType>() {
-
-            @Override
-            public int compare(RestrictionOnLandownershipType o1, RestrictionOnLandownershipType o2) {
-                QualifiedCode o1Code=new QualifiedCode(o1.getTypeCodelist(),o1.getTypeCode());
-                QualifiedCode o2Code=new QualifiedCode(o2.getTypeCodelist(),o2.getTypeCode());
-                return o1Code.compareTo(o2Code);
-            }
-            
-        });
-        for(RestrictionOnLandownershipType rest:rests) {
-            extract.getRealEstate().getRestrictionOnLandownership().add(rest);
-        }
-        
+        }        
         concernedTopicsList.addAll(concernedTopics);
+        return rests;
     }
     protected MultilingualBlobType createMultilingualBlob(byte[] wmsImage) {
         LocalisedBlobType blob=new LocalisedBlobType();
