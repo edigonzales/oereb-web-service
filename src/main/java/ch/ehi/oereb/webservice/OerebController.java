@@ -888,17 +888,20 @@ public class OerebController {
         java.util.Map<String,Object> baseData=null;
         try {
             String sqlStmt=
-                    "SELECT aname,aname_de,ea_lu.atext as amtimweb, auid,zeile1,zeile2,strasse,hausnr,plz,ort FROM "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" AS ea"
-                            +" JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu ON ea.t_id = ea_mu.oerebkrm_v2_0amt_amt_amtimweb"+" JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as ea_lu ON ea_mu.t_id = ea_lu.oerbkrm_v2__mltlngluri_localisedtext"
-                            +" WHERE ea_lu.atext=?";
+                    "SELECT aname,aname_de,ea_lu.atext as amtimweb,ea_lu_de.atext as amtimweb_de, auid,zeile1,zeile2,strasse,hausnr,plz,ort FROM "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" AS ea"
+                            +" LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu ON ea.t_id = ea_mu.oerebkrm_v2_0amt_amt_amtimweb"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as ea_lu ON ea_mu.t_id = ea_lu.oerbkrm_v2__mltlngluri_localisedtext"
+                            +" LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu_de ON ea.t_id = ea_mu_de.oerebkrm_v2_0amt_amt_amtimweb"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage='de') as ea_lu_de ON ea_mu_de.t_id = ea_lu_de.oerbkrm_v2__mltlngluri_localisedtext"
+                            +" WHERE ea_lu.atext=? OR ea_lu_de.atext=?";
             logger.info("stmt {} ",sqlStmt);
+            String uri=getUri(office.getOfficeAtWeb());
             baseData=jdbcTemplate.queryForMap(sqlStmt
-            ,getUri(office.getOfficeAtWeb()));
+            ,uri,uri);
         }catch(EmptyResultDataAccessException ex) {
             ; // ignore if no record found
         }
         if(baseData!=null) {
             office.setName(createMultilingualTextType(baseData, "aname"));
+            office.setOfficeAtWeb(createMultilingualUri(baseData, "amtimweb"));
             office.setUID((String) baseData.get("auid"));
             office.setLine1((String) baseData.get("zeile2"));
             office.setLine2((String) baseData.get("zeile1"));
@@ -1006,6 +1009,27 @@ public class OerebController {
             String txt=(String)baseData.get(prefix+"_"+lang.value());
             if(txt!=null) {
                 LocalisedTextType lTxt= new LocalisedTextType();
+                lTxt.setLanguage(lang);
+                lTxt.setText(txt);
+                ret.getLocalisedText().add(lTxt);
+            }
+        }
+        return ret;
+    }
+    private MultilingualUriType createMultilingualUri(Map<String, Object> baseData,String prefix) {
+        MultilingualUriType ret=new MultilingualUriType();
+        {
+            String txt=(String)baseData.get(prefix);
+            if(txt!=null) {
+                LocalisedUriType lTxt= new LocalisedUriType();
+                lTxt.setText(txt);
+                ret.getLocalisedText().add(lTxt);
+            }
+        }
+        for(LanguageCodeType lang:LanguageCodeType.values()) {
+            String txt=(String)baseData.get(prefix+"_"+lang.value());
+            if(txt!=null) {
+                LocalisedUriType lTxt= new LocalisedUriType();
                 lTxt.setLanguage(lang);
                 lTxt.setText(txt);
                 ret.getLocalisedText().add(lTxt);
