@@ -1381,9 +1381,11 @@ public class OerebController {
         "leg.artcodeliste," + 
         (withImages?" leg.symbol,":"") + 
         "e.rechtsstatus as e_rechtsstatus," + 
-        "e.publiziertab," + 
+        "e.publiziertab as e_publiziertab," + 
+        "e.publiziertbis as e_publiziertbis," + 
         "g.rechtsstatus as g_rechtsstatus," + 
-        "g.publiziertab," + 
+        "g.publiziertab as g_publiziertab," + 
+        "g.publiziertbis as g_publiziertbis," + 
         "ST_AsBinary(g.punkt) as punkt," + 
         "ST_AsBinary(g.linie) as linie," + 
         "ST_AsBinary(g.flaeche) as flaeche," + 
@@ -1444,6 +1446,23 @@ public class OerebController {
                     logger.info("g_id {} e_id {} d_id {} l_id {} l_d_id {} aussage {} ",g_id,e_id,d_id,l_id,l_d_id,aussage_de);
                     if(d_id!=l_d_id) {
                         throw new IllegalArgumentException("LegendeEintrag "+l_id+" passt nicht zu Darstellungsdienst "+d_id);
+                    }
+                    java.util.Date today=new java.util.Date();
+                    java.sql.Date e_publiziertab = rs.getDate("e_publiziertab");
+                    java.sql.Date e_publiziertbis = rs.getDate("e_publiziertbis");
+                    java.sql.Date g_publiziertab = rs.getDate("g_publiziertab");
+                    java.sql.Date g_publiziertbis = rs.getDate("g_publiziertbis");
+                    if(today.before(e_publiziertab)) {
+                        continue;
+                    }
+                    if(e_publiziertbis!=null && today.after(e_publiziertbis)) {
+                        continue;
+                    }
+                    if(today.before(g_publiziertab)) {
+                        continue;
+                    }
+                    if(g_publiziertbis!=null && today.after(g_publiziertbis)) {
+                        continue;
                     }
                     RestrictionOnLandownershipType rest=restrictions.get(e_id);
                     if(rest==null) {
@@ -1578,6 +1597,8 @@ public class OerebController {
                                     +",ed.abkuerzung_de"
                                     +",ed.offiziellenr_de"
                                     +",ed.auszugindex"
+                                    +",ed.publiziertab as d_publiziertab"
+                                    +",ed.publiziertbis as d_publiziertbis"
                                     +",docuri1.docuri"
                                     +",ea.aname_de as a_aname_de" 
                                     +",NULL as a_amtimweb" // ",ea.amtimweb as a_amtimweb" 
@@ -1599,6 +1620,14 @@ public class OerebController {
                                     DocumentType doc=new DocumentType();
                                     long docid=rs.getLong("t_id");
                                     long docidx=rs.getLong("auszugindex");
+                                    java.sql.Date d_publiziertab = rs.getDate("d_publiziertab");
+                                    java.sql.Date d_publiziertbis = rs.getDate("d_publiziertbis");
+                                    if(today.before(d_publiziertab)) {
+                                        return;
+                                    }
+                                    if(d_publiziertbis!=null && today.after(d_publiziertbis)) {
+                                        return;
+                                    }
                                     doc.setType(mapDocumentType(rs.getString("typ")));
                                     doc.setLawstatus(mapLawstatus(rs.getString("rechtsstatus")));
                                     doc.setTitle(createMultilingualTextType(rs.getString("titel_de")));
@@ -1628,6 +1657,8 @@ public class OerebController {
                                     +",ed.abkuerzung_de"
                                     +",ed.offiziellenr_de"
                                     +",ed.auszugindex"
+                                    +",ed.publiziertab as d_publiziertab"
+                                    +",ed.publiziertbis as d_publiziertbis"
                                     +",docuri1.docuri"
                                     +",ea.aname_de as a_aname_de" 
                                     +",NULL as a_amtimweb" // ",ea.amtimweb as a_amtimweb" 
@@ -1655,6 +1686,14 @@ public class OerebController {
                                     DocumentType doc=new DocumentType();
                                     long docid=rs.getLong("t_id");
                                     long docidx=rs.getLong("auszugindex");
+                                    java.sql.Date d_publiziertab = rs.getDate("d_publiziertab");
+                                    java.sql.Date d_publiziertbis = rs.getDate("d_publiziertbis");
+                                    if(today.before(d_publiziertab)) {
+                                        return;
+                                    }
+                                    if(d_publiziertbis!=null && today.after(d_publiziertbis)) {
+                                        return;
+                                    }
                                     doc.setType(mapDocumentType(rs.getString("typ")));
                                     doc.setLawstatus(mapLawstatus(rs.getString("rechtsstatus")));
                                     doc.setTitle(createMultilingualTextType(rs.getString("titel_de")));
