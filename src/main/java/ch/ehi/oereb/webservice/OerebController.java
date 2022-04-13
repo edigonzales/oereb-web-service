@@ -1634,6 +1634,7 @@ public class OerebController {
                                     doc.setAbbreviation(createMultilingualTextType(rs.getString("abkuerzung_de")));
                                     doc.setOfficialNumber(createMultilingualTextType(rs.getString("offiziellenr_de")));
                                     doc.setTextAtWeb(createMultilingualUri_de(rs.getString("docuri")));
+                                    doc.setIndex((int)docidx);
                                     OfficeType zustaendigeStelle=new OfficeType();
                                     zustaendigeStelle.setName(createMultilingualTextType(rs.getString("a_aname_de")));
                                     zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(rs.getString("a_amtimweb")));
@@ -1700,6 +1701,7 @@ public class OerebController {
                                     doc.setAbbreviation(createMultilingualTextType(rs.getString("abkuerzung_de")));
                                     doc.setOfficialNumber(createMultilingualTextType(rs.getString("offiziellenr_de")));
                                     doc.setTextAtWeb(createMultilingualUri_de(rs.getString("docuri")));
+                                    doc.setIndex((int)docidx);
                                     OfficeType zustaendigeStelle=new OfficeType();
                                     zustaendigeStelle.setName(createMultilingualTextType(rs.getString("a_aname_de")));
                                     zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(rs.getString("a_amtimweb")));
