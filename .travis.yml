@@ -26,6 +26,7 @@ before_script:
 
 script: 
   - gradle -Dspring_config_location=file:travis/ asciidoctor build 
+  - cat build/reports/tests/test/classes/ch.ehi.oereb.webservice.GetExtractTest.html
 deploy:
   - provider: script
     skip_cleanup: true
