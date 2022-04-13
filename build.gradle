@@ -37,6 +37,7 @@ compileJava.options.encoding = 'US-ASCII'
 configurations {
     jaxb
     deployerJars
+    tests
 }
 
 dependencies {
@@ -208,10 +209,16 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
+task testsJar(type: Jar) {
+    classifier = 'tests'
+    //from file('build/test-results/binary')
+    from file('build/reports/tests')
+}
 
 artifacts {
     archives sourcesJar
     archives javadocJar
+    tests testsJar
 }
 
 def githubRepoUrl = 'https://github.com/claeis/oereb-web-service'
@@ -237,6 +244,17 @@ def pomConfig = {
 }
 
 uploadArchives {
+    repositories {
+        mavenDeployer {
+        	configuration = configurations.deployerJars
+			repository(url: repos_url){
+            	authentication(userName: repos_usr, password: repos_pwd)
+            }
+        }
+    }
+}
+
+uploadTests {
     repositories {
         mavenDeployer {
         	configuration = configurations.deployerJars
