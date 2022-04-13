@@ -26,7 +26,7 @@ before_script:
 
 script: 
   - gradle -Dspring_config_location=file:travis/ asciidoctor build
-  - ssh-keyscan -H ftp.umleditor.org >> ~/.ssh/known_hosts;gradle -Drepos_url=${repos_url} -Drepos_pwd=${repos_pwd} -Drepos_usr=${repos_usr} uploadTests
+  - # ssh-keyscan -H ftp.umleditor.org >> ~/.ssh/known_hosts;gradle -Drepos_url=${repos_url} -Drepos_pwd=${repos_pwd} -Drepos_usr=${repos_usr} uploadTests
 deploy:
   - provider: script
     skip_cleanup: true

@@ -218,7 +218,8 @@ task testsJar(type: Jar) {
 artifacts {
     archives sourcesJar
     archives javadocJar
-    tests testsJar
+    archives testsJar
+    //tests testsJar
 }
 
 def githubRepoUrl = 'https://github.com/claeis/oereb-web-service'
