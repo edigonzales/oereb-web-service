@@ -570,7 +570,7 @@
 							</ns3:LocalisedText>
 						</ns3:Text>
 					</ns3:Lawstatus>
-					<ns3:Index>0</ns3:Index>
+					<ns3:Index>1</ns3:Index>
 					<ns3:ResponsibleOffice>
 						<ns3:Name>
 							<ns3:LocalisedText>
@@ -623,7 +623,7 @@
 							</ns3:LocalisedText>
 						</ns3:Text>
 					</ns3:Lawstatus>
-					<ns3:Index>0</ns3:Index>
+					<ns3:Index>310</ns3:Index>
 					<ns3:ResponsibleOffice>
 						<ns3:Name>
 							<ns3:LocalisedText>
@@ -677,7 +677,7 @@
 							</ns3:LocalisedText>
 						</ns3:Text>
 					</ns3:Lawstatus>
-					<ns3:Index>0</ns3:Index>
+					<ns3:Index>320</ns3:Index>
 					<ns3:ResponsibleOffice>
 						<ns3:Name>
 							<ns3:LocalisedText>
