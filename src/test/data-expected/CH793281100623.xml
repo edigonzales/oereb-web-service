@@ -1,234 +1,338 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns7:GetExtractByIdResponse xmlns:ns1="http://www.interlis.ch/geometry/1.0"  xmlns:ns6="http://schemas.geo.admin.ch/V_D/OeREB/2.0/ExtractData" xmlns:ns7="http://schemas.geo.admin.ch/V_D/OeREB/2.0/Extract" xmlns:ns8="http://www.w3.org/2000/09/xmldsig#" xmlns:ns9="http://schemas.geo.admin.ch/V_D/OeREB/1.0/Versioning">
-	<ns6:Extract>
-		<ns6:CreationDate>${xmlunit.ignore}</ns6:CreationDate>
-		<ns6:ConcernedTheme>
-			<ns6:Code>ch.AirportsSecurityZonePlans</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Sicherheitszonenplan</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ConcernedTheme>
-		<ns6:NotConcernedTheme>
-			<ns6:Code>ch.AirportsBuildingLines</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Baulinien Flughafenanlagen</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:NotConcernedTheme>
-		<ns6:NotConcernedTheme>
-			<ns6:Code>ch.GroundwaterProtectionSites</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Grundwasserschutzareale</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:NotConcernedTheme>
-		<ns6:NotConcernedTheme>
-			<ns6:Code>ch.SO.Baulinien</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Baulinien (kantonal/kommunal)</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:NotConcernedTheme>
-		<ns6:NotConcernedTheme>
-			<ns6:Code>ch.SO.Einzelschutz</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Einzelschutz</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:NotConcernedTheme>
-		<ns6:NotConcernedTheme>
-			<ns6:Code>ch.SO.Globalschutz</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Globalschutz</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:NotConcernedTheme>
-		<ns6:NotConcernedTheme>
-			<ns6:Code>ch.SO.GrundwasserschutzarealeSubthema</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Grundwasserschutzareale Subthema</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:NotConcernedTheme>
-		<ns6:NotConcernedTheme>
-			<ns6:Code>ch.SO.GrundwasserschutzzonenSubthema</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Grundwasserschutzzonen Subthema</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:NotConcernedTheme>
-		<ns6:NotConcernedTheme>
-			<ns6:Code>ch.SO.NutzungsplanungUeberlagernd</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Nutzungsplanung überlagernd</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:NotConcernedTheme>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.RailwaysBuildingLines</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Baulinien Eisenbahnanlagen</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.MotorwaysBuildingLines</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Baulinien Nationalstrassen</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.ContaminatedSites</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Kataster der belasteten Standorte</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.ContaminatedMilitarySites</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Kataster der belasteten Standorte im Bereich des Militärs</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.ContaminatedPublicTransportSites</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Kataster der belasteten Standorte im Bereich des öffentlichen Verkehrs</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.ContaminatedCivilAviationSites</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Kataster der belasteten Standorte im Bereich der zivilen Flugplätze</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.NoiseSensitivityLevels</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Lärmempfindlichkeitsstufen (in Nutzungszonen)</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.RailwaysProjectPlanningZones</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Projektierungszonen Eisenbahnanlagen</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.AirportsProjectPlanningZones</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Projektierungszonen Flughafenanlagen</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.MotorwaysProjectPlaningZones</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Projektierungszonen Nationalstrassen</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.ForestDistanceLines</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Waldabstandslinien</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:ThemeWithoutData>
-			<ns6:Code>ch.ForestPerimeters</ns6:Code>
-			<ns6:Text>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Statische Waldgrenzen</ns6:Text>
-			</ns6:LocalisedText>
-			</ns6:Text>
-		</ns6:ThemeWithoutData>
-		<ns6:LogoPLRCadastreRef>http://localhost/logo/ch.plr</ns6:LogoPLRCadastreRef>
-		<ns6:FederalLogoRef>http://localhost/logo/ch</ns6:FederalLogoRef>
-		<ns6:CantonalLogoRef>http://localhost/logo/ch.so</ns6:CantonalLogoRef>
-		<ns6:MunicipalityLogoRef>http://localhost/logo/ch.2498</ns6:MunicipalityLogoRef>
-		<ns6:ExtractIdentifier>${xmlunit.ignore}</ns6:ExtractIdentifier>
-		<ns6:GeneralInformation>
-			<ns6:LocalisedText>
-				<ns6:Language>de</ns6:Language>
-				<ns6:Text>Der Inhalt des ÖREB-Katasters wird als bekannt vorausgesetzt. Der Kanton Solothurn ist für die Genauigkeit und Verlässlichkeit der gesetzgebenden Dokumente in elektronischer Form nicht haftbar. Der Auszug hat rein informativen Charakter und begründet insbesondere keine Rechte und Pflichten. Rechtsverbindlich sind diejenigen Dokumente, welche rechtskräftig verabschiedet oder veröffentlicht worden sind. Weitere Informationen zum ÖREB-Kataster finden Sie unter cadastre.ch</ns6:Text>
-			</ns6:LocalisedText>
-		</ns6:GeneralInformation>
-		<ns6:Glossary>
-			<ns6:Title>
-				<ns6:LocalisedText>
-					<ns6:Language>de</ns6:Language>
-					<ns6:Text>ÖREB-Kataster</ns6:Text>
-				</ns6:LocalisedText>
-			</ns6:Title>
-			<ns6:Content>
-				<ns6:LocalisedText>
-					<ns6:Language>de</ns6:Language>
-					<ns6:Text>Kataster der öffentlich-rechtlichen Eigentumsbeschränkungen</ns6:Text>
-				</ns6:LocalisedText>
-			</ns6:Content>
-		</ns6:Glossary>
-		<ns6:RealEstate>
-			<ns6:Number>403</ns6:Number>
-			<ns6:IdentDN>SO0200002498</ns6:IdentDN>
-			<ns6:EGRID>CH793281100623</ns6:EGRID>
-			<ns6:Type>
-				<ns6:Code>RealEstate</ns6:Code>
-			</ns6:Type>
-			<ns6:Canton>SO</ns6:Canton>
-			<ns6:MunicipalityName>Rohr (SO)</ns6:MunicipalityName>
-			<ns6:MunicipalityCode>2498</ns6:MunicipalityCode>
-			<ns6:SubunitOfLandRegister>Rohr</ns6:SubunitOfLandRegister>
-			<ns6:LandRegistryArea>7855</ns6:LandRegistryArea>
-			<ns6:Limit>
+<ns4:GetExtractByIdResponse
+	xmlns:ns1="http://www.interlis.ch/geometry/1.0"
+	xmlns:ns2="http://schemas.geo.admin.ch/V_D/OeREB/1.0/Versioning"
+	xmlns:ns3="http://schemas.geo.admin.ch/V_D/OeREB/2.0/ExtractData"
+	xmlns:ns4="http://schemas.geo.admin.ch/V_D/OeREB/2.0/Extract"
+	xmlns:ns5="http://www.w3.org/2000/09/xmldsig#">
+	<ns3:Extract>
+		<ns3:CreationDate>${xmlunit.ignore}</ns3:CreationDate>
+		<ns3:ConcernedTheme>
+			<ns3:Code>ch.ProjektierungszonenFlughafenanlagen</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Projektierungszonen Flughafenanlagen</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ConcernedTheme>
+		<ns3:NotConcernedTheme>
+			<ns3:Code>ch.Nutzungsplanung</ns3:Code>
+			<ns3:SubCode>ch.SO.NutzungsplanungUeberlagernd</ns3:SubCode>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Nutzungsplanung überlagernd</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:NotConcernedTheme>
+		<ns3:NotConcernedTheme>
+			<ns3:Code>ch.Nutzungsplanung</ns3:Code>
+			<ns3:SubCode>ch.SO.Baulinien</ns3:SubCode>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Baulinien (kantonal/kommunal)</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:NotConcernedTheme>
+		<ns3:NotConcernedTheme>
+			<ns3:Code>ch.BaulinienFlughafenanlagen</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Baulinien Flughafenanlagen</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:NotConcernedTheme>
+		<ns3:NotConcernedTheme>
+			<ns3:Code>ch.Grundwasserschutzzonen</ns3:Code>
+			<ns3:SubCode>ch.SO.GrundwasserschutzzonenSubthema</ns3:SubCode>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Grundwasserschutzzonen Subthema</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:NotConcernedTheme>
+		<ns3:NotConcernedTheme>
+			<ns3:Code>ch.Grundwasserschutzareale</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Grundwasserschutzareale</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:NotConcernedTheme>
+		<ns3:NotConcernedTheme>
+			<ns3:Code>ch.Grundwasserschutzareale</ns3:Code>
+			<ns3:SubCode>ch.SO.GrundwasserschutzarealeSubthema</ns3:SubCode>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Grundwasserschutzareale Subthema</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:NotConcernedTheme>
+		<ns3:NotConcernedTheme>
+			<ns3:Code>ch.SO.Einzelschutz</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Einzelschutz</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:NotConcernedTheme>
+		<ns3:NotConcernedTheme>
+			<ns3:Code>ch.SO.Globalschutz</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Globalschutz</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:NotConcernedTheme>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.Planungszonen</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Planungszonen</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.ProjektierungszonenNationalstrassen</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Projektierungszonen Nationalstrassen</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.BaulinienNationalstrassen</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Baulinien Nationalstrassen</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.ProjektierungszonenEisenbahnanlagen</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Projektierungszonen Eisenbahnanlagen</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.BaulinienEisenbahnanlagen</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Baulinien Eisenbahnanlagen</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.Sicherheitszonenplan</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Sicherheitszonenplan</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.BelasteteStandorte</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Kataster der belasteten Standorte</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.BelasteteStandorteMilitaer</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Kataster der belasteten Standorte im Bereich des Militärs</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.BelasteteStandorteZivileFlugplaetze</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Kataster der belasteten Standorte im Bereich der zivilen Flugplätze</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.BelasteteStandorteOeffentlicherVerkehr</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Kataster der belasteten Standorte im Bereich des öffentlichen Verkehrs</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.Gewaesserraum</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Gewässerraum</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.Laermempfindlichkeitsstufen</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Lärmempfindlichkeitsstufen (in Nutzungszonen)</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.StatischeWaldgrenzen</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Statische Waldgrenzen</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.Waldabstandslinien</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Waldabstandslinien</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.Waldreservate</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Waldreservate</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.ProjektierungszonenStarkstromanlagen</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Projektierungszonen Leitungen mit einer Nennspannung von 220 kV oder höher</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:ThemeWithoutData>
+			<ns3:Code>ch.BaulinienStarkstromanlagen</ns3:Code>
+			<ns3:Text>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Baulinien Starkstromanlagen</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Text>
+		</ns3:ThemeWithoutData>
+		<ns3:LogoPLRCadastreRef>http://localhost/logo/ch.plr</ns3:LogoPLRCadastreRef>
+		<ns3:FederalLogoRef>http://localhost/logo/ch</ns3:FederalLogoRef>
+		<ns3:CantonalLogoRef>http://localhost/logo/ch.SO</ns3:CantonalLogoRef>
+		<ns3:MunicipalityLogoRef>http://localhost/logo/ch.2498</ns3:MunicipalityLogoRef>
+		<ns3:ExtractIdentifier>${xmlunit.ignore}</ns3:ExtractIdentifier>
+		<ns3:GeneralInformation>
+			<ns3:LocalisedText>
+				<ns3:Language>de</ns3:Language>
+				<ns3:Text>Der Inhalt des ÖREB-Katasters wird als bekannt vorausgesetzt. Der Kanton Testkanton ist für die Genauigkeit und Verlässlichkeit der gesetzgebenden Dokumente in elektronischer Form nicht haftbar. Der Auszug hat rein informativen Charakter und begründet insbesondere keine Rechte und Pflichten. Massgeblich sind diejenigen Dokumente, welche rechtskräftig verabschiedet oder veröffentlicht worden sind. Weitere Informationen zum ÖREB-Kataster finden Sie unter www.cadastre.ch</ns3:Text>
+			</ns3:LocalisedText>
+			<ns3:LocalisedText>
+				<ns3:Language>fr</ns3:Language>
+				<ns3:Text>Le contenu du cadastre RDPPF est supposé connu. Le canton de Testkanton n'engage pas sa responsabilité sur l'exactitude ou la fiabilité des documents législatifs dans leur version électronique. L'extrait a un caractère informatif et ne crée aucun droit ou obligation. La primauté va aux documents qui ont été légalement adoptés ou publiés. Vous trouverez d'autres informations sur le cadastre RDPPF sous www.cadastre.ch</ns3:Text>
+			</ns3:LocalisedText>
+			<ns3:LocalisedText>
+				<ns3:Language>it</ns3:Language>
+				<ns3:Text>Il contenuto del Catasto RDPP si considera noto. Il Canton Testkanton non può essere ritenuto responsabile per la precisione e l'affidabilità dei documenti legislativi in formato elettronico. L'estratto ha carattere puramente informativo e non è in particolare costitutivo di diritti e obblighi. Sono considerati determinante i documenti approvati o pubblicati passati in giudicato. Ulteriori informazioni relative al Catasto RDPP sono disponibili su www.cadastre.ch</ns3:Text>
+			</ns3:LocalisedText>
+			<ns3:LocalisedText>
+				<ns3:Language>rm</ns3:Language>
+				<ns3:Text>Il cuntegn dal cataster RDPP vegn premess sco enconuschent. Il chantun Testkanton n'è betg responsabel per l'exactadad e per la fidadadad dals documents legislativs electronics. L'extract ha in caracter puramain infurmativ e na motivescha cunzunt nagins dretgs e naginas obligaziuns. Giuridicamain liants èn quels documents ch'èn vegnids deliberads u publitgads cun vigur legala. Ulteriuras infurmaziuns davart il cataster RDPP chattais Vus sut www.cadastre.ch</ns3:Text>
+			</ns3:LocalisedText>
+		</ns3:GeneralInformation>
+		<ns3:Glossary>
+			<ns3:Title>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>ÖREB-Kataster</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>fr</ns3:Language>
+					<ns3:Text>Cadastre RDPPF</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>it</ns3:Language>
+					<ns3:Text>Catasto RDPP</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>rm</ns3:Language>
+					<ns3:Text>Cataster RDPP</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>en</ns3:Language>
+					<ns3:Text>PLR Cadastre</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Title>
+			<ns3:Content>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Kataster der öffentlich-rechtlichen Eigentumsbeschränkungen</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>fr</ns3:Language>
+					<ns3:Text>Cadastre des restrictions de droit public à la propriété foncière</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>it</ns3:Language>
+					<ns3:Text>Catasto delle restrizioni di diritto pubblico della proprietà</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>rm</ns3:Language>
+					<ns3:Text>Cataster da las restricziuns da dretg public da la proprietad</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>en</ns3:Language>
+					<ns3:Text>Cadastre of public-law restrictions on landownership</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Content>
+		</ns3:Glossary>
+		<ns3:RealEstate>
+			<ns3:Number>403</ns3:Number>
+			<ns3:IdentDN>SO0200002498</ns3:IdentDN>
+			<ns3:EGRID>CH793281100623</ns3:EGRID>
+			<ns3:Type>
+				<ns3:Code>RealEstate</ns3:Code>
+				<ns3:Text>
+					<ns3:LocalisedText>
+						<ns3:Language>de</ns3:Language>
+						<ns3:Text>Liegenschaft</ns3:Text>
+					</ns3:LocalisedText>
+				</ns3:Text>
+			</ns3:Type>
+			<ns3:Canton>SO</ns3:Canton>
+			<ns3:MunicipalityName>Rohr (SO)</ns3:MunicipalityName>
+			<ns3:MunicipalityCode>2498</ns3:MunicipalityCode>
+			<ns3:SubunitOfLandRegister>Rohr</ns3:SubunitOfLandRegister>
+			<ns3:LandRegistryArea>7855</ns3:LandRegistryArea>
+			<ns3:Limit>
 				<ns1:surface>
 					<ns1:exterior>
 						<ns1:polyline>
@@ -263,39 +367,39 @@
 						</ns1:polyline>
 					</ns1:exterior>
 				</ns1:surface>
-			</ns6:Limit>
-			<ns6:RestrictionOnLandownership>
-				<ns6:LegendText>
-					<ns6:LocalisedText>
-						<ns6:Language>de</ns6:Language>
-						<ns6:Text>Aussage Bundesthema Fläche</ns6:Text>
-					</ns6:LocalisedText>
-				</ns6:LegendText>
-				<ns6:Theme>
-					<ns6:Code>ch.AirportsSecurityZonePlans</ns6:Code>
-					<ns6:Text>
-						<ns6:LocalisedText>
-							<ns6:Language>de</ns6:Language>
-							<ns6:Text>Sicherheitszonenplan</ns6:Text>
-						</ns6:LocalisedText>
-					</ns6:Text>
-				</ns6:Theme>
-				<ns6:TypeCode>9901f</ns6:TypeCode>
-				<ns6:TypeCodelist>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ns6:TypeCodelist>
-				<ns6:Lawstatus>
-					<ns6:Code>inForce</ns6:Code>
-					<ns6:Text>
-						<ns6:LocalisedText>
-							<ns6:Language>de</ns6:Language>
-							<ns6:Text>in Kraft</ns6:Text>
-						</ns6:LocalisedText>
-					</ns6:Text>
-				</ns6:Lawstatus>
-				<ns6:AreaShare>5</ns6:AreaShare>
-				<ns6:PartInPercent>0.8</ns6:PartInPercent>
-				<ns6:SymbolRef>http://localhost/symbol/217</ns6:SymbolRef>
-				<ns6:Geometry>
-					<ns6:Surface>
+			</ns3:Limit>
+			<ns3:RestrictionOnLandownership>
+				<ns3:LegendText>
+					<ns3:LocalisedText>
+						<ns3:Language>de</ns3:Language>
+						<ns3:Text>Legendeeintrag Bundesthema Fläche</ns3:Text>
+					</ns3:LocalisedText>
+				</ns3:LegendText>
+				<ns3:Theme>
+					<ns3:Code>ch.ProjektierungszonenFlughafenanlagen</ns3:Code>
+					<ns3:Text>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>Projektierungszonen Flughafenanlagen</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:Text>
+				</ns3:Theme>
+				<ns3:TypeCode>9901f</ns3:TypeCode>
+				<ns3:TypeCodelist>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ns3:TypeCodelist>
+				<ns3:Lawstatus>
+					<ns3:Code>inForce</ns3:Code>
+					<ns3:Text>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>Rechtskräftig</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:Text>
+				</ns3:Lawstatus>
+				<ns3:AreaShare>5</ns3:AreaShare>
+				<ns3:PartInPercent>0.8</ns3:PartInPercent>
+				<ns3:SymbolRef>${xmlunit.ignore}</ns3:SymbolRef>
+				<ns3:Geometry>
+					<ns3:Surface>
 						<ns1:exterior>
 							<ns1:polyline>
 								<ns1:coord>
@@ -320,247 +424,420 @@
 								</ns1:coord>
 							</ns1:polyline>
 						</ns1:exterior>
-					</ns6:Surface>
-					<ns6:Lawstatus>
-						<ns6:Code>inForce</ns6:Code>
-						<ns6:Text>
-							<ns6:LocalisedText>
-								<ns6:Language>de</ns6:Language>
-								<ns6:Text>in Kraft</ns6:Text>
-							</ns6:LocalisedText>
-						</ns6:Text>
-					</ns6:Lawstatus>
-				</ns6:Geometry>
-				<ns6:Map>
-					<ns6:ReferenceWMS>
-						<ns6:LocalisedText>
-							<ns6:Text>https://geo.so.ch/api/wms?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetMap&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;LAYERS=ch.so.arp.nutzungsplanung.grundnutzung&amp;STYLES=&amp;CRS=EPSG%3A2056&amp;SRS=EPSG:2056&amp;BBOX=2638352.121212121,1251408.4848484849,2638407.878787879,1251441.5151515151&amp;DPI=300&amp;HEIGHT=1169&amp;WIDTH=2055</ns6:Text>
-						</ns6:LocalisedText>
-					</ns6:ReferenceWMS>
-					<ns6:OtherLegend>
-						<ns6:SymbolRef>http://localhost/symbol/218</ns6:SymbolRef>
-						<ns6:LegendText>
-							<ns6:LocalisedText>
-								<ns6:Language>de</ns6:Language>
-								<ns6:Text>Legendeeintrag Bundesthema Linie</ns6:Text>
-							</ns6:LocalisedText>
-						</ns6:LegendText>
-						<ns6:TypeCode>9901l</ns6:TypeCode>
-						<ns6:TypeCodelist>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ns6:TypeCodelist>
-						<ns6:Theme>
-							<ns6:Code>ch.AirportsSecurityZonePlans</ns6:Code>
-							<ns6:Text>
-								<ns6:LocalisedText>
-									<ns6:Language>de</ns6:Language>
-									<ns6:Text>Sicherheitszonenplan</ns6:Text>
-								</ns6:LocalisedText>
-							</ns6:Text>
-						</ns6:Theme>
-					</ns6:OtherLegend>
-					<ns6:OtherLegend>
-						<ns6:SymbolRef>http://localhost/symbol/219</ns6:SymbolRef>
-						<ns6:LegendText>
-							<ns6:LocalisedText>
-								<ns6:Language>de</ns6:Language>
-								<ns6:Text>Legendeeintrag Bundesthema Punkt</ns6:Text>
-							</ns6:LocalisedText>
-						</ns6:LegendText>
-						<ns6:TypeCode>9901p</ns6:TypeCode>
-						<ns6:TypeCodelist>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ns6:TypeCodelist>
-						<ns6:Theme>
-							<ns6:Code>ch.AirportsSecurityZonePlans</ns6:Code>
-							<ns6:Text>
-								<ns6:LocalisedText>
-									<ns6:Language>de</ns6:Language>
-									<ns6:Text>Sicherheitszonenplan</ns6:Text>
-								</ns6:LocalisedText>
-							</ns6:Text>
-						</ns6:Theme>
-					</ns6:OtherLegend>
-					<ns6:OtherLegend>
-						<ns6:SymbolRef>http://localhost/symbol/220</ns6:SymbolRef>
-						<ns6:LegendText>
-							<ns6:LocalisedText>
-								<ns6:Language>de</ns6:Language>
-								<ns6:Text>Legendeeintrag kantonales Subthema zu Bundesthema</ns6:Text>
-							</ns6:LocalisedText>
-						</ns6:LegendText>
-						<ns6:TypeCode>9902</ns6:TypeCode>
-						<ns6:TypeCodelist>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ns6:TypeCodelist>
-						<ns6:Theme>
-							<ns6:Code>ch.LandUsePlans</ns6:Code>
-					    	<ns6:SubCode>ch.SO.Baulinien</ns6:SubCode>
-							<ns6:Text>
-								<ns6:LocalisedText>
-									<ns6:Language>de</ns6:Language>
-									<ns6:Text>Baulinien (kantonal/kommunal)</ns6:Text>
-								</ns6:LocalisedText>
-							</ns6:Text>
-						</ns6:Theme>
-					</ns6:OtherLegend>
-					<ns6:OtherLegend>
-						<ns6:SymbolRef>http://localhost/symbol/221</ns6:SymbolRef>
-						<ns6:LegendText>
-							<ns6:LocalisedText>
-								<ns6:Language>de</ns6:Language>
-								<ns6:Text>Legendeeintrag kantonales Thema (kein Subthema)</ns6:Text>
-							</ns6:LocalisedText>
-						</ns6:LegendText>
-						<ns6:TypeCode>9903</ns6:TypeCode>
-						<ns6:TypeCodelist>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ns6:TypeCodelist>
-						<ns6:Theme>
-							<ns6:Code>ch.SO.Einzelschutz</ns6:Code>
-							<ns6:Text>
-								<ns6:LocalisedText>
-									<ns6:Language>de</ns6:Language>
-									<ns6:Text>Einzelschutz</ns6:Text>
-								</ns6:LocalisedText>
-							</ns6:Text>
-						</ns6:Theme>
-					</ns6:OtherLegend>
-					<ns6:min>
+					</ns3:Surface>
+					<ns3:Lawstatus>
+						<ns3:Code>inForce</ns3:Code>
+						<ns3:Text>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Rechtskräftig</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:Text>
+					</ns3:Lawstatus>
+				</ns3:Geometry>
+				<ns3:Map>
+					<ns3:ReferenceWMS>
+						<ns3:LocalisedText>
+							<ns3:Text>https://geo.so.ch/api/wms?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetMap&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;LAYERS=ch.so.arp.nutzungsplanung.grundnutzung&amp;STYLES=&amp;CRS=EPSG%3A2056&amp;SRS=EPSG:2056&amp;BBOX=2638352.121212121,1251408.4848484849,2638407.878787879,1251441.5151515151&amp;DPI=200&amp;HEIGHT=779&amp;WIDTH=1370</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:ReferenceWMS>
+					<ns3:OtherLegend>
+						<ns3:SymbolRef>${xmlunit.ignore}</ns3:SymbolRef>
+						<ns3:LegendText>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Legendeeintrag Bundesthema Linie</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:LegendText>
+						<ns3:TypeCode>9901l</ns3:TypeCode>
+						<ns3:TypeCodelist>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ns3:TypeCodelist>
+						<ns3:Theme>
+							<ns3:Code>ch.ProjektierungszonenFlughafenanlagen</ns3:Code>
+							<ns3:Text>
+								<ns3:LocalisedText>
+									<ns3:Language>de</ns3:Language>
+									<ns3:Text>Projektierungszonen Flughafenanlagen</ns3:Text>
+								</ns3:LocalisedText>
+							</ns3:Text>
+						</ns3:Theme>
+					</ns3:OtherLegend>
+					<ns3:OtherLegend>
+						<ns3:SymbolRef>${xmlunit.ignore}</ns3:SymbolRef>
+						<ns3:LegendText>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Legendeeintrag Bundesthema Punkt</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:LegendText>
+						<ns3:TypeCode>9901p</ns3:TypeCode>
+						<ns3:TypeCodelist>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ns3:TypeCodelist>
+						<ns3:Theme>
+							<ns3:Code>ch.ProjektierungszonenFlughafenanlagen</ns3:Code>
+							<ns3:Text>
+								<ns3:LocalisedText>
+									<ns3:Language>de</ns3:Language>
+									<ns3:Text>Projektierungszonen Flughafenanlagen</ns3:Text>
+								</ns3:LocalisedText>
+							</ns3:Text>
+						</ns3:Theme>
+					</ns3:OtherLegend>
+					<ns3:OtherLegend>
+						<ns3:SymbolRef>${xmlunit.ignore}</ns3:SymbolRef>
+						<ns3:LegendText>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Legendeeintrag kantonales Subthema zu Bundesthema</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:LegendText>
+						<ns3:TypeCode>9902</ns3:TypeCode>
+						<ns3:TypeCodelist>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ns3:TypeCodelist>
+						<ns3:Theme>
+							<ns3:Code>ch.Nutzungsplanung</ns3:Code>
+							<ns3:SubCode>ch.SO.Baulinien</ns3:SubCode>
+							<ns3:Text>
+								<ns3:LocalisedText>
+									<ns3:Language>de</ns3:Language>
+									<ns3:Text>Baulinien (kantonal/kommunal)</ns3:Text>
+								</ns3:LocalisedText>
+							</ns3:Text>
+						</ns3:Theme>
+					</ns3:OtherLegend>
+					<ns3:OtherLegend>
+						<ns3:SymbolRef>${xmlunit.ignore}</ns3:SymbolRef>
+						<ns3:LegendText>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Legendeeintrag kantonales Thema (kein Subthema)</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:LegendText>
+						<ns3:TypeCode>9903</ns3:TypeCode>
+						<ns3:TypeCodelist>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ns3:TypeCodelist>
+						<ns3:Theme>
+							<ns3:Code>ch.SO.Einzelschutz</ns3:Code>
+							<ns3:Text>
+								<ns3:LocalisedText>
+									<ns3:Language>de</ns3:Language>
+									<ns3:Text>Einzelschutz</ns3:Text>
+								</ns3:LocalisedText>
+							</ns3:Text>
+						</ns3:Theme>
+					</ns3:OtherLegend>
+					<ns3:min>
 						<ns1:c1>2638352.121212121</ns1:c1>
 						<ns1:c2>1251408.4848484849</ns1:c2>
-					</ns6:min>
-					<ns6:max>
+					</ns3:min>
+					<ns3:max>
 						<ns1:c1>2638407.878787879</ns1:c1>
 						<ns1:c2>1251441.5151515151</ns1:c2>
-					</ns6:max>
-					<ns6:layerIndex>0</ns6:layerIndex>
-					<ns6:layerOpacity>0.6</ns6:layerOpacity>
-				</ns6:Map>
-				<ns6:LegalProvisions>
-					<ns6:Type>
-						<ns6:Code>LegalProvision</ns6:Code>
-					</ns6:Type>
-					<ns6:Title>
-						<ns6:LocalisedText>
-							<ns6:Language>de</ns6:Language>
-							<ns6:Text>Baureglement</ns6:Text>
-						</ns6:LocalisedText>
-					</ns6:Title>
-					<ns6:Abbreviation>
-						<ns6:LocalisedText>
-							<ns6:Language>de</ns6:Language>
-							<ns6:Text>BR</ns6:Text>
-						</ns6:LocalisedText>
-					</ns6:Abbreviation>
-					<ns6:OfficialNumber>
-						<ns6:LocalisedText>
-							<ns6:Language>de</ns6:Language>
-							<ns6:Text>105_BR</ns6:Text>
-						</ns6:LocalisedText>
-					</ns6:OfficialNumber>
-					<ns6:TextAtWeb>
-						<ns6:LocalisedText>
-							<ns6:Language>de</ns6:Language>
-							<ns6:Text>https://geo.so.ch/docs/ch.so.arp.zonenplaene/Zonenplaene_pdf/105-Rohr/Reglemente/105_BR.pdf</ns6:Text>
-						</ns6:LocalisedText>
-					</ns6:TextAtWeb>
-					<ns6:Lawstatus>
-						<ns6:Code>inForce</ns6:Code>
-						<ns6:Text>
-							<ns6:LocalisedText>
-								<ns6:Language>de</ns6:Language>
-								<ns6:Text>in Kraft</ns6:Text>
-							</ns6:LocalisedText>
-						</ns6:Text>
-					</ns6:Lawstatus>
-					<ns6:Index>0</ns6:Index>
-					<ns6:ResponsibleOffice>
-						<ns6:Name>
-							<ns6:LocalisedText>
-								<ns6:Language>de</ns6:Language>
-								<ns6:Text>Gemeinde Rohr (SO)</ns6:Text>
-							</ns6:LocalisedText>
-						</ns6:Name>
-						<ns6:OfficeAtWeb>
-							<ns6:LocalisedText>
-								<ns6:Text>http://www.rohr-so.ch/</ns6:Text>
-							</ns6:LocalisedText>
-						</ns6:OfficeAtWeb>
-					</ns6:ResponsibleOffice>
-				</ns6:LegalProvisions>
-				<ns6:ResponsibleOffice>
-					<ns6:Name>
-						<ns6:LocalisedText>
-							<ns6:Language>de</ns6:Language>
-							<ns6:Text>Gemeinde Rohr (SO)</ns6:Text>
-						</ns6:LocalisedText>
-					</ns6:Name>
-					<ns6:OfficeAtWeb>
-						<ns6:LocalisedText>
-							<ns6:Text>http://www.rohr-so.ch/</ns6:Text>
-						</ns6:LocalisedText>
-					</ns6:OfficeAtWeb>
-				</ns6:ResponsibleOffice>
-			</ns6:RestrictionOnLandownership>
-			<ns6:PlanForLandRegister>
-				<ns6:ReferenceWMS>
-						<ns6:LocalisedText>
-							<ns6:Text>https://geo.so.ch/api/wms?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetMap&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;LAYERS=ch.so.agi.hintergrundkarte_farbig&amp;STYLES=&amp;CRS=EPSG%3A2056&amp;TILED=false&amp;OPACITIES=255&amp;t=675&amp;SRS=EPSG:2056&amp;BBOX=2638352.121212121,1251408.4848484849,2638407.878787879,1251441.5151515151&amp;DPI=300&amp;HEIGHT=1169&amp;WIDTH=2055</ns6:Text>
-						</ns6:LocalisedText>
-				</ns6:ReferenceWMS>
-				<ns6:min>
+					</ns3:max>
+					<ns3:layerIndex>0</ns3:layerIndex>
+					<ns3:layerOpacity>0.6</ns3:layerOpacity>
+				</ns3:Map>
+				<ns3:LegalProvisions>
+					<ns3:Type>
+						<ns3:Code>LegalProvision</ns3:Code>
+						<ns3:Text>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Rechtsvorschrift</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:Text>
+					</ns3:Type>
+					<ns3:Title>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>Baureglement</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:Title>
+					<ns3:Abbreviation>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>BR</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:Abbreviation>
+					<ns3:TextAtWeb>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>https://geo.so.ch/docs/ch.so.arp.zonenplaene/Zonenplaene_pdf/105-Rohr/Reglemente/105_BR.pdf</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:TextAtWeb>
+					<ns3:Lawstatus>
+						<ns3:Code>inForce</ns3:Code>
+						<ns3:Text>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Rechtskräftig</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:Text>
+					</ns3:Lawstatus>
+					<ns3:Index>0</ns3:Index>
+					<ns3:ResponsibleOffice>
+						<ns3:Name>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Gemeinde Rohr (SO)</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:Name>
+					</ns3:ResponsibleOffice>
+				</ns3:LegalProvisions>
+				<ns3:LegalProvisions>
+					<ns3:Type>
+						<ns3:Code>Law</ns3:Code>
+						<ns3:Text>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Gesetzliche Grundlage</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:Text>
+					</ns3:Type>
+					<ns3:Title>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>Bundesgesetz über die Luftfahrt</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:Title>
+					<ns3:Abbreviation>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>LFG</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:Abbreviation>
+					<ns3:OfficialNumber>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>SR 748.0</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:OfficialNumber>
+					<ns3:TextAtWeb>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>https://www.admin.ch/ch/d/sr/c748_0.html</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:TextAtWeb>
+					<ns3:Lawstatus>
+						<ns3:Code>inForce</ns3:Code>
+						<ns3:Text>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Rechtskräftig</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:Text>
+					</ns3:Lawstatus>
+					<ns3:Index>0</ns3:Index>
+					<ns3:ResponsibleOffice>
+						<ns3:Name>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Bundeskanzlei</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:Name>
+						<ns3:UID>CHE263297189</ns3:UID>
+					</ns3:ResponsibleOffice>
+				</ns3:LegalProvisions>
+				<ns3:LegalProvisions>
+					<ns3:Type>
+						<ns3:Code>Law</ns3:Code>
+						<ns3:Text>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Gesetzliche Grundlage</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:Text>
+					</ns3:Type>
+					<ns3:Title>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>Verordnung über die Infrastruktur der Luftfahrt</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:Title>
+					<ns3:Abbreviation>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>VIL</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:Abbreviation>
+					<ns3:OfficialNumber>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>SR 748.131.1</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:OfficialNumber>
+					<ns3:TextAtWeb>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>https://www.admin.ch/ch/d/sr/c748_131_1.html</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:TextAtWeb>
+					<ns3:Lawstatus>
+						<ns3:Code>inForce</ns3:Code>
+						<ns3:Text>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Rechtskräftig</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:Text>
+					</ns3:Lawstatus>
+					<ns3:Index>0</ns3:Index>
+					<ns3:ResponsibleOffice>
+						<ns3:Name>
+							<ns3:LocalisedText>
+								<ns3:Language>de</ns3:Language>
+								<ns3:Text>Bundeskanzlei</ns3:Text>
+							</ns3:LocalisedText>
+						</ns3:Name>
+						<ns3:UID>CHE263297189</ns3:UID>
+					</ns3:ResponsibleOffice>
+				</ns3:LegalProvisions>
+				<ns3:ResponsibleOffice>
+					<ns3:Name>
+						<ns3:LocalisedText>
+							<ns3:Language>de</ns3:Language>
+							<ns3:Text>Gemeinde Rohr (SO)</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:Name>
+					<ns3:OfficeAtWeb>
+						<ns3:LocalisedText>
+							<ns3:Text>http://www.rohr-so.ch/</ns3:Text>
+						</ns3:LocalisedText>
+					</ns3:OfficeAtWeb>
+				</ns3:ResponsibleOffice>
+			</ns3:RestrictionOnLandownership>
+			<ns3:PlanForLandRegister>
+				<ns3:ReferenceWMS>
+					<ns3:LocalisedText>
+						<ns3:Text>https://geo.so.ch/api/wms?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetMap&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;LAYERS=ch.so.agi.hintergrundkarte_farbig&amp;STYLES=&amp;CRS=EPSG%3A2056&amp;TILED=false&amp;OPACITIES=255&amp;t=675&amp;SRS=EPSG:2056&amp;BBOX=2638352.121212121,1251408.4848484849,2638407.878787879,1251441.5151515151&amp;DPI=200&amp;HEIGHT=779&amp;WIDTH=1370</ns3:Text>
+					</ns3:LocalisedText>
+				</ns3:ReferenceWMS>
+				<ns3:min>
 					<ns1:c1>2638352.121212121</ns1:c1>
 					<ns1:c2>1251408.4848484849</ns1:c2>
-				</ns6:min>
-				<ns6:max>
+				</ns3:min>
+				<ns3:max>
 					<ns1:c1>2638407.878787879</ns1:c1>
 					<ns1:c2>1251441.5151515151</ns1:c2>
-				</ns6:max>
-				<ns6:layerIndex>0</ns6:layerIndex>
-				<ns6:layerOpacity>0.6</ns6:layerOpacity>
-			</ns6:PlanForLandRegister>
-			<ns6:PlanForLandRegisterMainPage>
-				<ns6:ReferenceWMS>
-						<ns6:LocalisedText>
-							<ns6:Text>https://geo.so.ch/api/wms?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetMap&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;LAYERS=ch.so.agi.hintergrundkarte_farbig&amp;STYLES=&amp;CRS=EPSG%3A2056&amp;TILED=false&amp;OPACITIES=255&amp;t=675&amp;SRS=EPSG:2056&amp;BBOX=2638352.121212121,1251408.4848484849,2638407.878787879,1251441.5151515151&amp;DPI=300&amp;HEIGHT=1169&amp;WIDTH=2055</ns6:Text>
-						</ns6:LocalisedText>
-				</ns6:ReferenceWMS>
-				<ns6:min>
+				</ns3:max>
+				<ns3:layerIndex>0</ns3:layerIndex>
+				<ns3:layerOpacity>0.6</ns3:layerOpacity>
+			</ns3:PlanForLandRegister>
+			<ns3:PlanForLandRegisterMainPage>
+				<ns3:ReferenceWMS>
+					<ns3:LocalisedText>
+						<ns3:Text>https://geo.so.ch/api/wms?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetMap&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;LAYERS=ch.so.agi.hintergrundkarte_farbig&amp;STYLES=&amp;CRS=EPSG%3A2056&amp;TILED=false&amp;OPACITIES=255&amp;t=675&amp;SRS=EPSG:2056&amp;BBOX=2638352.121212121,1251408.4848484849,2638407.878787879,1251441.5151515151&amp;DPI=200&amp;HEIGHT=779&amp;WIDTH=1370</ns3:Text>
+					</ns3:LocalisedText>
+				</ns3:ReferenceWMS>
+				<ns3:min>
 					<ns1:c1>2638352.121212121</ns1:c1>
 					<ns1:c2>1251408.4848484849</ns1:c2>
-				</ns6:min>
-				<ns6:max>
+				</ns3:min>
+				<ns3:max>
 					<ns1:c1>2638407.878787879</ns1:c1>
 					<ns1:c2>1251441.5151515151</ns1:c2>
-				</ns6:max>
-				<ns6:layerIndex>0</ns6:layerIndex>
-				<ns6:layerOpacity>0.6</ns6:layerOpacity>
-			</ns6:PlanForLandRegisterMainPage>
-		</ns6:RealEstate>
-		<ns6:Disclaimer>
-			<ns6:Title>
-				<ns6:LocalisedText>
-					<ns6:Language>de</ns6:Language>
-					<ns6:Text>Haftungsausschluss Kataster der belasteten Standorte (KbS)</ns6:Text>
-				</ns6:LocalisedText>
-			</ns6:Title>
-			<ns6:Content>
-				<ns6:LocalisedText>
-					<ns6:Language>de</ns6:Language>
-					<ns6:Text>Der Kataster der belasteten Standorte (KbS) wurde anhand der vom Bundesamt für Umwelt BAFU festgelegten Kriterien erstellt und wird fortwährend aufgrund neuer Erkenntnisse (z.B. Untersuchungen) aktualisiert. Die im KbS eingetragenen Flächen können vom tatsächlichen Ausmass der Belastung abweichen. Erscheint ein Grundstück nicht im KbS, besteht keine absolute Gewähr, dass das Areal frei von jeglichen Abfall- oder Schadstoffbelastungen ist. Bahnbetrieblich, militärisch und für die Luftfahrt genutzte Standorte liegen im Zuständigkeitsbereich des Bundes. Für weitere Informationen wenden Sie sich an die kantonale Altlastenfachstelle: Amt für Umwelt (afu.so.ch)</ns6:Text>
-				</ns6:LocalisedText>
-			</ns6:Content>
-		</ns6:Disclaimer>
-		<ns6:PLRCadastreAuthority>
-			<ns6:Name>
-				<ns6:LocalisedText>
-					<ns6:Language>de</ns6:Language>
-					<ns6:Text>Amt für Geoinformation</ns6:Text>
-				</ns6:LocalisedText>
-			</ns6:Name>
-			<ns6:OfficeAtWeb>
-				<ns6:LocalisedText>
-					<ns6:Text>https://www.agi.so.ch</ns6:Text>
-				</ns6:LocalisedText>
-			</ns6:OfficeAtWeb>
-			<ns6:Street>Rötistrasse</ns6:Street>
-			<ns6:Number>4</ns6:Number>
-			<ns6:PostalCode>4501</ns6:PostalCode>
-			<ns6:City>Solothurn</ns6:City>
-		</ns6:PLRCadastreAuthority>
-		<ns6:UpdateDateCS>2019-07-15T00:00:00.000+02:00</ns6:UpdateDateCS>
-	</ns6:Extract>
-</ns7:GetExtractByIdResponse>
+				</ns3:max>
+				<ns3:layerIndex>0</ns3:layerIndex>
+				<ns3:layerOpacity>0.6</ns3:layerOpacity>
+			</ns3:PlanForLandRegisterMainPage>
+		</ns3:RealEstate>
+		<ns3:Disclaimer>
+			<ns3:Title>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Eigentumsbeschränkungen im Grundbuch</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>fr</ns3:Language>
+					<ns3:Text>Restrictions de propriété dans le registre foncier</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>it</ns3:Language>
+					<ns3:Text>Restrizioni della proprietà nel registro fondiario</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>rm</ns3:Language>
+					<ns3:Text>Restricziuns da la proprietad en il register funsil</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>en</ns3:Language>
+					<ns3:Text>Ownership restrictions in the land register</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Title>
+			<ns3:Content>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Zusätzlich zu den Angaben in diesem Auszug können Eigentumsbeschränkungen auch im Grundbuch angemerkt sein.</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>fr</ns3:Language>
+					<ns3:Text>Il est possible que des restrictions de propriété fassent l'objet d'une mention au registre foncier, en plus des indications figurant sur cet extrait.</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>it</ns3:Language>
+					<ns3:Text>Oltre alle informazioni contenute nel presente estratto, le restrizioni della proprietà possono essere annotate anche nel registro fondiario.</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>rm</ns3:Language>
+					<ns3:Text>Supplementarmain a las indicaziuns en quest extract pon restricziuns da la proprietad er esser remartgadas en il register funsil.</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>en</ns3:Language>
+					<ns3:Text>In addition to the information contained in this extract, ownership restrictions may also be cited in the land register.</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Content>
+		</ns3:Disclaimer>
+		<ns3:Disclaimer>
+			<ns3:Title>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Haftungsausschluss Kataster der belasteten Standorte (KbS)</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>fr</ns3:Language>
+					<ns3:Text>Clause de non-responsabilité du cadastre des sites pollués (CSP)</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>it</ns3:Language>
+					<ns3:Text>Clausola di esclusione della responsabilità relativa al catasto dei siti inquinati (CSIN)</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>rm</ns3:Language>
+					<ns3:Text>Exclusiun da la responsabladad cataster dals lieus contaminads (CLC)</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Title>
+			<ns3:Content>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Der Kataster der belasteten Standorte (KbS) wurde anhand der vom Bundesamt für Umwelt BAFU festgelegten Kriterien erstellt und wird fortwährend aufgrund neuer Erkenntnisse (z.B. Untersuchungen) aktualisiert. Die im KbS eingetragenen Flächen können vom tatsächlichen Ausmass der Belastung abweichen. Erscheint ein Grundstück nicht im KbS, besteht keine absolute Gewähr, dass das Areal frei von jeglichen Abfall- oder Schadstoffbelastungen ist. Bahnbetrieblich, militärisch und für die Luftfahrt genutzte Standorte liegen im Zuständigkeitsbereich des Bundes.</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>fr</ns3:Language>
+					<ns3:Text>Le cadastre des sites pollués (CSP) est établi d'après les critères émis par l'Office fédéral de l'environnement OFEV. Il est mis à jour continuellement sur la base des nouvelles connaissances (investigations). Les surfaces des sites indiqués dans le cadastre des sites pollués peuvent ne pas correspondre à la surface effectivement polluée. Cela ne signifie pas que tout terrain non inscrit au cadastre ne soit pas pollué et qu'il soit libre de tout déchet et pollution. Les zones utilisées à des fins de transports publics, militaire et aéronautique sont de la responsabilité de la Confédération.</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>it</ns3:Language>
+					<ns3:Text>Il catasto dei siti inquinati (CSIN) è stato elaborato sulla base dei criteri definiti dall'Ufficio federale dell'ambiente (UFAM) e viene continuamente aggiornato sulla base delle nuove conoscenze ottenute (p.es. in seguito a indagini). Le superfici riportate nel CSIN possono discostarsi dalla portata dell'inquinamento effettivo. Se un fondo non figura nel CSIN, non esiste alcuna garanzia assoluta che l'area sia libera da inquinamento dovuto a rifiuti o sostanze nocive. I siti sfruttati per finalità ferroviarie, militari o relative all'aviazione civile rientrano nella sfera di competenze della Confederazione.</ns3:Text>
+				</ns3:LocalisedText>
+				<ns3:LocalisedText>
+					<ns3:Language>rm</ns3:Language>
+					<ns3:Text>Il cataster dals lieus contaminads (CLC) è vegnì fatg tenor ils criteris fixads da l'Uffizi federal d'ambient UFAM e vegn actualisà permanentamain sin basa da novas enconuschientschas (p.ex. retschertgas). Las surfatschas inscrittas en il CLC pon divergiar da la dimensiun effectiva da la contaminaziun. Sch'in bain immobigliar n'è betg inditgà en il CLC, na datti nagina garanzia absoluta che l'areal saja liber da mintga contaminaziun che deriva da rument u da substanzas nuschaivlas. Lieus duvrads per il manaschi da la viafier, per il militar e per l'aviatica tutgan tar il champ da cumpetenza da la Confederaziun.</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Content>
+		</ns3:Disclaimer>
+		<ns3:PLRCadastreAuthority>
+			<ns3:Name>
+				<ns3:LocalisedText>
+					<ns3:Language>de</ns3:Language>
+					<ns3:Text>Amt für Geoinformation</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:Name>
+			<ns3:OfficeAtWeb>
+				<ns3:LocalisedText>
+					<ns3:Text>https://www.agi.so.ch</ns3:Text>
+				</ns3:LocalisedText>
+			</ns3:OfficeAtWeb>
+			<ns3:Street>Rötistrasse</ns3:Street>
+			<ns3:Number>4</ns3:Number>
+			<ns3:PostalCode>4501</ns3:PostalCode>
+			<ns3:City>Solothurn</ns3:City>
+		</ns3:PLRCadastreAuthority>
+		<ns3:UpdateDateCS>2019-07-15T00:00:00.000+02:00</ns3:UpdateDateCS>
+	</ns3:Extract>
+</ns4:GetExtractByIdResponse>

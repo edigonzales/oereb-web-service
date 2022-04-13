@@ -39,7 +39,7 @@ import ch.ehi.oereb.schemas.oereb._2_0.extract.GetExtractByIdResponse;
 // -Ddburl=jdbc:postgresql:dbname -Ddbusr=user -Ddbpwd=userpwd
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Ignore
+//@Ignore
 public class GetExtractTest {
     private static final String TEST_ILI = "src/test/ili";
     private static final String TEST_OUT = "build/ili2db";
@@ -309,7 +309,7 @@ public class GetExtractTest {
     {
         Assert.assertNotNull(service);
         ResponseEntity<GetEGRIDResponse> response = (ResponseEntity<GetEGRIDResponse>) service.getEgridByNumber(true,"SO0200002498","514");
-        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/egrid-CH133289063542-out.xml"));
+        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/egrid-CH580632068782-out.xml"));
         File controlFile = new File("src/test/data-expected/egrid-CH580632068782.xml");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Document doc = dbf.newDocumentBuilder().newDocument(); 
