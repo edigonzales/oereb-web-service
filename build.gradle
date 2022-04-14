@@ -196,6 +196,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 test{
+	systemProperty 'TZ',"Europe/Zurich"
 	systemProperty 'spring.config.location', spring_config_location
 }
 
