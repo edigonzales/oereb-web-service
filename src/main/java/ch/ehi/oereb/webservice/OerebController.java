@@ -2354,19 +2354,21 @@ public class OerebController {
     @Scheduled(cron="0 * * * * *")
     private void cleanUp() {    
         java.io.File[] tmpDirs = new java.io.File(oerebTmpdir).listFiles();
-        for (java.io.File tmpDir : tmpDirs) {
-            if (tmpDir.getName().startsWith(TMP_FOLDER_PREFIX)) {
-                try {
-                    FileTime creationTime = (FileTime) Files.getAttribute(Paths.get(tmpDir.getAbsolutePath()), "creationTime");                    
-                    Instant now = Instant.now();
-                    
-                    long fileAge = now.getEpochSecond() - creationTime.toInstant().getEpochSecond();
-                    if (fileAge > 60*60) {
-                        logger.info("deleting {}", tmpDir.getAbsolutePath());
-                        FileSystemUtils.deleteRecursively(tmpDir);
+        if(tmpDirs!=null) {
+            for (java.io.File tmpDir : tmpDirs) {
+                if (tmpDir.getName().startsWith(TMP_FOLDER_PREFIX)) {
+                    try {
+                        FileTime creationTime = (FileTime) Files.getAttribute(Paths.get(tmpDir.getAbsolutePath()), "creationTime");                    
+                        Instant now = Instant.now();
+                        
+                        long fileAge = now.getEpochSecond() - creationTime.toInstant().getEpochSecond();
+                        if (fileAge > 60*60) {
+                            logger.info("deleting {}", tmpDir.getAbsolutePath());
+                            FileSystemUtils.deleteRecursively(tmpDir);
+                        }
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
                     }
-                } catch (IOException e) {
-                    throw new IllegalStateException(e);
                 }
             }
         }
