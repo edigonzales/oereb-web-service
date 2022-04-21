@@ -25,7 +25,7 @@ before_script:
     - psql -c 'select postgis_full_version();' -d ili2db -U postgres
 
 script: 
-  - gradle -Dspring_config_location=file:travis/ asciidoctor build
+  - export TZ="Europe/Zurich"; gradle -Dspring_config_location=file:travis/ asciidoctor build
   - # ssh-keyscan -H ftp.umleditor.org >> ~/.ssh/known_hosts;gradle -Drepos_url=${repos_url} -Drepos_pwd=${repos_pwd} -Drepos_usr=${repos_usr} uploadTests
 deploy:
   - provider: script
