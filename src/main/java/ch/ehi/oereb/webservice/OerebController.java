@@ -413,7 +413,7 @@ public class OerebController {
                 , new RowMapper<JAXBElement<String>[]>() {
                     @Override
                     public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        JAXBElement ret[]=new JAXBElement[4];
+                        JAXBElement ret[]=new JAXBElement[5];
                         String egrid=rs.getString(1);
                         ret[0]=of.createGetEGRIDResponseTypeEgrid(egrid);
                         ret[1]=of.createGetEGRIDResponseTypeNumber(rs.getString(2));
@@ -461,7 +461,7 @@ public class OerebController {
                 , new RowMapper<JAXBElement<String>[]>() {
                     @Override
                     public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        JAXBElement ret[]=new JAXBElement[3];
+                        JAXBElement ret[]=new JAXBElement[5];
                         String egrid=rs.getString(1);
                         ret[0]=of.createGetEGRIDResponseTypeEgrid(egrid);
                         ret[1]=of.createGetEGRIDResponseTypeNumber(rs.getString(2));
