@@ -7,7 +7,7 @@ oereb-web-service is an open-source implementation of the server side part for t
 oereb-web-service is licensed under the LGPL 2.1 (Lesser GNU Public License).
 
 ## System Requirements
-For the current version of oereb-web-service, you will need a JRE (Java Runtime Environment) installed on your system, version 1.8 or later.
+For the current version of oereb-web-service, you will need a JRE (Java Runtime Environment) installed on your system, version 11 or later.
 The JRE (Java Runtime Environment) can be downloaded for free from the Website <http://www.java.com/>.
 
 ## Software Download 

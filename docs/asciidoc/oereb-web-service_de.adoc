@@ -9,7 +9,7 @@ oereb-web-service benötigt eine PostGIS Datenbank.
 
 === Laufzeitanforderungen
 
-Das Programm setzt Java 1.8 voraus.
+Das Programm setzt Java 11 voraus.
 
 === Lizenz
 
