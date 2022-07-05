@@ -22,11 +22,13 @@ group 'ch.ehi.oereb'
 
 version '2.0.1'+System.getProperty('release','-SNAPSHOT')
 
+sourceCompatibility = "11"
+targetCompatibility = "11"
 
-sourceCompatibility = "1.8" // 11
-targetCompatibility = "1.8" // 11
-compileJava.options.encoding = 'US-ASCII'
-
+compileJava {
+    options.compilerArgs.addAll(['--release', '11'])
+    options.encoding = 'US-ASCII'
+}
 
 // to get the latest SNAPSHOT uncomment the following lines
 //configurations.all {
