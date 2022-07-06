@@ -167,6 +167,7 @@ compileJava.dependsOn jaxb
 
 jar {
     enabled = true
+    archiveClassifier = ''
 }
 
 bootJar {
