@@ -46,7 +46,7 @@ dependencies {
     
     compile group: 'com.vividsolutions', name: 'jts-core', version: '1.14.0'
     compile 'commons-io:commons-io:2.6'
-    implementation ('io.github.sogis:pdf4oereb:2.0.64') {
+    implementation ('io.github.sogis:pdf4oereb:2.0.116') {
     //implementation ('io.github.sogis:app:2.0.47') {
         exclude group: 'org.slf4j', module: 'slf4j-simple'
     }
@@ -61,6 +61,7 @@ dependencies {
     compile group: 'javax.activation', name: 'activation', version: '1.1.1'
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-jdbc")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("org.springframework:spring-oxm:5.3.21")
     compile('org.springframework.boot:spring-boot-starter-test')
     jaxb (
