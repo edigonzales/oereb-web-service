@@ -54,7 +54,7 @@ dependencies {
     //compile ('ch.so.agi.oereb:pdf4oereb:1.0.+') {
     //	exclude group: 'org.slf4j', module: 'slf4j-simple'
     //}
-    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6' // add as compileOnly, so that eclipse sees it
+    compile group: 'org.postgresql', name: 'postgresql'
     compile	group: 'javax.xml.bind',name:'jaxb-api', version:'2.3.1'
     compile	group: 'com.sun.xml.bind',name:'jaxb-core', version:'2.3.0.1'
     compile	group: 'com.sun.xml.bind',name:'jaxb-impl', version:'2.3.2'
