@@ -582,7 +582,7 @@ public class OerebController {
         }
     }    
 
-    private ResponseEntity<?>  getExtractWithoutGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam,int dpi) {
+    ResponseEntity<?>  getExtractWithoutGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam,int dpi) {
         if(!format.equals(PARAM_CONST_XML) && !format.equals(PARAM_CONST_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
@@ -1525,9 +1525,7 @@ public class OerebController {
                         }
                         map.setLayerIndex(layerIndex);
                         map.setLayerOpacity(layerOpacity[0]);
-                        if(withGeometry) {
-                            setMapBBOX(map,bbox);
-                        }
+                        setMapBBOX(map,bbox);
                         
                         Map<Long,LegendEntryType> legendEntries=legendPerWms.get(d_id);
                         // WMS not yet seen?
@@ -2029,9 +2027,7 @@ public class OerebController {
             }
             planForLandregister.setLayerIndex(layerIndex);
             planForLandregister.setLayerOpacity(layerOpacity[0]);
-            if(withGeometry) {
-                setMapBBOX(planForLandregister,bbox);
-            }
+            setMapBBOX(planForLandregister,bbox);
         }
         {
             // Planausschnitt 174 * 99 mm
@@ -2055,9 +2051,7 @@ public class OerebController {
             }
             planForLandregisterMainPage.setLayerIndex(layerIndex);
             planForLandregisterMainPage.setLayerOpacity(layerOpacity[0]);
-            if(withGeometry) {
-                setMapBBOX(planForLandregisterMainPage,bbox);
-            }
+            setMapBBOX(planForLandregisterMainPage,bbox);
         }
         extract.setRealEstate(gs);
         

@@ -228,7 +228,7 @@ public class GetExtractTest {
     }
     // CH580632068782 SDR mit OEREBs (P,L,F) plus eine angeschnitten
     @Test
-    public void SDR() throws Exception 
+    public void SDR_mitGeometrie() throws Exception 
     {
         Assert.assertNotNull(service);
         ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithGeometryByEgrid("xml","CH580632068782",null,null,null,200);
@@ -250,7 +250,32 @@ public class GetExtractTest {
         for(Difference diff:diffs.getDifferences()) {
             System.out.println(diff.toString());
         }
-        //Assert.assertFalse(diffs.hasDifferences());
+        Assert.assertFalse(diffs.hasDifferences());
+    }
+    @Test
+    public void SDR_ohneGeometrie() throws Exception 
+    {
+        Assert.assertNotNull(service);
+        ResponseEntity<GetExtractByIdResponse> response = (ResponseEntity<GetExtractByIdResponse>) service.getExtractWithoutGeometryByEgrid("xml","CH580632068782",null,null,null,200);
+        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/CH580632068782-noGeom-out.xml"));
+        File controlFile = new File("src/test/data-expected/CH580632068782-noGeom.xml");
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        Document doc = dbf.newDocumentBuilder().newDocument(); 
+        marshaller.marshal(response.getBody(), new javax.xml.transform.dom.DOMResult(doc));
+        //Assert.assertThat(doc,createMatcher(controlFile));
+        Diff diffs = DiffBuilder
+        .compare(controlFile)
+        .withTest(doc)
+        .withDifferenceEvaluator(DifferenceEvaluators.chain(new PlaceholderDifferenceEvaluator(), DifferenceEvaluators.downgradeDifferencesToSimilar(ComparisonType.NAMESPACE_PREFIX)))
+        .ignoreComments()
+        .ignoreWhitespace()
+        .checkForSimilar()
+        .build();
+        //System.out.println(diff.toString());
+        for(Difference diff:diffs.getDifferences()) {
+            System.out.println(diff.toString());
+        }
+        Assert.assertFalse(diffs.hasDifferences());
     }
 
     // CH133289063542 Liegenschaft ohne OEREBs, keine anderen OEREBs im sichtbaren Bereich
@@ -311,6 +336,30 @@ public class GetExtractTest {
         ResponseEntity<GetEGRIDResponse> response = (ResponseEntity<GetEGRIDResponse>) service.getEgridByNumber(true,"SO0200002498","514");
         marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/egrid-CH580632068782-out.xml"));
         File controlFile = new File("src/test/data-expected/egrid-CH580632068782.xml");
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        Document doc = dbf.newDocumentBuilder().newDocument(); 
+        marshaller.marshal(response.getBody(), new javax.xml.transform.dom.DOMResult(doc));
+        //Assert.assertThat(doc,createMatcher(controlFile));
+        Diff diffs = DiffBuilder
+        .compare(controlFile)
+        .withTest(doc)
+        .withDifferenceEvaluator(DifferenceEvaluators.chain(new PlaceholderDifferenceEvaluator(), DifferenceEvaluators.downgradeDifferencesToSimilar(ComparisonType.NAMESPACE_PREFIX)))
+        .ignoreComments()
+        .ignoreWhitespace()
+        .checkForSimilar()
+        .build();
+        for(Difference diff:diffs.getDifferences()) {
+            System.out.println(diff.toString());
+        }
+        Assert.assertFalse(diffs.hasDifferences());
+    }
+    @Test
+    public void egrid_ohnGeometrie() throws Exception 
+    {
+        Assert.assertNotNull(service);
+        ResponseEntity<GetEGRIDResponse> response = (ResponseEntity<GetEGRIDResponse>) service.getEgridByNumber(false,"SO0200002498","514");
+        marshaller.marshal(response.getBody(),new javax.xml.transform.stream.StreamResult("build/egrid-CH580632068782-noGeom-out.xml"));
+        File controlFile = new File("src/test/data-expected/egrid-CH580632068782-noGeom.xml");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Document doc = dbf.newDocumentBuilder().newDocument(); 
         marshaller.marshal(response.getBody(), new javax.xml.transform.dom.DOMResult(doc));
