@@ -761,7 +761,7 @@ public class OerebController {
         Map<TopicCode,Integer> topicOrdering=getTopicOrdering();
         
         List<TopicCode> concernedTopics=new ArrayList<TopicCode>();
-        List<RestrictionOnLandownershipType> rests=getRestrictions(parcelGeom,bbox,withGeometry,withImages,dpi,queryTopics,concernedTopics);
+        List<RestrictionOnLandownershipType> rests=getRestrictions(bfsNr,parcelGeom,bbox,withGeometry,withImages,dpi,queryTopics,concernedTopics);
         rests.sort(new Comparator<RestrictionOnLandownershipType>() {
 
             @Override
@@ -1352,7 +1352,7 @@ public class OerebController {
         return qualifiedThemeCode;
     }
 
-    private List<RestrictionOnLandownershipType> getRestrictions(Geometry parcelGeom,Envelope bbox,boolean withGeometry, boolean withImages,int dpi,
+    private List<RestrictionOnLandownershipType> getRestrictions(int bfsnr,Geometry parcelGeom,Envelope bbox,boolean withGeometry, boolean withImages,int dpi,
             List<TopicCode> queryTopics, List<TopicCode> concernedTopicsList) {
         // select schnitt parcelGeom/oerebGeom where restritctionTopic in queryTopic
         WKBWriter geomEncoder=new WKBWriter(2,ByteOrderValues.BIG_ENDIAN);
@@ -1597,6 +1597,7 @@ public class OerebController {
                                     +",ed.auszugindex"
                                     +",ed.publiziertab as d_publiziertab"
                                     +",ed.publiziertbis as d_publiziertbis"
+                                    +",ed. nuringemeinde"
                                     +",docuri1.docuri"
                                     +",ea.aname_de as a_aname_de" 
                                     +",NULL as a_amtimweb" // ",ea.amtimweb as a_amtimweb" 
@@ -1607,7 +1608,7 @@ public class OerebController {
                                     + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0DOKUMENTE_DOKUMENT+" as ed on h.vorschrift=ed.t_id"
                                     + "      INNER JOIN (SELECT "+OEREBKRM_V2_0_MULTILINGUALURI+".oerbkrm_v2_kmnt_dkment_textimweb as docid,"+OEREBKRM_V2_0_LOCALISEDURI+".atext as docuri FROM  "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" ON  "+OEREBKRM_V2_0_LOCALISEDURI+".oerbkrm_v2__mltlngluri_localisedtext = "+OEREBKRM_V2_0_MULTILINGUALURI+".t_id WHERE alanguage='de') as docuri1 ON docuri1.docid=ed.t_id"
                                     + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" as ea ON ed.zustaendigestelle = ea.t_id"
-                                    +"  where eigentumsbeschraenkung=?"
+                                    +"  where eigentumsbeschraenkung=? "
                                     ;
                             logger.info("stmt {} ",stmt);
 
@@ -1624,6 +1625,10 @@ public class OerebController {
                                         return;
                                     }
                                     if(d_publiziertbis!=null && today.after(d_publiziertbis)) {
+                                        return;
+                                    }
+                                    long nurInGemeinde=rs.getLong("nuringemeinde");
+                                    if(!rs.wasNull()  && nurInGemeinde!=bfsnr) {
                                         return;
                                     }
                                     doc.setType(mapDocumentType(rs.getString("typ")));
