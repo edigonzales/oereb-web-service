@@ -11,7 +11,7 @@ apply plugin: 'io.spring.dependency-management'
 
 group 'ch.ehi.oereb'
 
-version '2.0.1'+System.getProperty('release','-SNAPSHOT')
+version '2.0.2'+System.getProperty('release','-SNAPSHOT')
 
 sourceCompatibility = "11"
 targetCompatibility = "11"
