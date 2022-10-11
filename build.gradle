@@ -171,6 +171,7 @@ jar {
 }
 
 bootJar {
+    enabled = true
     classifier = 'boot'
 }
 
@@ -215,6 +216,7 @@ artifacts {
     archives sourcesJar
     archives javadocJar
     archives testsJar
+    archives bootJar
     //tests testsJar
 }
 
