@@ -12,8 +12,8 @@
 				<Themen>
 				    <!-- wenn ein Thema hier aufgefuehrt ist, kommt es als 
 				    		ConcernedTheme oder NotConcernedTheme -->
-					<OeREBKRM_V2_0.ThemaRef><Thema>ch.SicherheitszonenplanFlughafen</Thema></OeREBKRM_V2_0.ThemaRef>
-					<OeREBKRM_V2_0.ThemaRef><Thema>ch.SO.Baulinien</Thema></OeREBKRM_V2_0.ThemaRef>
+					<OeREBKRM_V2_0.ThemaRef><Thema>ch.ProjektierungszonenFlughafenanlagen</Thema></OeREBKRM_V2_0.ThemaRef>
+					<OeREBKRM_V2_0.ThemaRef><Thema>ch.Nutzungsplanung</Thema><SubThema>ch.SO.Baulinien</SubThema></OeREBKRM_V2_0.ThemaRef>
 					<OeREBKRM_V2_0.ThemaRef><Thema>ch.SO.Einzelschutz</Thema></OeREBKRM_V2_0.ThemaRef>
 					<!-- Themen ohne Eigentumsbeschraenkungen -->
 						<OeREBKRM_V2_0.ThemaRef><Thema>ch.BaulinienFlughafenanlagen</Thema></OeREBKRM_V2_0.ThemaRef>

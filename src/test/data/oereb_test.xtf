@@ -156,6 +156,10 @@
 				<Eigentumsbeschraenkung REF="12377.3"></Eigentumsbeschraenkung>
 				<Vorschrift REF="_05ec505faf864aa"></Vorschrift>
 			</OeREBKRMtrsfr_V2_0.Transferstruktur.HinweisVorschrift>
+			<OeREBKRMtrsfr_V2_0.Transferstruktur.HinweisVorschrift>
+				<Eigentumsbeschraenkung REF="12377.3"></Eigentumsbeschraenkung>
+				<Vorschrift REF="_05ec505faf864aaB"></Vorschrift>
+			</OeREBKRMtrsfr_V2_0.Transferstruktur.HinweisVorschrift>
 
 			<OeREBKRMtrsfr_V2_0.Transferstruktur.Geometrie TID="12557.2">
 				<Flaeche>
@@ -263,7 +267,7 @@
 						</LegendeText>
 						<ArtCode>9901f</ArtCode>
 						<ArtCodeliste>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ArtCodeliste>
-						<Thema>ch.SicherheitszonenplanFlughafen</Thema>
+						<Thema>ch.ProjektierungszonenFlughafenanlagen</Thema>
 						<DarstellungsDienst REF="1000000000821"/>
 					</OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag>
 					<OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag TID="L9901l">
@@ -282,7 +286,7 @@
 						</LegendeText>
 						<ArtCode>9901l</ArtCode>
 						<ArtCodeliste>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ArtCodeliste>
-						<Thema>ch.SicherheitszonenplanFlughafen</Thema>
+						<Thema>ch.ProjektierungszonenFlughafenanlagen</Thema>
 						<DarstellungsDienst REF="1000000000821"/>
 					</OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag>
 					<OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag TID="L9901p">
@@ -301,7 +305,7 @@
 						</LegendeText>
 						<ArtCode>9901p</ArtCode>
 						<ArtCodeliste>urn:fdc:ilismeta.interlis.ch:2017:NP_Typ_Kanton_Grundnutzung.2498</ArtCodeliste>
-						<Thema>ch.SicherheitszonenplanFlughafen</Thema>
+						<Thema>ch.ProjektierungszonenFlughafenanlagen</Thema>
 						<DarstellungsDienst REF="1000000000821"/>
 					</OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag>
 					<OeREBKRMtrsfr_V2_0.Transferstruktur.LegendeEintrag TID="L9902">
@@ -385,7 +389,54 @@
 						</LocalisedText>
 					</OeREBKRM_V2_0.MultilingualUri>
 				</TextImWeb>
-				<AuszugIndex>0</AuszugIndex>
+				<AuszugIndex>1</AuszugIndex>
+				<Rechtsstatus>inKraft</Rechtsstatus>
+				<publiziertAb>2017-08-14</publiziertAb>
+				<ZustaendigeStelle REF="ch.2498"></ZustaendigeStelle>
+			</OeREBKRM_V2_0.Dokumente.Dokument>
+			<OeREBKRM_V2_0.Dokumente.Dokument TID="_05ec505faf864aaB">
+				<Typ>Rechtsvorschrift</Typ>
+				<Titel>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>Baureglement B</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Titel>
+				<Abkuerzung>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Language>de</Language>
+								<Text>BR_B</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</Abkuerzung>
+				<OffizielleNr>
+					<LocalisationCH_V1.MultilingualText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedText>
+								<Text>105_BR_B</Text>
+							</LocalisationCH_V1.LocalisedText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualText>
+				</OffizielleNr>
+				<NurInGemeinde>9999</NurInGemeinde>
+				<TextImWeb>
+					<OeREBKRM_V2_0.MultilingualUri>
+						<LocalisedText>
+							<OeREBKRM_V2_0.LocalisedUri>
+								<Language>de</Language>
+								<Text>https://geo.so.ch/docs/ch.so.arp.zonenplaene/Zonenplaene_pdf/105-Rohr/Reglemente/105_BR.pdf</Text>
+							</OeREBKRM_V2_0.LocalisedUri>
+						</LocalisedText>
+					</OeREBKRM_V2_0.MultilingualUri>
+				</TextImWeb>
+				<AuszugIndex>1</AuszugIndex>
 				<Rechtsstatus>inKraft</Rechtsstatus>
 				<publiziertAb>2017-08-14</publiziertAb>
 				<ZustaendigeStelle REF="ch.2498"></ZustaendigeStelle>

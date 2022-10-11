@@ -332,34 +332,6 @@
 			<ns3:MunicipalityCode>2498</ns3:MunicipalityCode>
 			<ns3:SubunitOfLandRegister>Rohr</ns3:SubunitOfLandRegister>
 			<ns3:LandRegistryArea>185</ns3:LandRegistryArea>
-			<ns3:Limit>
-				<ns1:surface>
-					<ns1:exterior>
-						<ns1:polyline>
-							<ns1:coord>
-								<ns1:c1>2638370.0</ns1:c1>
-								<ns1:c2>1251420.0</ns1:c2>
-							</ns1:coord>
-							<ns1:coord>
-								<ns1:c1>2638370.0</ns1:c1>
-								<ns1:c2>1251440.0</ns1:c2>
-							</ns1:coord>
-							<ns1:coord>
-								<ns1:c1>2638400.0</ns1:c1>
-								<ns1:c2>1251440.0</ns1:c2>
-							</ns1:coord>
-							<ns1:coord>
-								<ns1:c1>2638400.0</ns1:c1>
-								<ns1:c2>1251420.0</ns1:c2>
-							</ns1:coord>
-							<ns1:coord>
-								<ns1:c1>2638370.0</ns1:c1>
-								<ns1:c2>1251420.0</ns1:c2>
-							</ns1:coord>
-						</ns1:polyline>
-					</ns1:exterior>
-				</ns1:surface>
-			</ns3:Limit>
 			<ns3:RestrictionOnLandownership>
 				<ns3:LegendText>
 					<ns3:LocalisedText>
@@ -392,32 +364,6 @@
 				<ns3:PartInPercent>0.2</ns3:PartInPercent>
 				<ns3:SymbolRef>${xmlunit.ignore}</ns3:SymbolRef>
 				<ns3:Geometry>
-					<ns3:Surface>
-						<ns1:exterior>
-							<ns1:polyline>
-								<ns1:coord>
-									<ns1:c1>2638371.0</ns1:c1>
-									<ns1:c2>1251421.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638372.0</ns1:c1>
-									<ns1:c2>1251421.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638372.0</ns1:c1>
-									<ns1:c2>1251422.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638371.0</ns1:c1>
-									<ns1:c2>1251422.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638371.0</ns1:c1>
-									<ns1:c2>1251421.0</ns1:c2>
-								</ns1:coord>
-							</ns1:polyline>
-						</ns1:exterior>
-					</ns3:Surface>
 					<ns3:Lawstatus>
 						<ns3:Code>inForce</ns3:Code>
 						<ns3:Text>
@@ -590,10 +536,6 @@
 				<ns3:NrOfPoints>2</ns3:NrOfPoints>
 				<ns3:SymbolRef>${xmlunit.ignore}</ns3:SymbolRef>
 				<ns3:Geometry>
-					<ns3:Point>
-						<ns1:c1>2638372.0</ns1:c1>
-						<ns1:c2>1251421.0</ns1:c2>
-					</ns3:Point>
 					<ns3:Lawstatus>
 						<ns3:Code>inForce</ns3:Code>
 						<ns3:Text>
@@ -605,10 +547,6 @@
 					</ns3:Lawstatus>
 				</ns3:Geometry>
 				<ns3:Geometry>
-					<ns3:Point>
-						<ns1:c1>2638371.0</ns1:c1>
-						<ns1:c2>1251421.0</ns1:c2>
-					</ns3:Point>
 					<ns3:Lawstatus>
 						<ns3:Code>inForce</ns3:Code>
 						<ns3:Text>
@@ -836,32 +774,6 @@
 				<ns3:PartInPercent>0.3</ns3:PartInPercent>
 				<ns3:SymbolRef>${xmlunit.ignore}</ns3:SymbolRef>
 				<ns3:Geometry>
-					<ns3:Surface>
-						<ns1:exterior>
-							<ns1:polyline>
-								<ns1:coord>
-									<ns1:c1>2638365.0</ns1:c1>
-									<ns1:c2>1251421.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638372.0</ns1:c1>
-									<ns1:c2>1251421.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638372.0</ns1:c1>
-									<ns1:c2>1251422.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638365.0</ns1:c1>
-									<ns1:c2>1251422.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638365.0</ns1:c1>
-									<ns1:c2>1251421.0</ns1:c2>
-								</ns1:coord>
-							</ns1:polyline>
-						</ns1:exterior>
-					</ns3:Surface>
 					<ns3:Lawstatus>
 						<ns3:Code>inForce</ns3:Code>
 						<ns3:Text>
@@ -1088,16 +1000,6 @@
 				<ns3:LengthShare>2</ns3:LengthShare>
 				<ns3:SymbolRef>${xmlunit.ignore}</ns3:SymbolRef>
 				<ns3:Geometry>
-					<ns3:Line>
-						<ns1:coord>
-							<ns1:c1>2638371.0</ns1:c1>
-							<ns1:c2>1251421.0</ns1:c2>
-						</ns1:coord>
-						<ns1:coord>
-							<ns1:c1>2638371.0</ns1:c1>
-							<ns1:c2>1251422.0</ns1:c2>
-						</ns1:coord>
-					</ns3:Line>
 					<ns3:Lawstatus>
 						<ns3:Code>inForce</ns3:Code>
 						<ns3:Text>
@@ -1109,16 +1011,6 @@
 					</ns3:Lawstatus>
 				</ns3:Geometry>
 				<ns3:Geometry>
-					<ns3:Line>
-						<ns1:coord>
-							<ns1:c1>2638371.0</ns1:c1>
-							<ns1:c2>1251421.0</ns1:c2>
-						</ns1:coord>
-						<ns1:coord>
-							<ns1:c1>2638372.0</ns1:c1>
-							<ns1:c2>1251421.0</ns1:c2>
-						</ns1:coord>
-					</ns3:Line>
 					<ns3:Lawstatus>
 						<ns3:Code>inForce</ns3:Code>
 						<ns3:Text>
@@ -1346,32 +1238,6 @@
 				<ns3:PartInPercent>0.2</ns3:PartInPercent>
 				<ns3:SymbolRef>${xmlunit.ignore}</ns3:SymbolRef>
 				<ns3:Geometry>
-					<ns3:Surface>
-						<ns1:exterior>
-							<ns1:polyline>
-								<ns1:coord>
-									<ns1:c1>2638371.0</ns1:c1>
-									<ns1:c2>1251421.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638372.0</ns1:c1>
-									<ns1:c2>1251421.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638372.0</ns1:c1>
-									<ns1:c2>1251422.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638371.0</ns1:c1>
-									<ns1:c2>1251422.0</ns1:c2>
-								</ns1:coord>
-								<ns1:coord>
-									<ns1:c1>2638371.0</ns1:c1>
-									<ns1:c2>1251421.0</ns1:c2>
-								</ns1:coord>
-							</ns1:polyline>
-						</ns1:exterior>
-					</ns3:Surface>
 					<ns3:Lawstatus>
 						<ns3:Code>inForce</ns3:Code>
 						<ns3:Text>

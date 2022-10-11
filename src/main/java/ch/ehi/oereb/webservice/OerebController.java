@@ -4,8 +4,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -22,15 +26,15 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.namespace.QName;
 
-import org.postgresql.util.Base64;
+import java.util.Base64;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +45,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.FileSystemUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -113,6 +120,32 @@ import ch.so.agi.oereb.pdf4oereb.Locale;
 @Controller
 public class OerebController {
     
+    private static final String WMS_PARAM_LAYERS = "LAYERS";
+    private static final String WMS_PARAM_WIDTH = "WIDTH";
+    private static final String WMS_PARAM_HEIGHT = "HEIGHT";
+    private static final String WMS_PARAM_DPI = "DPI";
+    private static final String WMS_PARAM_BBOX = "BBOX";
+    private static final String WMS_PARAM_SRS = "SRS";
+    private static final String PARAM_CONST_PDF = "pdf";
+    private static final String PARAM_CONST_XML = "xml";
+    private static final String PARAM_CONST_URL = "url";
+    private static final String PARAM_CONST_ALL_FEDERAL = "ALL_FEDERAL";
+    private static final String PARAM_CONST_ALL = "ALL";
+    private static final String PARAM_CONST_TRUE = "TRUE";
+    private static final String PARAM_LOCALISATION = "LOCALISATION";
+    private static final String PARAM_POSTALCODE = "POSTALCODE";
+    private static final String PARAM_GNSS = "GNSS";
+    private static final String PARAM_EN = "EN";
+    private static final String PARAM_DPI = WMS_PARAM_DPI;
+    private static final String PARAM_WITHIMAGES = "WITHIMAGES";
+    private static final String PARAM_TOPICS = "TOPICS";
+    private static final String PARAM_LANG = "LANG";
+    private static final String PARAM_SIGNED = "SIGNED";
+    private static final String PARAM_NUMBER = "NUMBER";
+    private static final String PARAM_IDENTDN = "IDENTDN";
+    private static final String PARAM_EGRID = "EGRID";
+    private static final String PARAM_GEOMETRY = "GEOMETRY";
+    private static final String OERBKRMVS_V2_0THEMA_THEMAGESETZ = "oerbkrmvs_v2_0thema_themagesetz";
     private static final String OERBKRMVS_V2_0KONFIGURATION_GRUNDSTUECKSARTTXT = "oerbkrmvs_v2_0konfiguration_grundstuecksarttxt";
     private static final String OEREBKRM_V2_0_LOCALISEDBLOB = "oerebkrm_v2_0_localisedblob";
     private static final String OEREBKRM_V2_0_MULTILINGUALBLOB = "oerebkrm_v2_0_multilingualblob";
@@ -140,18 +173,18 @@ public class OerebController {
     private static final String TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_GEBAEUDEEINGANG = "dm01vch24lv95dgebaeudeadressen_gebaeudeeingang";
     private static final String TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_LOKALISATION = "dm01vch24lv95dgebaeudeadressen_lokalisation";
     private static final String TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_LOKALISATIONSNAME = "dm01vch24lv95dgebaeudeadressen_lokalisationsname";
-    private static final String PARAM_FORMAT_PDF = "pdf";
-    private static final String PARAM_FORMAT_XML = "xml";
     private static final String TABLE_DM01VCH24LV95DGEMEINDEGRENZEN_GEMEINDE = "dm01vch24lv95dgemeindegrenzen_gemeinde";
     private static final String TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT = "dm01vch24lv95dliegenschaften_liegenschaft";
     private static final String TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT = "dm01vch24lv95dliegenschaften_selbstrecht";
     private static final String TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK = "dm01vch24lv95dliegenschaften_bergwerk";
     private static final String TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK = "dm01vch24lv95dliegenschaften_grundstueck";
 
-    protected static final String extractNS = "http://schemas.geo.admin.ch/V_D/OeREB/1.0/Extract";
     private static final LanguageCodeType DE = LanguageCodeType.DE;
     private static final String LOGO_ENDPOINT = "logo";
     private static final String SYMBOL_ENDPOINT = "symbol";
+    private static final String TMP_FOLDER_PREFIX = "oerebws";
+    private static final String SERVICE_SPEC_VERSION = "extract-2.0";
+    private static final String FILE_EXT_XML = ".xml";
     
     private Logger logger=org.slf4j.LoggerFactory.getLogger(this.getClass());
     private Jts2xtf24 jts2xtf = new Jts2xtf24();
@@ -173,10 +206,16 @@ public class OerebController {
     private String dbschema;
     @Value("${oereb.cadastreAuthorityUrl}")
     private String plrCadastreAuthorityUrl;
+    @Value("${oereb.webAppUrl}")
+    private String webAppUrl;
+    @Value("${oereb.canton:Solothurn}")
+    private String plrCanton;
     @Value("${oereb.tmpdir:${java.io.tmpdir}}")
     private String oerebTmpdir;
     @Value("${oereb.minIntersection:0.001}")
     private double minIntersection;
+    @Value("${oereb.dpi:300}")
+    private int defaultMapDpi;
     
     @Value("${oereb.planForLandregisterMainPage}")
     private String oerebPlanForLandregisterMainPage;
@@ -184,7 +223,7 @@ public class OerebController {
     private String oerebPlanForLandregister;
     
     
-    private static byte[] minimalImage=Base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==");
+    private static byte[] minimalImage=Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==");
 
     @GetMapping("/")
     public ResponseEntity<String>  ping() {
@@ -231,17 +270,17 @@ public class OerebController {
     // ON ST_Intersects(gebein.lage, plz.flaeche)
     @GetMapping("/getegrid/{format}")
     public ResponseEntity<GetEGRIDResponse>  getEgrid(@PathVariable String format, @RequestParam Map<String, String> queryParameters) {
-        if(!format.equals(PARAM_FORMAT_XML)) {
+        if(!format.equals(PARAM_CONST_XML)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
-        String geometryParam=queryParameters.get("GEOMETRY");
-        boolean withGeometry=false; // geometryParam!=null?"TRUE".equalsIgnoreCase(geometryParam):false;
-        String identdn=queryParameters.get("IDENTDN");
-        String en=queryParameters.get("EN");
-        String gnss=queryParameters.get("GNSS");
-        String postalcode=queryParameters.get("POSTALCODE");
-        String localisation=queryParameters.get("LOCALISATION");
-        String number=queryParameters.get("NUMBER");
+        String geometryParam=queryParameters.get(PARAM_GEOMETRY);
+        boolean withGeometry=geometryParam!=null?PARAM_CONST_TRUE.equalsIgnoreCase(geometryParam):false;
+        String identdn=queryParameters.get(PARAM_IDENTDN);
+        String en=queryParameters.get(PARAM_EN);
+        String gnss=queryParameters.get(PARAM_GNSS);
+        String postalcode=queryParameters.get(PARAM_POSTALCODE);
+        String localisation=queryParameters.get(PARAM_LOCALISATION);
+        String number=queryParameters.get(PARAM_NUMBER);
         if(identdn!=null) {
             return getEgridByNumber(withGeometry, identdn, number);
         }else if(en!=null || gnss!=null) {
@@ -256,25 +295,28 @@ public class OerebController {
         }
         throw new IllegalArgumentException("parameter IDENTDN or EN or GNSS or POSTALCODE expected");
     }
-    private ResponseEntity<GetEGRIDResponse>  getEgridByNumber(boolean withGeometry,String identdn,String number) {
+    ResponseEntity<GetEGRIDResponse>  getEgridByNumber(boolean withGeometry,String identdn,String number) {
         GetEGRIDResponseType ret= new GetEGRIDResponseType();
+        ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory of=new ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory();
         List<JAXBElement<String>[]> gsList=jdbcTemplate.query(
                 "SELECT egris_egrid,nummer,nbident,art AS type FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" WHERE nummer=? AND nbident=?", new RowMapper<JAXBElement<String>[]>() {
                     @Override
-                    public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    public JAXBElement[] mapRow(ResultSet rs, int rowNum) throws SQLException {
                         JAXBElement ret[]=new JAXBElement[5];
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,rs.getString(1));
-                        ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
-                        ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
-                        ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
+                        String egrid=rs.getString(1);
+                        ret[0]=of.createGetEGRIDResponseTypeEgrid(egrid);
+                        ret[1]=of.createGetEGRIDResponseTypeNumber(rs.getString(2));
+                        ret[2]=of.createGetEGRIDResponseTypeIdentDN(rs.getString(3));
+                        ret[3]=of.createGetEGRIDResponseTypeType(mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
-                            ret[4]=new JAXBElement<String>(new QName(extractNS,"limit"),String.class,rs.getString(5));
+                            MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
+                            ret[4]=of.createGetEGRIDResponseTypeLimit(geomGml);
                         }
                         return ret;
                     }
                     
                 },number,identdn);
-        for(JAXBElement<String>[] gs:gsList) {
+        for(JAXBElement[] gs:gsList) {
             ret.getEgridAndNumberAndIdentDN().add(gs[0]);
             ret.getEgridAndNumberAndIdentDN().add(gs[1]);
             ret.getEgridAndNumberAndIdentDN().add(gs[2]);
@@ -285,7 +327,7 @@ public class OerebController {
         }
          return new ResponseEntity<GetEGRIDResponse>(new GetEGRIDResponse(ret),gsList.size()>0?HttpStatus.OK:HttpStatus.NO_CONTENT);
     }
-    private ResponseEntity<GetEGRIDResponse>  getEgridByXY(boolean  withGeometry,String xy,String gnss) {
+    ResponseEntity<GetEGRIDResponse>  getEgridByXY(boolean  withGeometry,String xy,String gnss) {
         if(xy==null && gnss==null) {
             throw new IllegalArgumentException("parameter EN or GNSS required");
         }else if(xy!=null && gnss!=null) {
@@ -312,21 +354,24 @@ public class OerebController {
         // SELECT g.egris_egrid,g.nummer,g.nbident FROM oereb.dm01vch24lv95dliegenschaften_grundstueck g LEFT JOIN oereb.dm01vch24lv95dliegenschaften_liegenschaft l ON l.liegenschaft_von=g.t_id WHERE ST_DWithin(ST_GeomFromEWKT('SRID=2056;POINT( 2638242.500 1251450.000)'),l.geometrie,1.0)
         // SELECT g.egris_egrid,g.nummer,g.nbident FROM oereb.dm01vch24lv95dliegenschaften_grundstueck g LEFT JOIN oereb.dm01vch24lv95dliegenschaften_liegenschaft l ON l.liegenschaft_von=g.t_id WHERE ST_DWithin(ST_Transform(ST_GeomFromEWKT('SRID=4326;POINT( 7.94554 47.41277)'),2056),l.geometrie,1.0)
         GetEGRIDResponseType ret= new GetEGRIDResponseType();
+        ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory of=new ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory();
         List<JAXBElement<String>[]> gsList=jdbcTemplate.query(
                 "SELECT egris_egrid,nummer,nbident,art as type FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" g"
                         +" LEFT JOIN (SELECT liegenschaft_von as von, geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT
-                             +" UNION SELECT selbstrecht_von as von,  geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT
-                             +" UNION SELECT bergwerk_von as von,     geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK+") b ON b.von=g.t_id WHERE ST_DWithin(ST_Transform(?,2056),b.geometrie,1.0)"
+                             +" UNION ALL SELECT selbstrecht_von as von,  geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT
+                             +" UNION ALL SELECT bergwerk_von as von,     geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK+") b ON b.von=g.t_id WHERE ST_DWithin(ST_Transform(?,2056),b.geometrie,1.0)"
                 , new RowMapper<JAXBElement<String>[]>() {
                     @Override
                     public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
                         JAXBElement ret[]=new JAXBElement[5];
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,rs.getString(1));
-                        ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
-                        ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
-                        ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
+                        String egrid=rs.getString(1);
+                        ret[0]=of.createGetEGRIDResponseTypeEgrid(egrid);
+                        ret[1]=of.createGetEGRIDResponseTypeNumber(rs.getString(2));
+                        ret[2]=of.createGetEGRIDResponseTypeIdentDN(rs.getString(3));
+                        ret[3]=of.createGetEGRIDResponseTypeType(mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
-                            ret[4]=new JAXBElement<String>(new QName(extractNS,"limit"),String.class,rs.getString(5));
+                            MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
+                            ret[4]=of.createGetEGRIDResponseTypeLimit(geomGml);
                         }
                         return ret;
                     }
@@ -349,11 +394,12 @@ public class OerebController {
         logger.debug("localisation {}",localisation);
         logger.debug("number {}",number);
         GetEGRIDResponseType ret= new GetEGRIDResponseType();
+        ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory of=new ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory();
         String stmt="SELECT DISTINCT egris_egrid,nummer,nbident, art as type FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" as g"
                 +" JOIN ("
                 + "(SELECT liegenschaft_von as von, geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT
-                    +" UNION SELECT selbstrecht_von as von,  geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT
-                    +" UNION SELECT bergwerk_von as von,     geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK+") as a "
+                    +" UNION ALL SELECT selbstrecht_von as von,  geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT
+                    +" UNION ALL SELECT bergwerk_von as von,     geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK+") as a "
                             + " JOIN (select lage from (select lage from "+getSchema()+"."+TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_LOKALISATIONSNAME+" as lname " 
                             + " JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_LOKALISATION+" AS lokn ON lokn.t_id=lname.benannte "
                             + " JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_GEBAEUDEEINGANG+" as geb ON geb.gebaeudeeingang_von=lokn.t_id " 
@@ -367,13 +413,15 @@ public class OerebController {
                 , new RowMapper<JAXBElement<String>[]>() {
                     @Override
                     public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        JAXBElement ret[]=new JAXBElement[3];
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,rs.getString(1));
-                        ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
-                        ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
-                        ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
+                        JAXBElement ret[]=new JAXBElement[5];
+                        String egrid=rs.getString(1);
+                        ret[0]=of.createGetEGRIDResponseTypeEgrid(egrid);
+                        ret[1]=of.createGetEGRIDResponseTypeNumber(rs.getString(2));
+                        ret[2]=of.createGetEGRIDResponseTypeIdentDN(rs.getString(3));
+                        ret[3]=of.createGetEGRIDResponseTypeType(mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
-                            ret[4]=new JAXBElement<String>(new QName(extractNS,"limit"),String.class,rs.getString(5));
+                            MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
+                            ret[4]=of.createGetEGRIDResponseTypeLimit(geomGml);
                         }
                         return ret;
                     }
@@ -394,11 +442,12 @@ public class OerebController {
         logger.debug("postalcode {}",postalcode);
         logger.debug("localisation {}",localisation);
         GetEGRIDResponseType ret= new GetEGRIDResponseType();
+        ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory of=new ch.ehi.oereb.schemas.oereb._2_0.extract.ObjectFactory();
         String stmt="SELECT DISTINCT egris_egrid,nummer,nbident,art as type FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" as g"
                 +" JOIN ("
                 + "(SELECT liegenschaft_von as von, geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT
-                    +" UNION SELECT selbstrecht_von as von,  geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT
-                    +" UNION SELECT bergwerk_von as von,     geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK+") as a "
+                    +" UNION ALL SELECT selbstrecht_von as von,  geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT
+                    +" UNION ALL SELECT bergwerk_von as von,     geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK+") as a "
                             + " JOIN (select lage from (select lage from "+getSchema()+"."+TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_LOKALISATIONSNAME+" as lname " 
                             + " JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_LOKALISATION+" AS lokn ON lokn.t_id=lname.benannte "
                             + " JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DGEBAEUDEADRESSEN_GEBAEUDEEINGANG+" as geb ON geb.gebaeudeeingang_von=lokn.t_id " 
@@ -412,13 +461,15 @@ public class OerebController {
                 , new RowMapper<JAXBElement<String>[]>() {
                     @Override
                     public JAXBElement<String>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        JAXBElement ret[]=new JAXBElement[3];
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"egrid"),String.class,rs.getString(1));
-                        ret[1]=new JAXBElement<String>(new QName(extractNS,"number"),String.class,rs.getString(2));
-                        ret[2]=new JAXBElement<String>(new QName(extractNS,"identDN"),String.class,rs.getString(3));
-                        ret[3]=new JAXBElement<RealEstateTypeType>(new QName(extractNS,"type"),RealEstateTypeType.class,mapRealEstateType(rs.getString(4)));
+                        JAXBElement ret[]=new JAXBElement[5];
+                        String egrid=rs.getString(1);
+                        ret[0]=of.createGetEGRIDResponseTypeEgrid(egrid);
+                        ret[1]=of.createGetEGRIDResponseTypeNumber(rs.getString(2));
+                        ret[2]=of.createGetEGRIDResponseTypeIdentDN(rs.getString(3));
+                        ret[3]=of.createGetEGRIDResponseTypeType(mapRealEstateType(rs.getString(4)));
                         if(withGeometry) {
-                            ret[4]=new JAXBElement<String>(new QName(extractNS,"limit"),String.class,rs.getString(5));
+                            MultiSurfaceType geomGml=jts2xtf.createMultiSurfaceType(getParcelGeometryByEgrid(egrid));
+                            ret[4]=of.createGetEGRIDResponseTypeLimit(geomGml);
                         }
                         return ret;
                     }
@@ -438,30 +489,34 @@ public class OerebController {
     
     @GetMapping(value="/extract/{format}",consumes=MediaType.ALL_VALUE,produces = {MediaType.APPLICATION_PDF_VALUE,MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?>  getExtract(@PathVariable String format,@RequestParam Map<String, String> queryParameters) {
-        String geometryParam=queryParameters.get("GEOMETRY");
-        boolean withGeometry=geometryParam!=null?"TRUE".equalsIgnoreCase(geometryParam):false;
-        String egrid=queryParameters.get("EGRID");
-        String identdn=queryParameters.get("IDENTDN");
-        String number=queryParameters.get("NUMBER");
-        String signed=queryParameters.get("SIGNED");
-        String lang=queryParameters.get("LANG");
-        String topics=queryParameters.get("TOPICS");
-        String withImages=queryParameters.get("WITHIMAGES");     
-        if(egrid!=null) {
+        String geometryParam=queryParameters.get(PARAM_GEOMETRY);
+        boolean withGeometry=geometryParam!=null?PARAM_CONST_TRUE.equalsIgnoreCase(geometryParam):false;
+        String egrid=queryParameters.get(PARAM_EGRID);
+        String identdn=queryParameters.get(PARAM_IDENTDN);
+        String number=queryParameters.get(PARAM_NUMBER);
+        String signed=queryParameters.get(PARAM_SIGNED);
+        String lang=queryParameters.get(PARAM_LANG);
+        String topics=queryParameters.get(PARAM_TOPICS);
+        String withImages=queryParameters.get(PARAM_WITHIMAGES);
+        String dpiParam=queryParameters.get(PARAM_DPI);
+        int dpi=dpiParam!=null?Integer.parseInt(dpiParam):defaultMapDpi;
+        if(format.equalsIgnoreCase(PARAM_CONST_URL)) {
+            return getExtractRedirect(egrid,identdn,number);
+        }else if(egrid!=null) {
             if(withGeometry) {
-                return getExtractWithGeometryByEgrid(format,egrid,lang,topics,withImages);
+                return getExtractWithGeometryByEgrid(format,egrid,lang,topics,withImages,dpi);
             }
-            return getExtractWithoutGeometryByEgrid(format,egrid,lang,topics,withImages);
+            return getExtractWithoutGeometryByEgrid(format,egrid,lang,topics,withImages,dpi);
         }else {
             if(withGeometry) {
-                return getExtractWithGeometryByNumber(format,identdn,number,lang,topics,withImages);
+                return getExtractWithGeometryByNumber(format,identdn,number,lang,topics,withImages,dpi);
             }
-            return getExtractWithoutGeometryByNumber(format,identdn,number,lang,topics,withImages);
+            return getExtractWithoutGeometryByNumber(format,identdn,number,lang,topics,withImages,dpi);
         }
     }
                 
-    ResponseEntity<?>  getExtractWithGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam) {
-        if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
+    ResponseEntity<?>  getExtractWithGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam,int dpi) {
+        if(!format.equals(PARAM_CONST_XML) && !format.equals(PARAM_CONST_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         Grundstueck parcel=getParcelByEgrid(egrid);
@@ -473,31 +528,30 @@ public class OerebController {
             // non unlocked municipality
             return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
         }
-
         boolean withGeometry = true;
-        boolean withImages = withImagesParam==null?false:withGeometry;
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        boolean withImages = withImagesParam==null?false:PARAM_CONST_TRUE.equalsIgnoreCase(withImagesParam);
+        if(format.equals(PARAM_CONST_PDF)) {
             withImages = true;
             withGeometry = true;
         }
-        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages);
+        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages,dpi);
         
         GetExtractByIdResponseType response=new GetExtractByIdResponseType();
         response.setExtract(extract);
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
-        if(format.equals(PARAM_FORMAT_PDF)) {
-            return getExtractAsPdf(parcel, responseEle);
+        if(format.equals(PARAM_CONST_PDF)) {
+            return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }
-    private ResponseEntity<?> getExtractAsPdf(Grundstueck parcel, GetExtractByIdResponse responseEle) {
-        java.io.File tmpFolder=new java.io.File(oerebTmpdir,"oerebws"+Thread.currentThread().getId());
+    private ResponseEntity<?> createExtractAsPdf(Grundstueck parcel, GetExtractByIdResponse responseEle) {
+        java.io.File tmpFolder=new java.io.File(oerebTmpdir,TMP_FOLDER_PREFIX+Thread.currentThread().getId());
         if(!tmpFolder.exists()) {
             tmpFolder.mkdirs();
         }
         logger.info("tmpFolder {}",tmpFolder.getAbsolutePath());
-        java.io.File tmpExtractFile=new java.io.File(tmpFolder,parcel.getEgrid()+".xml");
+        java.io.File tmpExtractFile=new java.io.File(tmpFolder,parcel.getEgrid()+FILE_EXT_XML);
         marshaller.marshal(responseEle,new javax.xml.transform.stream.StreamResult(tmpExtractFile));
         try {
             java.io.File pdfFile=extractXml2pdf.runXml2Pdf(tmpExtractFile.getAbsolutePath(), tmpFolder.getAbsolutePath(), Locale.DE);
@@ -528,8 +582,8 @@ public class OerebController {
         }
     }    
 
-    private ResponseEntity<?>  getExtractWithoutGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam) {
-        if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
+    ResponseEntity<?>  getExtractWithoutGeometryByEgrid(String format,String egrid,String lang,String topics,String withImagesParam,int dpi) {
+        if(!format.equals(PARAM_CONST_XML) && !format.equals(PARAM_CONST_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         Grundstueck parcel=getParcelByEgrid(egrid);
@@ -543,24 +597,24 @@ public class OerebController {
         }
 
         boolean withGeometry = false;
-        boolean withImages = withImagesParam==null?false:withGeometry;
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        boolean withImages = withImagesParam==null?false:PARAM_CONST_TRUE.equalsIgnoreCase(withImagesParam);
+        if(format.equals(PARAM_CONST_PDF)) {
             withImages = true;
             withGeometry = true;
         }
-        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages);
+        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages,dpi);
         
         GetExtractByIdResponseType response=new GetExtractByIdResponseType();
         response.setExtract(extract);
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
-        if(format.equals(PARAM_FORMAT_PDF)) {
-            return getExtractAsPdf(parcel, responseEle);
+        if(format.equals(PARAM_CONST_PDF)) {
+            return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }    
-    private ResponseEntity<?>  getExtractWithGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam) {
-        if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
+    private ResponseEntity<?>  getExtractWithGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam,int dpi) {
+        if(!format.equals(PARAM_CONST_XML) && !format.equals(PARAM_CONST_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         Grundstueck parcel=getParcelByNumber(identdn,number);
@@ -574,24 +628,35 @@ public class OerebController {
         }
 
         boolean withGeometry = true;
-        boolean withImages = withImagesParam==null?false:withGeometry;
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        boolean withImages = withImagesParam==null?false:PARAM_CONST_TRUE.equalsIgnoreCase(withImagesParam);
+        if(format.equals(PARAM_CONST_PDF)) {
             withImages = true;
             withGeometry = true;
         }
-        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages);
+        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages,dpi);
         
         GetExtractByIdResponseType response=new GetExtractByIdResponseType();
         response.setExtract(extract);
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
-        if(format.equals(PARAM_FORMAT_PDF)) {
-            return getExtractAsPdf(parcel, responseEle);
+        if(format.equals(PARAM_CONST_PDF)) {
+            return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }    
-    private ResponseEntity<?>  getExtractWithoutGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam) {
-        if(!format.equals(PARAM_FORMAT_XML) && !format.equals(PARAM_FORMAT_PDF)) {
+    private ResponseEntity<?> getExtractRedirect(String egridParam, String identdn, String number) {
+        String egrid=verifyEgrid(egridParam, identdn, number);
+        if(egrid==null) {
+            return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+        }
+        HttpHeaders headers=new HttpHeaders();
+        headers.add(HttpHeaders.LOCATION, getWebAppUrl(egrid));
+        ResponseEntity<Object> ret=new ResponseEntity<Object>(headers,HttpStatus.SEE_OTHER);
+        return ret;
+    }
+
+    private ResponseEntity<?>  getExtractWithoutGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam,int dpi) {
+        if(!format.equals(PARAM_CONST_XML) && !format.equals(PARAM_CONST_PDF)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         Grundstueck parcel=getParcelByNumber(identdn,number);
@@ -605,25 +670,25 @@ public class OerebController {
         }
 
         boolean withGeometry = false;
-        boolean withImages = withImagesParam==null?false:withGeometry;
-        if(format.equals(PARAM_FORMAT_PDF)) {
+        boolean withImages = withImagesParam==null?false:PARAM_CONST_TRUE.equalsIgnoreCase(withImagesParam);
+        if(format.equals(PARAM_CONST_PDF)) {
             withImages = true;
             withGeometry = true;
         }
-        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages);
+        Extract extract=createExtract(parcel.getEgrid(),parcel,basedataDate,withGeometry,lang,topics,withImages,dpi);
         
         GetExtractByIdResponseType response=new GetExtractByIdResponseType();
         response.setExtract(extract);
         GetExtractByIdResponse responseEle=new GetExtractByIdResponse(response);
         
-        if(format.equals(PARAM_FORMAT_PDF)) {
-            return getExtractAsPdf(parcel, responseEle);
+        if(format.equals(PARAM_CONST_PDF)) {
+            return createExtractAsPdf(parcel, responseEle);
         }
         return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
     }    
     @GetMapping("/capabilities/{format}")
     public @ResponseBody  GetCapabilitiesResponse getCapabilities(@PathVariable String format) {
-        if(!format.equals(PARAM_FORMAT_XML)) {
+        if(!format.equals(PARAM_CONST_XML)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         GetCapabilitiesResponseType ret=new GetCapabilitiesResponseType();
@@ -637,8 +702,8 @@ public class OerebController {
             allTopics.add(topic.getMainTopic());
         }
         allTopicsOfThisCadastre=new ArrayList<TopicCode>(allTopics);
-        allTopicsOfThisCadastre.sort(null);
-        setThemes(ret.getTopic(),allTopicsOfThisCadastre);
+        Map<TopicCode,Integer> topicOrdering=getTopicOrdering();
+        setThemes(ret.getTopic(),sortTopics(allTopicsOfThisCadastre,topicOrdering));
         
         // Liste der vorhandenen Gemeinden;
         List<Integer> gemeinden=jdbcTemplate.query(
@@ -661,27 +726,27 @@ public class OerebController {
 
     @GetMapping("/versions/{format}")
     public @ResponseBody  GetVersionsResponse getVersions(@PathVariable String format) {
-        if(!format.equals(PARAM_FORMAT_XML)) {
+        if(!format.equals(PARAM_CONST_XML)) {
             throw new IllegalArgumentException("unsupported format <"+format+">");
         }
         GetVersionsResponseType ret=new GetVersionsResponseType();
         VersionType ver=new VersionType();
-        ver.setVersion("extract-2.0");
+        ver.setVersion(SERVICE_SPEC_VERSION);
         ret.getSupportedVersion().add(ver);
         return new GetVersionsResponse(ret);
     }
     
-    private Extract createExtract(String egrid, Grundstueck parcel, java.sql.Date basedataDate,boolean withGeometry, String lang, String requestedTopicsAsText, boolean withImages) {
+    private Extract createExtract(String egrid, Grundstueck parcel, java.sql.Date basedataDate,boolean withGeometry, String lang, String requestedTopicsAsText, boolean withImages,int dpi) {
         ExtractType extract=new ExtractType();
         logger.info("timezone id {}",TimeZone.getDefault().getID());
         XMLGregorianCalendar today=createXmlDate(new java.util.Date());
         extract.setCreationDate(today);
         extract.setExtractIdentifier(UUID.randomUUID().toString());
-        List<TopicCode> requestedTopics=parseTopics(requestedTopicsAsText);
+        List<TopicCode> requestedTopics=parseParameterTopics(requestedTopicsAsText);
         // Grundstueck
         final Geometry parcelGeom = parcel.getGeometrie();
         Envelope bbox = getMapBBOX(parcelGeom);
-        setParcel(extract,egrid,parcel,bbox,withGeometry,withImages);
+        setParcel(extract,egrid,parcel,bbox,withGeometry,withImages,dpi);
         int bfsNr=extract.getRealEstate().getMunicipalityCode();
         // freigeschaltete Themen in der betroffenen Gemeinde
         List<TopicCode> availableTopics=getTopicsOfMunicipality(bfsNr);
@@ -692,9 +757,25 @@ public class OerebController {
                 queryTopics.add(availableTopic);
             }
         }
-        List<TopicCode> concernedTopics=new ArrayList<TopicCode>();
 
-        addRestrictions(extract,parcelGeom,bbox,withGeometry,withImages,queryTopics,concernedTopics);
+        Map<TopicCode,Integer> topicOrdering=getTopicOrdering();
+        
+        List<TopicCode> concernedTopics=new ArrayList<TopicCode>();
+        List<RestrictionOnLandownershipType> rests=getRestrictions(bfsNr,parcelGeom,bbox,withGeometry,withImages,dpi,queryTopics,concernedTopics);
+        rests.sort(new Comparator<RestrictionOnLandownershipType>() {
+
+            @Override
+            public int compare(RestrictionOnLandownershipType o1, RestrictionOnLandownershipType o2) {
+                Integer o1Code=topicOrdering.get(new TopicCode(o1.getTheme().getCode(),o1.getTheme().getSubCode()));
+                Integer o2Code=topicOrdering.get(new TopicCode(o2.getTheme().getCode(),o2.getTheme().getSubCode()));
+                return o1Code.compareTo(o2Code);
+            }
+            
+        });
+        for(RestrictionOnLandownershipType rest:rests) {
+            extract.getRealEstate().getRestrictionOnLandownership().add(rest);
+        }
+        
         // Themen
         List<TopicCode> themeWithoutData=new ArrayList<TopicCode>();
         for(TopicCode requestedTopic:requestedTopics) {
@@ -714,13 +795,9 @@ public class OerebController {
                 notConcernedTopics.remove(concernedTopic);
             }
         }
-
-        concernedTopics.sort(null);
-        setThemes(extract.getConcernedTheme(), concernedTopics);
-        notConcernedTopics.sort(null);
-        setThemes(extract.getNotConcernedTheme(), notConcernedTopics);
-        themeWithoutData.sort(null);
-        setThemes(extract.getThemeWithoutData(), themeWithoutData);
+        setThemes(extract.getConcernedTheme(), sortTopics(concernedTopics,topicOrdering));
+        setThemes(extract.getNotConcernedTheme(), sortTopics(notConcernedTopics,topicOrdering));
+        setThemes(extract.getThemeWithoutData(), sortTopics(themeWithoutData,topicOrdering));
         // Logos
         if(withImages) {
             extract.setLogoPLRCadastre(getImage("ch.plr"));
@@ -771,6 +848,10 @@ public class OerebController {
         ret.getLocalisedText().add(uri);
         return ret;
     }
+    
+    private String getWebAppUrl(String egrid) {
+        return webAppUrl+egrid;
+    }
     private String getSymbolRef(String id) {
         return ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment(SYMBOL_ENDPOINT).pathSegment(id).build().toUriString();
     }
@@ -807,17 +888,20 @@ public class OerebController {
         java.util.Map<String,Object> baseData=null;
         try {
             String sqlStmt=
-                    "SELECT aname,aname_de,ea_lu.atext as amtimweb, auid,zeile1,zeile2,strasse,hausnr,plz,ort FROM "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" AS ea"
-                            +" JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu ON ea.t_id = ea_mu.oerebkrm_v2_0amt_amt_amtimweb"+" JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as ea_lu ON ea_mu.t_id = ea_lu.oerbkrm_v2__mltlngluri_localisedtext"
-                            +" WHERE ea_lu.atext=?";
+                    "SELECT aname,aname_de,ea_lu.atext as amtimweb,ea_lu_de.atext as amtimweb_de, auid,zeile1,zeile2,strasse,hausnr,plz,ort FROM "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" AS ea"
+                            +" LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu ON ea.t_id = ea_mu.oerebkrm_v2_0amt_amt_amtimweb"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as ea_lu ON ea_mu.t_id = ea_lu.oerbkrm_v2__mltlngluri_localisedtext"
+                            +" LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu_de ON ea.t_id = ea_mu_de.oerebkrm_v2_0amt_amt_amtimweb"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage='de') as ea_lu_de ON ea_mu_de.t_id = ea_lu_de.oerbkrm_v2__mltlngluri_localisedtext"
+                            +" WHERE ea_lu.atext=? OR ea_lu_de.atext=?";
             logger.info("stmt {} ",sqlStmt);
+            String uri=getUri(office.getOfficeAtWeb());
             baseData=jdbcTemplate.queryForMap(sqlStmt
-            ,getUri(office.getOfficeAtWeb()));
+            ,uri,uri);
         }catch(EmptyResultDataAccessException ex) {
             ; // ignore if no record found
         }
         if(baseData!=null) {
             office.setName(createMultilingualTextType(baseData, "aname"));
+            office.setOfficeAtWeb(createMultilingualUri(baseData, "amtimweb"));
             office.setUID((String) baseData.get("auid"));
             office.setLine1((String) baseData.get("zeile2"));
             office.setLine2((String) baseData.get("zeile1"));
@@ -866,7 +950,9 @@ public class OerebController {
     private void setGeneralInformation(ExtractType extract) {
         java.util.Map<String,Object> baseData=jdbcTemplate.queryForMap(
                 "SELECT inhalt_de,inhalt_fr,inhalt_it,inhalt_rm,inhalt_en FROM "+getSchema()+"."+OERBKRMVS_V2_0KONFIGURATION_INFORMATION);
-        extract.getGeneralInformation().add(createMultilingualMTextType(baseData,"inhalt"));
+        Map<String,String> params=new HashMap<String,String>();
+        params.put("canton", plrCanton);
+        extract.getGeneralInformation().add(createMultilingualMTextType(baseData,"inhalt",params));
     }
 
     private void setBaseData(ExtractType extract,java.sql.Date basedataDate) {
@@ -879,6 +965,28 @@ public class OerebController {
         for(LanguageCodeType lang:LanguageCodeType.values()) {
             String txt=(String)baseData.get(prefix+"_"+lang.value());
             if(txt!=null && txt.length()>0) {
+                LocalisedMTextType lTxt= new LocalisedMTextType();
+                lTxt.setLanguage(lang);
+                lTxt.setText(txt);
+                ret.getLocalisedText().add(lTxt);
+            }
+        }
+        return ret;
+    }
+    private MultilingualMTextType createMultilingualMTextType(Map<String, Object> baseData,String prefix,Map<String,String> params) {
+        MultilingualMTextType ret=new MultilingualMTextType();
+        for(LanguageCodeType lang:LanguageCodeType.values()) {
+            String txt=(String)baseData.get(prefix+"_"+lang.value());
+            if(txt!=null && txt.length()>0) {
+                if(params!=null) {
+                    for(String key:params.keySet()) {
+                        String param="${"+key+"}";
+                        int pos=txt.indexOf(param);
+                        if(pos>-1) {
+                            txt=txt.substring(0, pos)+params.get(key)+txt.substring(pos+param.length());
+                        }
+                    }
+                }
                 LocalisedMTextType lTxt= new LocalisedMTextType();
                 lTxt.setLanguage(lang);
                 lTxt.setText(txt);
@@ -908,6 +1016,27 @@ public class OerebController {
         }
         return ret;
     }
+    private MultilingualUriType createMultilingualUri(Map<String, Object> baseData,String prefix) {
+        MultilingualUriType ret=new MultilingualUriType();
+        {
+            String txt=(String)baseData.get(prefix);
+            if(txt!=null) {
+                LocalisedUriType lTxt= new LocalisedUriType();
+                lTxt.setText(txt);
+                ret.getLocalisedText().add(lTxt);
+            }
+        }
+        for(LanguageCodeType lang:LanguageCodeType.values()) {
+            String txt=(String)baseData.get(prefix+"_"+lang.value());
+            if(txt!=null) {
+                LocalisedUriType lTxt= new LocalisedUriType();
+                lTxt.setLanguage(lang);
+                lTxt.setText(txt);
+                ret.getLocalisedText().add(lTxt);
+            }
+        }
+        return ret;
+    }
     private MultilingualMTextType createMultilingualMTextType(String txt) {
         LocalisedMTextType lTxt = createLocalizedMText(txt);
         if(lTxt==null) {
@@ -926,8 +1055,8 @@ public class OerebController {
         ret.getLocalisedText().add(lTxt);
         return ret;
     }
-    private MultilingualUriType createMultilinualUriType(String txt) {
-        LocalisedUriType lTxt = createLocalizedUri(txt);
+    private MultilingualUriType createMultilingualUri_de(String txt) {
+        LocalisedUriType lTxt = createLocalizedUri_de(txt);
         if(lTxt==null) {
             return null;
         }
@@ -954,7 +1083,7 @@ public class OerebController {
         lTxt.setText(txt);
         return lTxt;
     }
-    private LocalisedUriType createLocalizedUri(String txt) {
+    private LocalisedUriType createLocalizedUri_de(String txt) {
         if(txt==null || txt.length()==0) {
             return null;
         }
@@ -1157,37 +1286,55 @@ public class OerebController {
         return gs;
     }
     private Geometry getParcelGeometryByEgrid(String egrid) {
-        byte[] geom=jdbcTemplate.queryForObject(
-                "SELECT ST_AsBinary(ST_Collect(geometrie)) FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" g LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT+" l ON g.egris_egrid=?", new RowMapper<byte[]>() {
-                    @Override
-                    public byte[] mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return rs.getBytes(1);
-                    }
-                    
-                },egrid);
-        if(geom==null) {
-            return null;
-        }
-        PrecisionModel precisionModel=new PrecisionModel(1000.0);
-        GeometryFactory geomFactory=new GeometryFactory(precisionModel);
-        WKBReader decoder=new WKBReader(geomFactory);
-        Geometry polygon=null;
-        try {
-            polygon=decoder.read(geom);
-            if(polygon==null || polygon.isEmpty()) {
+            PrecisionModel precisionModel=new PrecisionModel(1000.0);
+            GeometryFactory geomFactory=new GeometryFactory(precisionModel);
+            List<Geometry> gslist=jdbcTemplate.query(
+                    "SELECT ST_AsBinary(l.geometrie) as l_geometrie,ST_AsBinary(s.geometrie) as s_geometrie,ST_AsBinary(b.geometrie) as b_geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" g"
+                            +" LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT+" l ON g.t_id=l.liegenschaft_von "
+                            +" LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT+" s ON g.t_id=s.selbstrecht_von"
+                            +" LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK+" b ON g.t_id=b.bergwerk_von"
+                            +" WHERE g.egris_egrid=?", new RowMapper<Geometry>() {
+                        WKBReader decoder=new WKBReader(geomFactory);
+                        
+                        @Override
+                        public Geometry mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            Geometry polygon=null;
+                            byte l_geometrie[]=rs.getBytes("l_geometrie");
+                            byte s_geometrie[]=rs.getBytes("s_geometrie");
+                            byte b_geometrie[]=rs.getBytes("b_geometrie");
+                            try {
+                                if(l_geometrie!=null) {
+                                    polygon=decoder.read(l_geometrie);
+                                }else if(s_geometrie!=null) {
+                                    polygon=decoder.read(s_geometrie);
+                                }else if(b_geometrie!=null) {
+                                    polygon=decoder.read(b_geometrie);
+                                }else {
+                                    throw new IllegalStateException("no geometrie");
+                                }
+                                if(polygon==null || polygon.isEmpty()) {
+                                    return null;
+                                }
+                            } catch (ParseException e) {
+                                throw new IllegalStateException(e);
+                            }
+                            return polygon;
+                        }
+
+                        
+                    },egrid);
+            if(gslist==null || gslist.isEmpty()) {
                 return null;
             }
-        } catch (ParseException e) {
-            throw new IllegalStateException(e);
-        }
-        
-        return polygon;
+            Geometry multiPolygon=geomFactory.createMultiPolygon(gslist.toArray(new Polygon[gslist.size()]));
+            return multiPolygon;
     }
     public void setThemes(final List<ThemeType> themes, List<TopicCode> topicCodes) {
         for(TopicCode topicCode:topicCodes) {
             ThemeType themeEle1=new ThemeType();
-            themeEle1.setCode(mapTopicCodeFromDataToExtract(topicCode.getCode()));
-            themeEle1.setText(getTopicText(topicCode.getCode()));
+            themeEle1.setCode(topicCode.getMainCode());
+            themeEle1.setSubCode(topicCode.getSubCode());
+            themeEle1.setText(getTopicText(topicCode));
             ThemeType themeEle = themeEle1;
             themes.add(themeEle);
         }
@@ -1205,7 +1352,7 @@ public class OerebController {
         return qualifiedThemeCode;
     }
 
-    private void addRestrictions(ExtractType extract, Geometry parcelGeom,Envelope bbox,boolean withGeometry, boolean withImages,
+    private List<RestrictionOnLandownershipType> getRestrictions(int bfsnr,Geometry parcelGeom,Envelope bbox,boolean withGeometry, boolean withImages,int dpi,
             List<TopicCode> queryTopics, List<TopicCode> concernedTopicsList) {
         // select schnitt parcelGeom/oerebGeom where restritctionTopic in queryTopic
         WKBWriter geomEncoder=new WKBWriter(2,ByteOrderValues.BIG_ENDIAN);
@@ -1219,19 +1366,26 @@ public class OerebController {
         "g.t_id as g_id," + 
         "ea.aname_de as ea_aname_de," + 
         "ea_lu.atext as ea_amtimweb," + 
+        "ea_lu_de.atext as ea_amtimweb_de," + 
         "ea.auid as ea_auid," + 
         "d.t_id as d_id," + 
         "d_lu.atext as verweiswms," + 
+        "d_lu_de.atext as verweiswms_de," + 
         "e.t_id as e_id," + 
+        "leg.t_id as l_id," + 
+        "leg.darstellungsdienst as l_d_id," + 
         "leg.legendetext_de," + 
         "leg.thema," + 
         "leg.subthema," + 
         "leg.artcode," + 
         "leg.artcodeliste," + 
+        (withImages?" leg.symbol,":"") + 
         "e.rechtsstatus as e_rechtsstatus," + 
-        "e.publiziertab," + 
+        "e.publiziertab as e_publiziertab," + 
+        "e.publiziertbis as e_publiziertbis," + 
         "g.rechtsstatus as g_rechtsstatus," + 
-        "g.publiziertab," + 
+        "g.publiziertab as g_publiziertab," + 
+        "g.publiziertbis as g_publiziertbis," + 
         "ST_AsBinary(g.punkt) as punkt," + 
         "ST_AsBinary(g.linie) as linie," + 
         "ST_AsBinary(g.flaeche) as flaeche," + 
@@ -1241,12 +1395,12 @@ public class OerebController {
         " INNER JOIN "+getSchema()+"."+OERBKRMFR_V2_0TRANSFERSTRUKTUR_DARSTELLUNGSDIENST+" as d ON e.darstellungsdienst = d.t_id" + 
         " INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" as ea ON e.zustaendigestelle = ea.t_id"+
         " INNER JOIN "+getSchema()+"."+OERBKRMFR_V2_0TRANSFERSTRUKTUR_LEGENDEEINTRAG+" as leg ON e.legende = leg.t_id"+
-        " JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu ON ea.t_id = ea_mu.oerebkrm_v2_0amt_amt_amtimweb"+" JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as ea_lu ON ea_mu.t_id = ea_lu.oerbkrm_v2__mltlngluri_localisedtext"+
-        " JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as d_mu ON d.t_id = d_mu.oerbkrmfr_vstllngsdnst_verweiswms"+" JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as d_lu ON d_mu.t_id = d_lu.oerbkrm_v2__mltlngluri_localisedtext"+
+        " LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu ON ea.t_id = ea_mu.oerebkrm_v2_0amt_amt_amtimweb"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as ea_lu ON ea_mu.t_id = ea_lu.oerbkrm_v2__mltlngluri_localisedtext"+
+        " LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as ea_mu_de ON ea.t_id = ea_mu_de.oerebkrm_v2_0amt_amt_amtimweb"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage='de') as ea_lu_de ON ea_mu_de.t_id = ea_lu_de.oerbkrm_v2__mltlngluri_localisedtext"+
+        " LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as d_mu ON d.t_id = d_mu.oerbkrmfr_vstllngsdnst_verweiswms AND d_mu.oerbkrmfr_vstllngsdnst_verweiswms IS NOT NULL"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage IS NULL) as d_lu ON d_mu.t_id = d_lu.oerbkrm_v2__mltlngluri_localisedtext"+
+        " LEFT JOIN "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" as d_mu_de ON d.t_id = d_mu_de.oerbkrmfr_vstllngsdnst_verweiswms AND d_mu_de.oerbkrmfr_vstllngsdnst_verweiswms IS NOT NULL"+" LEFT JOIN (SELECT atext,oerbkrm_v2__mltlngluri_localisedtext FROM "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" WHERE alanguage='de') as d_lu_de ON d_mu_de.t_id = d_lu_de.oerbkrm_v2__mltlngluri_localisedtext"+
         //" INNER JOIN "+getSchema()+"."+TABLE_OERBKRMVS_V1_1VORSCHRIFTEN_AMT+" as ga ON g.zustaendigestelle = ga.t_id"+
-        " WHERE (ST_DWithin(ST_GeomFromWKB(:geom,2056),flaeche,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),linie,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),punkt,0.1)) "
-        + "AND (thema in (:topics) OR subthema in (:topics))";
-        logger.info("stmt {} ",sqlStmt);
+        " WHERE (ST_DWithin(ST_GeomFromWKB(:geom,2056),flaeche,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),linie,0.1) OR ST_DWithin(ST_GeomFromWKB(:geom,2056),punkt,0.1)) ";
         Set<TopicCode> concernedTopics=new HashSet<TopicCode>();
         Map<Long,TopicCode> restriction2topicCode=new HashMap<Long,TopicCode>();
         Map<Long,RestrictionOnLandownershipType> restrictions=new HashMap<Long,RestrictionOnLandownershipType>();
@@ -1254,17 +1408,30 @@ public class OerebController {
         Map<Long,Double> restrictionsLengthShare=new HashMap<Long,Double>();
         Map<Long,Double> restrictionsAreaShare=new HashMap<Long,Double>();
         Map<Long,Long> restriction2mapid=new HashMap<Long,Long>();
+        Map<Long,Long> restriction2legendeid=new HashMap<Long,Long>();
         Set<Long> concernedRestrictions=new HashSet<Long>();
-        Map<Long,List<LegendEntryType>> legendPerWms=new HashMap<Long,List<LegendEntryType>>();
-        Map<Long,Set<QualifiedCode>> otherLegendCodesPerMap=new HashMap<Long,Set<QualifiedCode>>();
-        Map<Long,Set<QualifiedCode>> concernedCodesPerRestriction=new HashMap<Long,Set<QualifiedCode>>();
+        Map<Long,Map<Long,LegendEntryType>> legendPerWms=new HashMap<Long,Map<Long,LegendEntryType>>();
+        Map<Long,Set<Long>> otherLegendCodesPerMap=new HashMap<Long,Set<Long>>();
         ArrayList<String> queryTopicCodes = new ArrayList<String>();
+        ArrayList<String> querySubTopicCodes = new ArrayList<String>();
         for(TopicCode topicCode:queryTopics) {
-            queryTopicCodes.add(topicCode.getCode());
+            if(topicCode.isSubTopic()) {
+                querySubTopicCodes.add(topicCode.getSubCode());
+            }else {
+                queryTopicCodes.add(topicCode.getMainCode());
+            }
         }
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("topics", queryTopicCodes);
+        if(!querySubTopicCodes.isEmpty()) {
+            parameters.addValue("subtopics", querySubTopicCodes);
+            sqlStmt=sqlStmt+ "AND (thema in (:topics) OR subthema in (:subtopics))";
+        }else {
+            sqlStmt=sqlStmt+ "AND (thema in (:topics))";
+            
+        }
         parameters.addValue("geom", filterGeom);
+        logger.info("stmt {} ",sqlStmt);
         jdbcParamTemplate.query(sqlStmt, parameters,new ResultSetExtractor<Object>() {
 
             @Override
@@ -1273,9 +1440,30 @@ public class OerebController {
                     long g_id=rs.getLong("g_id");
                     long e_id=rs.getLong("e_id");
                     long d_id=rs.getLong("d_id");
+                    long l_id=rs.getLong("l_id");
+                    long l_d_id=rs.getLong("l_d_id");
                     final String aussage_de = rs.getString("legendetext_de");
-                    logger.info("g_id {} e_id {} d_id {} aussage {} ",g_id,e_id,d_id,aussage_de);
-                    
+                    logger.info("g_id {} e_id {} d_id {} l_id {} l_d_id {} aussage {} ",g_id,e_id,d_id,l_id,l_d_id,aussage_de);
+                    if(d_id!=l_d_id) {
+                        throw new IllegalArgumentException("LegendeEintrag "+l_id+" passt nicht zu Darstellungsdienst "+d_id);
+                    }
+                    java.util.Date today=new java.util.Date();
+                    java.sql.Date e_publiziertab = rs.getDate("e_publiziertab");
+                    java.sql.Date e_publiziertbis = rs.getDate("e_publiziertbis");
+                    java.sql.Date g_publiziertab = rs.getDate("g_publiziertab");
+                    java.sql.Date g_publiziertbis = rs.getDate("g_publiziertbis");
+                    if(today.before(e_publiziertab)) {
+                        continue;
+                    }
+                    if(e_publiziertbis!=null && today.after(e_publiziertbis)) {
+                        continue;
+                    }
+                    if(today.before(g_publiziertab)) {
+                        continue;
+                    }
+                    if(g_publiziertbis!=null && today.after(g_publiziertbis)) {
+                        continue;
+                    }
                     RestrictionOnLandownershipType rest=restrictions.get(e_id);
                     if(rest==null) {
                         
@@ -1283,18 +1471,17 @@ public class OerebController {
                         rest=localRest;
                         restrictions.put(e_id,rest);
                         restriction2mapid.put(e_id,d_id);
-                        concernedCodesPerRestriction.put(e_id,new HashSet<QualifiedCode>());
+                        restriction2legendeid.put(e_id,l_id);
                         
                         rest.setLegendText(createMultilingualMTextType(aussage_de));
                         rest.setLawstatus(mapLawstatus(rs.getString("e_rechtsstatus")));
-                        String subThema=rs.getString("subthema"); 
-
                         String topic=rs.getString("thema");
-                        TopicCode qtopic=new TopicCode(topic,subThema,null);
+                        String subThema=rs.getString("subthema"); 
+                        TopicCode qtopic=new TopicCode(topic,subThema);
                         restriction2topicCode.put(e_id, qtopic);
                         ThemeType themeEle1=new ThemeType();
-                        themeEle1.setCode(mapTopicCodeFromDataToExtract(topic));
-                        themeEle1.setText(getTopicText(qtopic.getCode()));
+                        themeEle1.setCode(topic);
+                        themeEle1.setText(getTopicText(qtopic));
                         themeEle1.setSubCode(subThema);
                         ThemeType themeEle = themeEle1;
                         rest.setTheme(themeEle);
@@ -1304,14 +1491,22 @@ public class OerebController {
                         rest.setTypeCodelist(typeCodelist);
                         
                         OfficeType zustaendigeStelle=new OfficeType();
-                        zustaendigeStelle.setName(createMultilingualTextType(rs.getString("ea_aname_de")));
-                        zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(rs.getString("ea_amtimweb")));
+                        String ea_name=rs.getString("ea_aname_de");
+                        zustaendigeStelle.setName(createMultilingualTextType(ea_name));
+                        String ea_amtimweb=rs.getString("ea_amtimweb_de");
+                        if(ea_amtimweb==null) {
+                            ea_amtimweb=rs.getString("ea_amtimweb");
+                        }
+                        zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(ea_amtimweb));
                         zustaendigeStelle.setUID(rs.getString("ea_auid"));
                         rest.setResponsibleOffice(zustaendigeStelle);
                         
                         MapType map=new MapType();
-                        String wmsUrl=rs.getString("verweiswms");
-                        wmsUrl = getWmsUrl(bbox, wmsUrl);
+                        String wmsUrl=rs.getString("verweiswms_de");
+                        if(wmsUrl==null) {
+                            wmsUrl=rs.getString("verweiswms");
+                        }
+                        wmsUrl = getWmsUrl(bbox, wmsUrl,dpi);
                         map.setReferenceWMS(createMultilingualUri(wmsUrl));
                         if(withImages) {
                             try {
@@ -1330,16 +1525,14 @@ public class OerebController {
                         }
                         map.setLayerIndex(layerIndex);
                         map.setLayerOpacity(layerOpacity[0]);
-                        if(withGeometry) {
-                            setMapBBOX(map,bbox);
-                        }
+                        setMapBBOX(map,bbox);
                         
-                        List<LegendEntryType> legendEntries=legendPerWms.get(d_id);
+                        Map<Long,LegendEntryType> legendEntries=legendPerWms.get(d_id);
                         // WMS not yet seen?
                         if(legendEntries==null){
-                            otherLegendCodesPerMap.put(d_id, new HashSet<QualifiedCode>());
+                            otherLegendCodesPerMap.put(d_id, new HashSet<Long>());
                             // collect legend entries
-                            List<LegendEntryType> localLegendEntries=new ArrayList<LegendEntryType>();
+                            Map<Long,LegendEntryType> localLegendEntries=new HashMap<Long,LegendEntryType>();
                             legendEntries=localLegendEntries;
                             legendPerWms.put(d_id,legendEntries);
                             String stmt="SELECT" + 
@@ -1357,14 +1550,15 @@ public class OerebController {
 
                                 @Override
                                 public void processRow(ResultSet rs) throws SQLException {
+                                    long t_id=rs.getLong("t_id");
                                     final String l_code = rs.getString("artcode");
                                     final String l_codelist = rs.getString("artcodeliste");
                                     LegendEntryType l=new LegendEntryType();
                                     l.setLegendText(createMultilingualTextType(rs.getString("legendetext_de")));
                                     String legendTopic=rs.getString("thema");
-                                    String qualifiedThemeCode=getQualifiedThemeCode(legendTopic,rs.getString("subthema"),null);
+                                    TopicCode qualifiedThemeCode=new TopicCode(legendTopic,rs.getString("subthema"));
                                     ThemeType themeEle=new ThemeType();
-                                    themeEle.setCode(mapTopicCodeFromDataToExtract(legendTopic));
+                                    themeEle.setCode(legendTopic);
                                     themeEle.setSubCode(rs.getString("subthema"));
                                     themeEle.setText(getTopicText(qualifiedThemeCode));
                                     ThemeType legendThemeEle = themeEle;
@@ -1372,68 +1566,167 @@ public class OerebController {
                                     if(withImages) {
                                         l.setSymbol(rs.getBytes("symbol"));
                                     }else {
-                                        l.setSymbolRef(getSymbolRef(rs.getString("t_id")));
+                                        l.setSymbolRef(getSymbolRef(Long.toString(t_id)));
                                     }
                                     l.setTypeCode(l_code);
                                     l.setTypeCodelist(l_codelist);
-                                    localLegendEntries.add(l);
+                                    localLegendEntries.put(t_id,l);
                                 }
                             },d_id);
                         }
                         if(withImages) {
-                            rest.setSymbol(getSymbol(legendEntries,typeCodelist,typeCode).getSymbol());
+                            rest.setSymbol(rs.getBytes("symbol"));
                         }else {
-                            rest.setSymbolRef(getSymbol(legendEntries,typeCodelist,typeCode).getSymbolRef());
+                            rest.setSymbolRef(getSymbolRef(Long.toString(l_id)));
                         }
                         rest.setMap(map);
-                        String stmt= 
-                                "select "
-                                +"ed.t_id"
-                                +",ed.typ"
-                                +",ed.titel_de"
-                                +",ed.abkuerzung_de"
-                                +",ed.offiziellenr_de"
-                                +",docuri1.docuri"
-                                +",ea.aname_de as a_aname_de" 
-                                +",NULL as a_amtimweb" // ",ea.amtimweb as a_amtimweb" 
-                                +",ea.auid as a_auid"
-                                +",ed.rechtsstatus"
-                                
-                                + " from "+getSchema()+"."+OERBKRMFR_V2_0TRANSFERSTRUKTUR_HINWEISVORSCHRIFT+" as h "
-                                + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0DOKUMENTE_DOKUMENT+" as ed on h.vorschrift=ed.t_id"
-                                + "      INNER JOIN (SELECT "+OEREBKRM_V2_0_MULTILINGUALURI+".oerbkrm_v2_kmnt_dkment_textimweb as docid,"+OEREBKRM_V2_0_LOCALISEDURI+".atext as docuri FROM  "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" ON  "+OEREBKRM_V2_0_LOCALISEDURI+".oerbkrm_v2__mltlngluri_localisedtext = "+OEREBKRM_V2_0_MULTILINGUALURI+".t_id WHERE alanguage='de') as docuri1 ON docuri1.docid=ed.t_id"
-                                + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" as ea ON ed.zustaendigestelle = ea.t_id"
-                                +"  where eigentumsbeschraenkung=?"
-                                ;
-                        logger.info("stmt {} ",stmt);
-                        List<DocumentType> documents = rest.getLegalProvisions();
-                        HashMap<Long,DocumentType> documentMap = new HashMap<Long,DocumentType>();
+                        
+                        // Dokumente
+                        Map<Long,DocumentType> documentMap = new HashMap<Long,DocumentType>();
+                        Map<Long,Long> documentOrdering = new HashMap<Long,Long>();
 
-                        jdbcTemplate.query(stmt, new RowCallbackHandler() {
+                        // Rechtsvorschriften
+                        {
+                            String stmt= 
+                                    "select "
+                                    +"ed.t_id"
+                                    +",ed.typ"
+                                    +",ed.titel_de"
+                                    +",ed.abkuerzung_de"
+                                    +",ed.offiziellenr_de"
+                                    +",ed.auszugindex"
+                                    +",ed.publiziertab as d_publiziertab"
+                                    +",ed.publiziertbis as d_publiziertbis"
+                                    +",ed. nuringemeinde"
+                                    +",docuri1.docuri"
+                                    +",ea.aname_de as a_aname_de" 
+                                    +",NULL as a_amtimweb" // ",ea.amtimweb as a_amtimweb" 
+                                    +",ea.auid as a_auid"
+                                    +",ed.rechtsstatus"
+                                    
+                                    + " from "+getSchema()+"."+OERBKRMFR_V2_0TRANSFERSTRUKTUR_HINWEISVORSCHRIFT+" as h "
+                                    + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0DOKUMENTE_DOKUMENT+" as ed on h.vorschrift=ed.t_id"
+                                    + "      INNER JOIN (SELECT "+OEREBKRM_V2_0_MULTILINGUALURI+".oerbkrm_v2_kmnt_dkment_textimweb as docid,"+OEREBKRM_V2_0_LOCALISEDURI+".atext as docuri FROM  "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" ON  "+OEREBKRM_V2_0_LOCALISEDURI+".oerbkrm_v2__mltlngluri_localisedtext = "+OEREBKRM_V2_0_MULTILINGUALURI+".t_id WHERE alanguage='de') as docuri1 ON docuri1.docid=ed.t_id"
+                                    + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" as ea ON ed.zustaendigestelle = ea.t_id"
+                                    +"  where eigentumsbeschraenkung=? "
+                                    ;
+                            logger.info("stmt {} ",stmt);
 
-                            @Override
-                            public void processRow(ResultSet rs) throws SQLException {
-                                DocumentType doc=new DocumentType();
-                                long docid=rs.getLong("t_id");
-                                doc.setType(mapDocumentType(rs.getString("typ")));
-                                doc.setLawstatus(mapLawstatus(rs.getString("rechtsstatus")));
-                                doc.setTitle(createMultilingualTextType(rs.getString("titel_de")));
-                                doc.setAbbreviation(createMultilingualTextType(rs.getString("abkuerzung_de")));
-                                doc.setOfficialNumber(createMultilingualTextType(rs.getString("offiziellenr_de")));
-                                doc.setTextAtWeb(createMultilinualUriType(rs.getString("docuri")));
-                                OfficeType zustaendigeStelle=new OfficeType();
-                                zustaendigeStelle.setName(createMultilingualTextType(rs.getString("a_aname_de")));
-                                zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(rs.getString("a_amtimweb")));
-                                zustaendigeStelle.setUID(rs.getString("a_auid"));
-                                doc.setResponsibleOffice(zustaendigeStelle);
-                                
-                                documentMap.put(docid,doc);
-                                documents.add(doc);
+                            jdbcTemplate.query(stmt, new RowCallbackHandler() {
+
+                                @Override
+                                public void processRow(ResultSet rs) throws SQLException {
+                                    DocumentType doc=new DocumentType();
+                                    long docid=rs.getLong("t_id");
+                                    long docidx=rs.getLong("auszugindex");
+                                    java.sql.Date d_publiziertab = rs.getDate("d_publiziertab");
+                                    java.sql.Date d_publiziertbis = rs.getDate("d_publiziertbis");
+                                    if(today.before(d_publiziertab)) {
+                                        return;
+                                    }
+                                    if(d_publiziertbis!=null && today.after(d_publiziertbis)) {
+                                        return;
+                                    }
+                                    long nurInGemeinde=rs.getLong("nuringemeinde");
+                                    if(!rs.wasNull()  && nurInGemeinde!=bfsnr) {
+                                        return;
+                                    }
+                                    doc.setType(mapDocumentType(rs.getString("typ")));
+                                    doc.setLawstatus(mapLawstatus(rs.getString("rechtsstatus")));
+                                    doc.setTitle(createMultilingualTextType(rs.getString("titel_de")));
+                                    doc.setAbbreviation(createMultilingualTextType(rs.getString("abkuerzung_de")));
+                                    doc.setOfficialNumber(createMultilingualTextType(rs.getString("offiziellenr_de")));
+                                    doc.setTextAtWeb(createMultilingualUri_de(rs.getString("docuri")));
+                                    doc.setIndex((int)docidx);
+                                    OfficeType zustaendigeStelle=new OfficeType();
+                                    zustaendigeStelle.setName(createMultilingualTextType(rs.getString("a_aname_de")));
+                                    zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(rs.getString("a_amtimweb")));
+                                    zustaendigeStelle.setUID(rs.getString("a_auid"));
+                                    doc.setResponsibleOffice(zustaendigeStelle);
+                                    
+                                    documentMap.put(docid,doc);
+                                    documentOrdering.put(docid,docidx);
+                                }
+                            },e_id);
+                        }
+                        // Gesetze
+                        {
+                            TopicCode topicCode=restriction2topicCode.get(e_id);
+                            MapSqlParameterSource parameters = new MapSqlParameterSource();
+                            String stmt= 
+                                    "select "
+                                    +"ed.t_id"
+                                    +",ed.typ"
+                                    +",ed.titel_de"
+                                    +",ed.abkuerzung_de"
+                                    +",ed.offiziellenr_de"
+                                    +",ed.auszugindex"
+                                    +",ed.publiziertab as d_publiziertab"
+                                    +",ed.publiziertbis as d_publiziertbis"
+                                    +",docuri1.docuri"
+                                    +",ea.aname_de as a_aname_de" 
+                                    +",NULL as a_amtimweb" // ",ea.amtimweb as a_amtimweb" 
+                                    +",ea.auid as a_auid"
+                                    +",ed.rechtsstatus"
+                                    +" from "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA+" as t"
+                                    + " INNER JOIN "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMAGESETZ+" as tg ON t.t_id=tg.thema "
+                                    + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0DOKUMENTE_DOKUMENT+" as ed on tg.gesetz=ed.t_id"
+                                    + "      INNER JOIN (SELECT "+OEREBKRM_V2_0_MULTILINGUALURI+".oerbkrm_v2_kmnt_dkment_textimweb as docid,"+OEREBKRM_V2_0_LOCALISEDURI+".atext as docuri FROM  "+getSchema()+"."+OEREBKRM_V2_0_MULTILINGUALURI+" INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0_LOCALISEDURI+" ON  "+OEREBKRM_V2_0_LOCALISEDURI+".oerbkrm_v2__mltlngluri_localisedtext = "+OEREBKRM_V2_0_MULTILINGUALURI+".t_id WHERE alanguage='de') as docuri1 ON docuri1.docid=ed.t_id"
+                                    + "      INNER JOIN "+getSchema()+"."+OEREBKRM_V2_0AMT_AMT+" as ea ON ed.zustaendigestelle = ea.t_id";
+                            if(topicCode.isSubTopic()) {
+                                parameters.addValue("topics", topicCode.getMainCode());
+                                parameters.addValue("subtopics", topicCode.getSubCode());
+                                stmt=stmt+"  WHERE (t.acode IN (:topics) AND t.subcode IS NULL) OR t.subcode IN (:subtopics)";
+                            }else {
+                                parameters.addValue("topics", topicCode.getMainCode());
+                                stmt=stmt+"  WHERE (t.acode IN (:topics) AND t.subcode IS NULL)";
                             }
+                            logger.info("stmt {} ",stmt);
 
-                            
-                        },e_id);
+                            jdbcParamTemplate.query(stmt, parameters,new RowCallbackHandler() {
 
+                                @Override
+                                public void processRow(ResultSet rs) throws SQLException {
+                                    DocumentType doc=new DocumentType();
+                                    long docid=rs.getLong("t_id");
+                                    long docidx=rs.getLong("auszugindex");
+                                    java.sql.Date d_publiziertab = rs.getDate("d_publiziertab");
+                                    java.sql.Date d_publiziertbis = rs.getDate("d_publiziertbis");
+                                    if(today.before(d_publiziertab)) {
+                                        return;
+                                    }
+                                    if(d_publiziertbis!=null && today.after(d_publiziertbis)) {
+                                        return;
+                                    }
+                                    doc.setType(mapDocumentType(rs.getString("typ")));
+                                    doc.setLawstatus(mapLawstatus(rs.getString("rechtsstatus")));
+                                    doc.setTitle(createMultilingualTextType(rs.getString("titel_de")));
+                                    doc.setAbbreviation(createMultilingualTextType(rs.getString("abkuerzung_de")));
+                                    doc.setOfficialNumber(createMultilingualTextType(rs.getString("offiziellenr_de")));
+                                    doc.setTextAtWeb(createMultilingualUri_de(rs.getString("docuri")));
+                                    doc.setIndex((int)docidx);
+                                    OfficeType zustaendigeStelle=new OfficeType();
+                                    zustaendigeStelle.setName(createMultilingualTextType(rs.getString("a_aname_de")));
+                                    zustaendigeStelle.setOfficeAtWeb(createMultilingualUri(rs.getString("a_amtimweb")));
+                                    zustaendigeStelle.setUID(rs.getString("a_auid"));
+                                    doc.setResponsibleOffice(zustaendigeStelle);
+                                    
+                                    documentMap.put(docid,doc);
+                                    documentOrdering.put(docid,docidx);
+                                }
+                            });
+                        }
+                        List<Long> docids=new ArrayList<Long>(documentOrdering.keySet());
+                        docids.sort(new Comparator<Long>() {
+                            @Override
+                            public int compare(Long o1, Long o2) {
+                                return documentOrdering.get(o1).compareTo(documentOrdering.get(o2));
+                            }
+                        });
+                        List<DocumentType> documents = rest.getLegalProvisions();
+                        for(Long docid:docids) {
+                            documents.add(documentMap.get(docid));
+                        }
                     }
                    
                     QualifiedCode thisCode=new QualifiedCode(rest.getTypeCodelist(),rest.getTypeCode());
@@ -1474,15 +1767,13 @@ public class OerebController {
                         intersection=parcelGeom.intersection(punkt);
                     }
                     
-                    Set<QualifiedCode> otherLegendCodes=otherLegendCodesPerMap.get(d_id);
-                    Set<QualifiedCode> concernedCodes=concernedCodesPerRestriction.get(e_id);
+                    Set<Long> otherLegendCodes=otherLegendCodesPerMap.get(d_id);
                     if(intersection.isEmpty()) {
-                        otherLegendCodes.add(thisCode);
+                        otherLegendCodes.add(l_id);
                         logger.debug("otherLegend {}",thisCode);
                     }else {
                         logger.debug("concernedCode {}",thisCode);
                         concernedRestrictions.add(e_id);
-                        concernedCodes.add(thisCode);
                         
                         TopicCode qtopic=restriction2topicCode.get(e_id);
                         if(!concernedTopics.contains(qtopic)) {
@@ -1538,8 +1829,7 @@ public class OerebController {
                     
                 }
                 return null;
-            }
-            
+            }            
         }
         );
         List<RestrictionOnLandownershipType> rests=new ArrayList<RestrictionOnLandownershipType>(); 
@@ -1561,36 +1851,23 @@ public class OerebController {
                 throw new IllegalStateException("no share");
             }
             
-            
+            // otherLegend ermitteln
             MapType map=rest.getMap();
             long d_id=restriction2mapid.get(e_id);
-            List<LegendEntryType> legendEntries = legendPerWms.get(d_id);
+            long l_id=restriction2legendeid.get(e_id);
+            Map<Long,LegendEntryType> legendEntries = legendPerWms.get(d_id);
             logger.debug("d_id {} legendEntries.size() {}",d_id,legendEntries.size());
-            Set<QualifiedCode> otherLegendCodes=otherLegendCodesPerMap.get(d_id);
+            Set<Long> otherLegendCodes=otherLegendCodesPerMap.get(d_id);
             logger.debug("d_id {} otherLegendCodes.size() {}",d_id,otherLegendCodes.size());
-            for(LegendEntryType entry:legendEntries) {
-                QualifiedCode otherCode=new QualifiedCode(entry.getTypeCodelist(),entry.getTypeCode());
-                if(otherLegendCodes.contains(otherCode) && !otherCode.equals(concernedCode)) {
-                    map.getOtherLegend().add(entry);
+            for(Long entryId:legendEntries.keySet()) {
+                if(otherLegendCodes.contains(entryId) && entryId!=l_id) {
+                    map.getOtherLegend().add(legendEntries.get(entryId));
                 }
             }
             rests.add(rest);
-        }
-        rests.sort(new Comparator<RestrictionOnLandownershipType>() {
-
-            @Override
-            public int compare(RestrictionOnLandownershipType o1, RestrictionOnLandownershipType o2) {
-                QualifiedCode o1Code=new QualifiedCode(o1.getTypeCodelist(),o1.getTypeCode());
-                QualifiedCode o2Code=new QualifiedCode(o2.getTypeCodelist(),o2.getTypeCode());
-                return o1Code.compareTo(o2Code);
-            }
-            
-        });
-        for(RestrictionOnLandownershipType rest:rests) {
-            extract.getRealEstate().getRestrictionOnLandownership().add(rest);
-        }
-        
+        }        
         concernedTopicsList.addAll(concernedTopics);
+        return rests;
     }
     protected MultilingualBlobType createMultilingualBlob(byte[] wmsImage) {
         LocalisedBlobType blob=new LocalisedBlobType();
@@ -1600,23 +1877,6 @@ public class OerebController {
         ret.getLocalisedBlob().add(blob);
         return ret;
     }
-    protected String mapTopicCodeFromDataToExtract(String topic) {
-        for(int i=0;i<TopicCode.TODO_REMOVE_FEDERAL_TOPICS_DATA.length;i++) {
-            if(topic.equals(TopicCode.TODO_REMOVE_FEDERAL_TOPICS_DATA[i])) {
-                return TopicCode.FEDERAL_TOPICS_EXTRACT[i];
-            }
-        }
-        return topic;
-    }
-    private String TODO_REMOVE_mapTopicCodeFromExtractToData(String topic) {
-        for(int i=0;i<TopicCode.FEDERAL_TOPICS_EXTRACT.length;i++) {
-            if(topic.equals(TopicCode.FEDERAL_TOPICS_EXTRACT[i])) {
-                return TopicCode.TODO_REMOVE_FEDERAL_TOPICS_DATA[i];
-            }
-        }
-        return topic;
-    }
-
 
     protected LegendEntryType getSymbol(List<LegendEntryType> legendEntries, String typeCodelist, String typeCode) {
         for(LegendEntryType entry:legendEntries) {
@@ -1634,11 +1894,8 @@ public class OerebController {
     private HashMap<String,LawstatusType> statusCodes=null;
     private HashMap<String,DocumentTypeType> docCodes=null;
     private HashMap<String,RealEstateTypeType> realEstateCodes=null;
-    private static final int MAP_DPI = 300;
     private static final int MAP_WIDTH_MM = 174;
-    private static final int MAP_WIDTH_PIXEL = (int) (MAP_DPI*MAP_WIDTH_MM/25.4);
     private static final int MAP_HEIGHT_MM = 99;
-    private static final int MAP_HEIGHT_PIXEL = (int) (MAP_DPI*MAP_HEIGHT_MM/25.4);
     private LawstatusType mapLawstatus(String xtfTransferCode) {
         if(statusCodes==null) {
             statusCodes=new HashMap<String,LawstatusType>();
@@ -1723,7 +1980,7 @@ public class OerebController {
         return null;
     }
 
-    private void setParcel(ExtractType extract, String egrid, Grundstueck parcel,Envelope bbox, boolean withGeometry,boolean withImages) {
+    private void setParcel(ExtractType extract, String egrid, Grundstueck parcel,Envelope bbox, boolean withGeometry,boolean withImages,int dpi) {
         WKBWriter geomEncoder=new WKBWriter(2,ByteOrderValues.BIG_ENDIAN);
         geomEncoder.write(parcel.getGeometrie());
         
@@ -1735,6 +1992,9 @@ public class OerebController {
         gs.setIdentDN(nbident);
         gs.setNumber(parcel.getNummer());
         gs.setSubunitOfLandRegister(parcel.getGbSubKreis());
+        if(gs.getSubunitOfLandRegister()!=null) {
+            gs.setSubunitOfLandRegisterDesignation(getSubunitDesignationOfMunicipality(parcel.getBfsNr()));
+        }
         gs.setMunicipalityCode(parcel.getBfsNr());
         // gemeindename
         String gemeindename=jdbcTemplate.queryForObject(
@@ -1753,7 +2013,7 @@ public class OerebController {
         {
             // Planausschnitt 174 * 99 mm
             MapType planForLandregister=new MapType();
-            String fixedWmsUrl = getWmsUrl(bbox, oerebPlanForLandregister);
+            String fixedWmsUrl = getWmsUrl(bbox, oerebPlanForLandregister,dpi);
             planForLandregister.setReferenceWMS(createMultilingualUri(fixedWmsUrl));
             gs.setPlanForLandRegister(planForLandregister);
             if(withImages) {
@@ -1772,14 +2032,12 @@ public class OerebController {
             }
             planForLandregister.setLayerIndex(layerIndex);
             planForLandregister.setLayerOpacity(layerOpacity[0]);
-            if(withGeometry) {
-                setMapBBOX(planForLandregister,bbox);
-            }
+            setMapBBOX(planForLandregister,bbox);
         }
         {
             // Planausschnitt 174 * 99 mm
             MapType planForLandregisterMainPage=new MapType();
-            String fixedWmsUrl = getWmsUrl(bbox, oerebPlanForLandregisterMainPage);
+            String fixedWmsUrl = getWmsUrl(bbox, oerebPlanForLandregisterMainPage,dpi);
             planForLandregisterMainPage.setReferenceWMS(createMultilingualUri(fixedWmsUrl));
             gs.setPlanForLandRegisterMainPage(planForLandregisterMainPage);
             if(withImages) {
@@ -1798,9 +2056,7 @@ public class OerebController {
             }
             planForLandregisterMainPage.setLayerIndex(layerIndex);
             planForLandregisterMainPage.setLayerOpacity(layerOpacity[0]);
-            if(withGeometry) {
-                setMapBBOX(planForLandregisterMainPage,bbox);
-            }
+            setMapBBOX(planForLandregisterMainPage,bbox);
         }
         extract.setRealEstate(gs);
         
@@ -1885,28 +2141,38 @@ public class OerebController {
         return ret;
     }
 
-    private String getWmsUrl(Envelope bbox, String url) {
+    private String getWmsUrl(Envelope bbox, String url,int dpi) {
         final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
         UriComponents uri=builder.build();
-        if(uri.getQueryParams().containsKey("SRS")) {
-            builder.replaceQueryParam("SRS","EPSG:2056");
+        String paramSrs=getWmsParam(uri.getQueryParams(), WMS_PARAM_SRS);
+        if(uri.getQueryParams().containsKey(paramSrs)) {
+            builder.replaceQueryParam(paramSrs,"EPSG:2056");
         }
-        builder.replaceQueryParam("BBOX", bbox.getMinX()+","+bbox.getMinY()+","+bbox.getMaxX()+","+bbox.getMaxY());
-        builder.replaceQueryParam("DPI", MAP_DPI);
-        builder.replaceQueryParam("HEIGHT", MAP_HEIGHT_PIXEL);
-        builder.replaceQueryParam("WIDTH", MAP_WIDTH_PIXEL);
+        String paramBbox=getWmsParam(uri.getQueryParams(), WMS_PARAM_BBOX);
+        builder.replaceQueryParam(paramBbox, bbox.getMinX()+","+bbox.getMinY()+","+bbox.getMaxX()+","+bbox.getMaxY());
+        int mapWidthPixel = (int) (dpi*MAP_WIDTH_MM/25.4);
+        int mapHeightPixel = (int) (dpi*MAP_HEIGHT_MM/25.4);
+        
+        String paramDpi=getWmsParam(uri.getQueryParams(), WMS_PARAM_DPI);
+        builder.replaceQueryParam(paramDpi, dpi);
+        String paramHeight=getWmsParam(uri.getQueryParams(), WMS_PARAM_HEIGHT);
+        builder.replaceQueryParam(paramHeight, mapHeightPixel);
+        String paramWidth=getWmsParam(uri.getQueryParams(), WMS_PARAM_WIDTH);
+        builder.replaceQueryParam(paramWidth, mapWidthPixel);
         String fixedWmsUrl = builder.build().toUriString();
         return fixedWmsUrl;
     }
     private Integer getLayerIndex(String url, double[] layerOpacity) {
         UriComponents builder = UriComponentsBuilder.fromUriString(url).build();
-        List<String> layers=new ArrayList<String>(builder.getQueryParams().get("LAYERS"));
+        String paramLayers=getWmsParam(builder.getQueryParams(),WMS_PARAM_LAYERS);
+        List<String> layers=new ArrayList<String>(builder.getQueryParams().get(paramLayers));
         layers.sort(null);
         java.util.List<java.util.Map<String,Object>> wmsv=jdbcTemplate.queryForList(
                 "SELECT verweiswms, layerindex, layerdeckkraft FROM "+getSchema()+"."+OERBKRMVS_V2_0KONFIGURATION_MAPLAYERING);
         for(java.util.Map<String,Object> wmsData:wmsv) {
             UriComponents wmsUrlBuilder = UriComponentsBuilder.fromUriString((String)wmsData.get("verweiswms")).build();
-            List<String> wmsLayers=new ArrayList<String>(wmsUrlBuilder.getQueryParams().get("LAYERS"));
+            paramLayers=getWmsParam(wmsUrlBuilder.getQueryParams(),WMS_PARAM_LAYERS);
+            List<String> wmsLayers=new ArrayList<String>(wmsUrlBuilder.getQueryParams().get(paramLayers));
             wmsLayers.sort(null);
             if(wmsLayers.equals(layers)) {
                 layerOpacity[0]=((BigDecimal) wmsData.get("layerdeckkraft")).doubleValue();
@@ -1915,44 +2181,102 @@ public class OerebController {
         }
         return null;
     }
-
-
-
-    private List<TopicCode> parseTopics(String requestedTopicsAsText) {
-        if(requestedTopicsAsText==null || requestedTopicsAsText.length()==0) {
-            requestedTopicsAsText="ALL";
+    private String getWmsParam(MultiValueMap<String, String> queryParams, String param) {
+        for(String queryParam:queryParams.keySet()) {
+            if(queryParam.equalsIgnoreCase(param)) {
+                return queryParam;
+            }
         }
+        return param;
+    }
+    private List<TopicCode> sortTopics(List<TopicCode> topics, Map<TopicCode, Integer> topicOrdering) {
+        List<TopicCode> ret=new ArrayList<TopicCode>(topics);
+        ret.sort(new Comparator<TopicCode>() {
+
+            @Override
+            public int compare(TopicCode o1, TopicCode o2) {
+                int idx1=topicOrdering.get(o1);
+                int idx2=topicOrdering.get(o2);
+                return Integer.compare(idx1, idx2);
+            }
+            
+        });
+        return ret;
+    }
+    private Map<TopicCode, Integer> getTopicOrdering() {
+        java.util.Map<TopicCode,Integer> ret=new java.util.HashMap<TopicCode,Integer>();
+        jdbcTemplate.query(
+                "SELECT acode,subcode,auszugindex FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA,new RowCallbackHandler() {
+                    @Override
+                    public void processRow(ResultSet rs) throws SQLException {
+                        String code=rs.getString("acode");
+                        String subcode=rs.getString("subcode");
+                        int index=rs.getInt("auszugindex");
+                        TopicCode topic=new TopicCode(code,subcode);
+                        ret.put(topic,index);
+                    }
+                });
+        return ret;
+    }
+
+
+    private List<TopicCode> parseParameterTopics(String requestedTopicsAsText) {
+        if(requestedTopicsAsText==null || requestedTopicsAsText.length()==0) {
+            requestedTopicsAsText=PARAM_CONST_ALL;
+        }
+        java.util.Set<TopicCode> all=new java.util.HashSet<TopicCode>();
+        java.util.Set<TopicCode> allMain=new java.util.HashSet<TopicCode>();
+        java.util.Map<String,TopicCode> allSub=new java.util.HashMap<String,TopicCode>();
+        jdbcTemplate.query(
+                "SELECT acode,subcode FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA,new RowCallbackHandler() {
+                    @Override
+                    public void processRow(ResultSet rs) throws SQLException {
+                        String code=rs.getString("acode");
+                        String subcode=rs.getString("subcode");
+                        TopicCode topic=new TopicCode(code,subcode);
+                        all.add(topic);
+                        if(!topic.isSubTopic()) {
+                            allMain.add(topic);
+                        }else {
+                            allSub.put(topic.getSubCode(), topic);
+                        }
+                    }
+                });
         java.util.Set<TopicCode> ret=new java.util.HashSet<TopicCode>();
         String topicsx[]=requestedTopicsAsText.split(";");
-        for(String topic:topicsx) {
-            if(topic.equals("ALL_FEDERAL") || topic.equals("ALL")) {
-                jdbcTemplate.query(
-                        "SELECT acode,subcode FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA,new RowCallbackHandler() {
-                            @Override
-                            public void processRow(ResultSet rs) throws SQLException {
-                                String code=rs.getString("acode");
-                                String subcode=rs.getString("subcode");
-                                if(topic.equals("ALL_FEDERAL") && isFederalTopicCode(code)) {
-                                    ret.add(new TopicCode(code,subcode,null));
-                                }else{
-                                    ret.add(new TopicCode(code,subcode,null));
-                                }
-                            }
-                        });
+        for(String topicCode:topicsx) {
+            if(topicCode.equals(PARAM_CONST_ALL_FEDERAL)) {
+                for(TopicCode code:allMain) {
+                    if(isFederalTopicCode(code.getMainCode())) {
+                        ret.add(code);
+                    }
+                }
+            }else if(topicCode.equals(PARAM_CONST_ALL)){
+                ret.addAll(all);
             }else {
-                ret.add(new TopicCode(topic,null,null));
+                if(allSub.containsKey(topicCode)) {
+                    ret.add(allSub.get(topicCode));
+                }else {
+                    ret.add(new TopicCode(topicCode,null));
+                }
             }
+            
         }
         return new ArrayList<TopicCode>(ret);
     }
     private boolean isFederalTopicCode(String code) {
         return code.startsWith("ch.") && code.indexOf('.', 3)==-1;        
     }
-    private MultilingualTextType getTopicText(String code) {
+    private MultilingualTextType getTopicText(TopicCode code) {
         String title_de=null;
         try {
-            title_de=jdbcTemplate.queryForObject(
-                    "SELECT titel_de FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA+" WHERE (acode=? AND subcode IS NULL) OR subcode=?",String.class,code,code);
+            if(code.isSubTopic()) {
+                title_de=jdbcTemplate.queryForObject(
+                        "SELECT titel_de FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA+" WHERE acode=? AND subcode=?",String.class,code.getMainCode(),code.getSubCode());
+            }else {
+                title_de=jdbcTemplate.queryForObject(
+                        "SELECT titel_de FROM "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA+" WHERE (acode=? AND subcode IS NULL)",String.class,code.getMainCode());
+            }
         }catch(EmptyResultDataAccessException ex) {
             logger.error("unknown topic code <{}>",code);
             title_de="Thematitel";
@@ -1964,6 +2288,16 @@ public class OerebController {
         ret.getLocalisedText().add(text);
         return ret;
     }
+    private String  verifyEgrid(String egrid,String identdn,String number) {
+        try {
+            String ret=jdbcTemplate.queryForObject(
+                    "SELECT egris_egrid AS type FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" WHERE egris_egrid=? OR (nummer=? AND nbident=?)", String.class,egrid,number,identdn);
+            return ret;
+        }catch(EmptyResultDataAccessException ex) {
+        }
+        return null;
+    }
+    
 
     private List<TopicCode> getTopicsOfMunicipality(int bfsNr) {
         List<TopicCode> ret=new ArrayList<TopicCode>();
@@ -1974,7 +2308,7 @@ public class OerebController {
                             public void processRow(ResultSet rs) throws SQLException {
                                 String code=rs.getString("thema");
                                 String subcode=rs.getString("subthema");
-                                ret.add(new TopicCode(code,subcode,null));
+                                ret.add(new TopicCode(code,subcode));
                             }
                         },bfsNr);
         return ret;
@@ -1992,6 +2326,16 @@ public class OerebController {
         }
         return ret;
     }
+    private String getSubunitDesignationOfMunicipality(int bfsNr) {
+        String ret=null;
+        try {
+            ret=jdbcTemplate.queryForObject("SELECT bezeichnunguntereinheitgrundbuch from "+getSchema()+"."+OERBKRMVS_V2_0KONFIGURATION_GEMEINDEMITOEREBK+" WHERE gemeinde=?",String.class,bfsNr);
+        }catch(EmptyResultDataAccessException ex) {
+            // a non-unlocked municipality has no entry
+            return null;
+        }
+        return ret;
+    }
     private List<TopicCode> getAllTopicsOfThisCadastre() {
         List<TopicCode> ret=new ArrayList<TopicCode>();
         jdbcTemplate.query("SELECT DISTINCT acode,subcode from "+getSchema()+"."+OERBKRMVS_V2_0THEMA_THEMA
@@ -2000,9 +2344,32 @@ public class OerebController {
                             public void processRow(ResultSet rs) throws SQLException {
                                 String code=rs.getString("acode");
                                 String subcode=rs.getString("subcode");
-                                ret.add(new TopicCode(code,subcode,null));
+                                ret.add(new TopicCode(code,subcode));
                             }
                         });
         return ret;
+    }
+    
+    @Scheduled(cron="0 * * * * *")
+    private void cleanUp() {    
+        java.io.File[] tmpDirs = new java.io.File(oerebTmpdir).listFiles();
+        if(tmpDirs!=null) {
+            for (java.io.File tmpDir : tmpDirs) {
+                if (tmpDir.getName().startsWith(TMP_FOLDER_PREFIX)) {
+                    try {
+                        FileTime creationTime = (FileTime) Files.getAttribute(Paths.get(tmpDir.getAbsolutePath()), "creationTime");                    
+                        Instant now = Instant.now();
+                        
+                        long fileAge = now.getEpochSecond() - creationTime.toInstant().getEpochSecond();
+                        if (fileAge > 60*60) {
+                            logger.info("deleting {}", tmpDir.getAbsolutePath());
+                            FileSystemUtils.deleteRecursively(tmpDir);
+                        }
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+        }
     }
 }

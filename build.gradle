@@ -1,32 +1,25 @@
-buildscript {
-    repositories {
-        mavenCentral()
-//        mavenLocal()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.4.RELEASE")
-    }
-}
-
 plugins {
-	id "java"
-	id "maven"
-	id 'org.asciidoctor.jvm.convert' version '3.1.0'
-	id 'org.asciidoctor.jvm.pdf' version '3.1.0'
+    id 'org.springframework.boot' version '2.7.1'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'maven'
+    id 'org.asciidoctor.jvm.convert' version '3.1.0'
+    id 'org.asciidoctor.jvm.pdf' version '3.1.0'
 }
 
-apply plugin: 'org.springframework.boot'
-//apply plugin: 'io.spring.dependency-management'
+apply plugin: 'io.spring.dependency-management'
 
 group 'ch.ehi.oereb'
 
-version '2.0.0'+System.getProperty('release','-SNAPSHOT')
+version '2.0.1'+System.getProperty('release','-SNAPSHOT')
 
+sourceCompatibility = "11"
+targetCompatibility = "11"
 
-sourceCompatibility = "1.8" // 11
-targetCompatibility = "1.8" // 11
-compileJava.options.encoding = 'US-ASCII'
-
+compileJava {
+    options.compilerArgs.addAll(['--release', '11'])
+    options.encoding = 'US-ASCII'
+}
 
 // to get the latest SNAPSHOT uncomment the following lines
 //configurations.all {
@@ -37,6 +30,7 @@ compileJava.options.encoding = 'US-ASCII'
 configurations {
     jaxb
     deployerJars
+    tests
 }
 
 dependencies {
@@ -50,40 +44,41 @@ dependencies {
     testCompile group: 'org.xmlunit', name: 'xmlunit-core', version: '2.6.4'
     testCompile group: 'org.xmlunit', name: 'xmlunit-placeholders', version: '2.6.4'
     
-	compile group: 'com.vividsolutions', name: 'jts-core', version: '1.14.0'
-	compile 'commons-io:commons-io:2.6'
-	implementation ('io.github.sogis:pdf4oereb:2.0.46') {
-	//implementation ('io.github.sogis:app:2.0.47') {
-    	exclude group: 'org.slf4j', module: 'slf4j-simple'
-	}
-	
-	//compile ('ch.so.agi.oereb:pdf4oereb:1.0.+') {
+    compile group: 'com.vividsolutions', name: 'jts-core', version: '1.14.0'
+    compile 'commons-io:commons-io:2.6'
+    implementation ('io.github.sogis:pdf4oereb:2.0.116') {
+    //implementation ('io.github.sogis:app:2.0.47') {
+        exclude group: 'org.slf4j', module: 'slf4j-simple'
+    }
+    
+    //compile ('ch.so.agi.oereb:pdf4oereb:1.0.+') {
     //	exclude group: 'org.slf4j', module: 'slf4j-simple'
-	//}
-	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6' // add as compileOnly, so that eclipse sees it
-	compile	group: 'javax.xml.bind',name:'jaxb-api', version:'2.3.1'
-	compile	group: 'com.sun.xml.bind',name:'jaxb-core', version:'2.3.0.1'
-	compile	group: 'com.sun.xml.bind',name:'jaxb-impl', version:'2.3.2'
-	compile group: 'javax.activation', name: 'activation', version: '1.1.1'
-    compile("org.springframework.boot:spring-boot-starter-web:2.1.4.RELEASE")
-    compile("org.springframework.boot:spring-boot-starter-jdbc:2.1.4.RELEASE")
-    compile("org.springframework:spring-oxm:5.1.6.RELEASE")
-    compile('org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE')
+    //}
+    compile group: 'org.postgresql', name: 'postgresql'
+    compile	group: 'javax.xml.bind',name:'jaxb-api', version:'2.3.1'
+    compile	group: 'com.sun.xml.bind',name:'jaxb-core', version:'2.3.0.1'
+    compile	group: 'com.sun.xml.bind',name:'jaxb-impl', version:'2.3.2'
+    compile group: 'javax.activation', name: 'activation', version: '1.1.1'
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-jdbc")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile("org.springframework:spring-oxm:5.3.21")
+    compile('org.springframework.boot:spring-boot-starter-test')
     jaxb (
-		'com.sun.xml.bind:jaxb-xjc:2.3.1',
-		'javax.xml.bind:jaxb-api:2.3.1',
-		'com.sun.xml.bind:jaxb-core:2.3.0.1',
-		'com.sun.xml.bind:jaxb-impl:2.3.2',
-		'javax.activation:activation:1.1.1'
+        'com.sun.xml.bind:jaxb-xjc:2.3.1',
+        'javax.xml.bind:jaxb-api:2.3.1',
+        'com.sun.xml.bind:jaxb-core:2.3.0.1',
+        'com.sun.xml.bind:jaxb-impl:2.3.2',
+        'javax.activation:activation:1.1.1'
     )
     deployerJars "org.apache.maven.wagon:wagon-ftp:3.3.3"
     deployerJars "org.apache.maven.wagon:wagon-ssh:3.3.3"
 }
 
 repositories {
-	mavenLocal()
-	mavenCentral()
-	jcenter()
+    mavenLocal()
+    mavenCentral()
+    jcenter()
     maven {
         url "http://jars.interlis.ch"
     }
@@ -94,7 +89,7 @@ def generatedXjcSources = "$buildDir/xjc/java"
 Properties properties = new Properties()
 File propFile=project.rootProject.file('user.properties')
 if(propFile.exists()){
-	properties.load(propFile.newDataInputStream())
+    properties.load(propFile.newDataInputStream())
 }
 def git = System.getProperty('git',properties.get('git','git'))
 def repos_pwd = System.getProperty('repos_pwd',properties.get('repos_pwd','repos_pwd'))
@@ -114,12 +109,12 @@ def getGitHash = { ->
 }
 
 ext {
-	buildNumber = getGitHash()
+    buildNumber = getGitHash()
 }
 
 sourceSets {
     main {
-    	//output.dir(generatedResources, builtBy: 'generateMyResources')
+        //output.dir(generatedResources, builtBy: 'generateMyResources')
         java {
             srcDirs = ['src/main/java',"$generatedXjcSources"]
         }
@@ -132,14 +127,14 @@ sourceSets {
 }
 
 task generateMyResources {
-	doLast {
-		def versionProps = new Properties()
-		versionProps.setProperty('version', "$project.version")
-		versionProps.setProperty('versionCommit', getGitHash())
-		def versionPropsFile = new File(generatedResources,"ch/ehi/oereb/webservice/Version.properties")
-		versionPropsFile.getParentFile().mkdirs();
-		versionProps.store(versionPropsFile.newWriter(), null);
-	}
+    doLast {
+        def versionProps = new Properties()
+        versionProps.setProperty('version', "$project.version")
+        versionProps.setProperty('versionCommit', getGitHash())
+        def versionPropsFile = new File(generatedResources,"ch/ehi/oereb/webservice/Version.properties")
+        versionPropsFile.getParentFile().mkdirs();
+        versionProps.store(versionPropsFile.newWriter(), null);
+    }
 }
 task jaxb {
     System.setProperty('javax.xml.accessExternalSchema', 'all')
@@ -151,15 +146,15 @@ task jaxb {
         mkdir "$generatedXjcSources"
 
         ant.taskdef(
-			name: 'xjc',
-			classname: 'com.sun.tools.xjc.XJCTask',
-			classpath: configurations.jaxb.asPath
+            name: 'xjc',
+            classname: 'com.sun.tools.xjc.XJCTask',
+            classpath: configurations.jaxb.asPath
         )
 
         ant.xjc(
-			destdir: "$generatedXjcSources",
-			language: 'XMLSCHEMA',
-			extension: true
+            destdir: "$generatedXjcSources",
+            language: 'XMLSCHEMA',
+            extension: true
         ){
             schema(dir: "src/main/xsd", includes: "OeREB/**/*.xsd,geometry/1.0/*.xsd")
             binding(dir: "src/main/xjb", includes: "global.xjb,OeREB.xjb,xmldsig-core-schema.xjb,geometry.xjb")
@@ -171,11 +166,13 @@ compileJava.dependsOn jaxb
 
 
 jar {
-	enabled = true
+    enabled = true
+    archiveClassifier = ''
 }
 
 bootJar {
-	classifier = 'boot'
+    enabled = true
+    classifier = 'boot'
 }
 
 asciidoctor {
@@ -195,23 +192,32 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 test{
-	systemProperty 'spring.config.location', spring_config_location
+    systemProperty 'TZ',"Europe/Zurich"
+    systemProperty 'spring.config.location', spring_config_location
 }
 
 javadoc{
-	failOnError = false
-	options.addBooleanOption 'Xdoclint:none', true
-	//options.addStringOption('Xdoclint:none', '-quiet')
+    failOnError = false
+    options.addBooleanOption 'Xdoclint:none', true
+    //options.addStringOption('Xdoclint:none', '-quiet')
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
+task testsJar(type: Jar) {
+    classifier = 'tests'
+    //from file('build/test-results/binary')
+    from file('build/reports/tests')
+}
 
 artifacts {
     archives sourcesJar
     archives javadocJar
+    archives testsJar
+    archives bootJar
+    //tests testsJar
 }
 
 def githubRepoUrl = 'https://github.com/claeis/oereb-web-service'
@@ -239,9 +245,20 @@ def pomConfig = {
 uploadArchives {
     repositories {
         mavenDeployer {
-        	configuration = configurations.deployerJars
-			repository(url: repos_url){
-            	authentication(userName: repos_usr, password: repos_pwd)
+            configuration = configurations.deployerJars
+            repository(url: repos_url){
+                authentication(userName: repos_usr, password: repos_pwd)
+            }
+        }
+    }
+}
+
+uploadTests {
+    repositories {
+        mavenDeployer {
+            configuration = configurations.deployerJars
+            repository(url: repos_url){
+                authentication(userName: repos_usr, password: repos_pwd)
             }
         }
     }
