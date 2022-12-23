@@ -543,7 +543,10 @@ public class OerebController {
         if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
-        return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
+        
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType(MediaType.APPLICATION_XML);
+        return new ResponseEntity<GetExtractByIdResponse>(responseEle,responseHeaders,HttpStatus.OK);
     }
     private ResponseEntity<?> createExtractAsPdf(Grundstueck parcel, GetExtractByIdResponse responseEle) {
         java.io.File tmpFolder=new java.io.File(oerebTmpdir,TMP_FOLDER_PREFIX+Thread.currentThread().getId());
@@ -611,7 +614,10 @@ public class OerebController {
         if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
-        return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
+        
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType(MediaType.APPLICATION_XML);
+        return new ResponseEntity<GetExtractByIdResponse>(responseEle,responseHeaders,HttpStatus.OK);
     }    
     private ResponseEntity<?>  getExtractWithGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam,int dpi) {
         if(!format.equals(PARAM_CONST_XML) && !format.equals(PARAM_CONST_PDF)) {
@@ -642,7 +648,9 @@ public class OerebController {
         if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
-        return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType(MediaType.APPLICATION_XML);
+        return new ResponseEntity<GetExtractByIdResponse>(responseEle,responseHeaders,HttpStatus.OK);
     }    
     private ResponseEntity<?> getExtractRedirect(String egridParam, String identdn, String number) {
         String egrid=verifyEgrid(egridParam, identdn, number);
@@ -684,7 +692,9 @@ public class OerebController {
         if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
-        return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType(MediaType.APPLICATION_XML);
+        return new ResponseEntity<GetExtractByIdResponse>(responseEle,responseHeaders,HttpStatus.OK);
     }    
     @GetMapping("/capabilities/{format}")
     public @ResponseBody  GetCapabilitiesResponse getCapabilities(@PathVariable String format) {
