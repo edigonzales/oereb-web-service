@@ -1026,6 +1026,11 @@ public class OerebController {
         }
         return ret;
     }
+    
+    private String getMultilingualUri(MultilingualUriType multilingualUri) {
+        return multilingualUri.getLocalisedText().get(0).getText();
+    }
+    
     private MultilingualUriType createMultilingualUri(Map<String, Object> baseData,String prefix) {
         MultilingualUriType ret=new MultilingualUriType();
         {
@@ -1518,15 +1523,8 @@ public class OerebController {
                         }
                         wmsUrl = getWmsUrl(bbox, wmsUrl,dpi);
                         map.setReferenceWMS(createMultilingualUri(wmsUrl));
-                        if(withImages) {
-                            try {
-                                byte wmsImage[]=getWmsImage(wmsUrl);
-                                map.setImage(createMultilingualBlob(wmsImage));
-                            } catch (IOException | URISyntaxException e) {
-                                logger.error("failed to get wms image",e);
-                                map.setImage(createMultilingualBlob(minimalImage));
-                            }
-                        }
+                        // Make WMS requests later, after figuring out which restrictions
+                        // are concerned.
                         double layerOpacity[]=new double[1];
                         Integer layerIndex=getLayerIndex(wmsUrl,layerOpacity);
                         if(layerIndex==null) {
@@ -1874,6 +1872,19 @@ public class OerebController {
                     map.getOtherLegend().add(legendEntries.get(entryId));
                 }
             }
+            
+            // wms requests
+            if(withImages) {
+                try {
+                    String wmsUrl = getMultilingualUri(map.getReferenceWMS());
+                    byte wmsImage[]=getWmsImage(wmsUrl);
+                    map.setImage(createMultilingualBlob(wmsImage));
+                } catch (IOException | URISyntaxException e) {
+                    logger.error("failed to get wms image",e);
+                    map.setImage(createMultilingualBlob(minimalImage));
+                }
+            }
+
             rests.add(rest);
         }        
         concernedTopicsList.addAll(concernedTopics);
