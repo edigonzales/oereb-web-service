@@ -46,7 +46,7 @@ dependencies {
     
     compile group: 'com.vividsolutions', name: 'jts-core', version: '1.14.0'
     compile 'commons-io:commons-io:2.6'
-    implementation ('io.github.sogis:pdf4oereb:2.0.119') {
+    implementation ('io.github.sogis:pdf4oereb:2.0.120') {
     //implementation ('io.github.sogis:app:2.0.47') {
         exclude group: 'org.slf4j', module: 'slf4j-simple'
     }
