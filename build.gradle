@@ -82,6 +82,7 @@ repositories {
     maven {
         url "http://jars.interlis.ch"
     }
+    maven { url "https://s01.oss.sonatype.org/service/local/repositories/releases/content/" }
 }
 
 def generatedXjcSources = "$buildDir/xjc/java"
