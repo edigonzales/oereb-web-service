@@ -11,7 +11,7 @@ apply plugin: 'io.spring.dependency-management'
 
 group 'ch.ehi.oereb'
 
-version '2.0.1'+System.getProperty('release','-SNAPSHOT')
+version '2.0.2'+System.getProperty('release','-SNAPSHOT')
 
 sourceCompatibility = "11"
 targetCompatibility = "11"
@@ -46,7 +46,7 @@ dependencies {
     
     compile group: 'com.vividsolutions', name: 'jts-core', version: '1.14.0'
     compile 'commons-io:commons-io:2.6'
-    implementation ('io.github.sogis:pdf4oereb:2.0.116') {
+    implementation ('io.github.sogis:pdf4oereb:2.0.121') {
     //implementation ('io.github.sogis:app:2.0.47') {
         exclude group: 'org.slf4j', module: 'slf4j-simple'
     }
@@ -82,6 +82,7 @@ repositories {
     maven {
         url "http://jars.interlis.ch"
     }
+    maven { url "https://s01.oss.sonatype.org/service/local/repositories/releases/content/" }
 }
 
 def generatedXjcSources = "$buildDir/xjc/java"

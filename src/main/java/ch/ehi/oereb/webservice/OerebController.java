@@ -543,7 +543,10 @@ public class OerebController {
         if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
-        return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
+        
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType(MediaType.APPLICATION_XML);
+        return new ResponseEntity<GetExtractByIdResponse>(responseEle,responseHeaders,HttpStatus.OK);
     }
     private ResponseEntity<?> createExtractAsPdf(Grundstueck parcel, GetExtractByIdResponse responseEle) {
         java.io.File tmpFolder=new java.io.File(oerebTmpdir,TMP_FOLDER_PREFIX+Thread.currentThread().getId());
@@ -611,7 +614,10 @@ public class OerebController {
         if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
-        return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
+        
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType(MediaType.APPLICATION_XML);
+        return new ResponseEntity<GetExtractByIdResponse>(responseEle,responseHeaders,HttpStatus.OK);
     }    
     private ResponseEntity<?>  getExtractWithGeometryByNumber(String format,String identdn,String number,String lang,String topics,String withImagesParam,int dpi) {
         if(!format.equals(PARAM_CONST_XML) && !format.equals(PARAM_CONST_PDF)) {
@@ -642,7 +648,9 @@ public class OerebController {
         if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
-        return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType(MediaType.APPLICATION_XML);
+        return new ResponseEntity<GetExtractByIdResponse>(responseEle,responseHeaders,HttpStatus.OK);
     }    
     private ResponseEntity<?> getExtractRedirect(String egridParam, String identdn, String number) {
         String egrid=verifyEgrid(egridParam, identdn, number);
@@ -684,7 +692,9 @@ public class OerebController {
         if(format.equals(PARAM_CONST_PDF)) {
             return createExtractAsPdf(parcel, responseEle);
         }
-        return new ResponseEntity<GetExtractByIdResponse>(responseEle,HttpStatus.OK);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType(MediaType.APPLICATION_XML);
+        return new ResponseEntity<GetExtractByIdResponse>(responseEle,responseHeaders,HttpStatus.OK);
     }    
     @GetMapping("/capabilities/{format}")
     public @ResponseBody  GetCapabilitiesResponse getCapabilities(@PathVariable String format) {
@@ -1016,6 +1026,11 @@ public class OerebController {
         }
         return ret;
     }
+    
+    private String getMultilingualUri(MultilingualUriType multilingualUri) {
+        return multilingualUri.getLocalisedText().get(0).getText();
+    }
+    
     private MultilingualUriType createMultilingualUri(Map<String, Object> baseData,String prefix) {
         MultilingualUriType ret=new MultilingualUriType();
         {
@@ -1508,15 +1523,8 @@ public class OerebController {
                         }
                         wmsUrl = getWmsUrl(bbox, wmsUrl,dpi);
                         map.setReferenceWMS(createMultilingualUri(wmsUrl));
-                        if(withImages) {
-                            try {
-                                byte wmsImage[]=getWmsImage(wmsUrl);
-                                map.setImage(createMultilingualBlob(wmsImage));
-                            } catch (IOException | URISyntaxException e) {
-                                logger.error("failed to get wms image",e);
-                                map.setImage(createMultilingualBlob(minimalImage));
-                            }
-                        }
+                        // Make WMS requests later, after figuring out which restrictions
+                        // are concerned.
                         double layerOpacity[]=new double[1];
                         Integer layerIndex=getLayerIndex(wmsUrl,layerOpacity);
                         if(layerIndex==null) {
@@ -1864,6 +1872,19 @@ public class OerebController {
                     map.getOtherLegend().add(legendEntries.get(entryId));
                 }
             }
+            
+            // wms requests
+            if(withImages) {
+                try {
+                    String wmsUrl = getMultilingualUri(map.getReferenceWMS());
+                    byte wmsImage[]=getWmsImage(wmsUrl);
+                    map.setImage(createMultilingualBlob(wmsImage));
+                } catch (IOException | URISyntaxException e) {
+                    logger.error("failed to get wms image",e);
+                    map.setImage(createMultilingualBlob(minimalImage));
+                }
+            }
+
             rests.add(rest);
         }        
         concernedTopicsList.addAll(concernedTopics);
