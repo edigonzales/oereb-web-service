@@ -57,18 +57,19 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.geom.PrecisionModel;
-import com.vividsolutions.jts.io.ByteOrderValues;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
-import com.vividsolutions.jts.io.WKBWriter;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.io.ByteOrderValues;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.io.WKBWriter;
+import org.locationtech.jts.operation.overlayng.OverlayNG;
 
 import ch.ehi.oereb.schemas.oereb._2_0.extract.GetCapabilitiesResponse;
 import ch.ehi.oereb.schemas.oereb._2_0.extract.GetCapabilitiesResponseType;
@@ -1752,7 +1753,7 @@ public class OerebController {
                         } catch (ParseException e) {
                             throw new IllegalStateException(e);
                         }
-                        intersection=parcelGeom.intersection(flaeche);
+                        intersection=OverlayNG.overlay(parcelGeom,flaeche,OverlayNG.INTERSECTION,precisionModel);
                         if(!intersection.isEmpty() && intersection.getArea()<minIntersection) {
                             intersection=geomFactory.createPolygon((Coordinate[])null);
                         }
@@ -1762,7 +1763,7 @@ public class OerebController {
                         } catch (ParseException e) {
                             throw new IllegalStateException(e);
                         }
-                        intersection=parcelGeom.intersection(linie);
+                        intersection=OverlayNG.overlay(parcelGeom,linie,OverlayNG.INTERSECTION,precisionModel);
                         if(!intersection.isEmpty() &&  intersection.getLength()<minIntersection) {
                             intersection=geomFactory.createLineString((Coordinate[])null);
                         }
@@ -1772,7 +1773,7 @@ public class OerebController {
                         } catch (ParseException e) {
                             throw new IllegalStateException(e);
                         }
-                        intersection=parcelGeom.intersection(punkt);
+                        intersection=OverlayNG.overlay(parcelGeom,punkt,OverlayNG.INTERSECTION,precisionModel);
                     }
                     
                     Set<Long> otherLegendCodes=otherLegendCodesPerMap.get(d_id);

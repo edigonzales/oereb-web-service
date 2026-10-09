@@ -1,6 +1,6 @@
 package ch.ehi.oereb.webservice;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public class Grundstueck {
     private String nummer;
